@@ -246,6 +246,7 @@ const App: React.FC = () => {
               onClick={() => handleOpenModal()} 
               icon={<Plus size={18} />}
               size="sm"
+              className="hidden md:flex"
             >
               Novo
             </Button>
