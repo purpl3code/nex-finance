@@ -13,6 +13,8 @@ import { InvestmentDashboard } from './components/InvestmentDashboard';
 import { Sidebar } from './components/Sidebar';
 import { Modal } from './components/ui/Modal';
 import { Button } from './components/ui/Button';
+import { PageShell } from './components/ui/PageShell';
+import { PageHeader } from './components/ui/PageHeader';
 import { FilterState } from './types';
 import { Plus, Search, Menu } from 'lucide-react';
 
@@ -79,8 +81,6 @@ const App: React.FC = () => {
   const [editingItem, setEditingItem] = useState<any>(undefined);
   
   // --- NAVIGATION & ROUTING LOGIC ---
-  
-  // 1. Helper to get tab from hash
   const getTabFromHash = (): AppTab => {
     if (typeof window === 'undefined') return 'dashboard';
     const hash = window.location.hash.replace('#', '');
@@ -90,7 +90,6 @@ const App: React.FC = () => {
   const [activeTab, setActiveTabState] = useState<AppTab>(getTabFromHash());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // 2. Sync Hash -> State (Handle Back/Forward buttons)
   useEffect(() => {
     const handleHashChange = () => {
       const newTab = getTabFromHash();
@@ -101,14 +100,11 @@ const App: React.FC = () => {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // 3. Wrapper to update Hash when UI changes
   const setActiveTab = (tab: AppTab) => {
     window.location.hash = tab;
     setActiveTabState(tab);
     window.scrollTo(0,0);
   };
-
-  // ----------------------------------
 
   const currentDate = new Date();
   const [filters, setFilters] = useState<FilterState>({
@@ -120,7 +116,6 @@ const App: React.FC = () => {
     accountId: 'all'
   });
 
-  // Combine transactions and transfers
   const unifiedList = useMemo(() => 
     getUnifiedList(filters), 
     [getUnifiedList, filters]
@@ -201,6 +196,29 @@ const App: React.FC = () => {
      }
   };
 
+  // --- COMMON CONTROLS ---
+  const MonthSelector = () => (
+    <select 
+      value={filters.month}
+      onChange={(e) => setFilters(prev => ({ ...prev, month: parseInt(e.target.value) }))}
+      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none hover:bg-slate-700 transition-colors"
+    >
+      {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
+    </select>
+  );
+
+  const YearSelector = () => (
+    <select 
+      value={filters.year}
+      onChange={(e) => setFilters(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none hover:bg-slate-700 transition-colors"
+    >
+      {Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i).map(y => (
+        <option key={y} value={y}>{y}</option>
+      ))}
+    </select>
+  );
+
   return (
     <div className="flex h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden">
       
@@ -235,84 +253,27 @@ const App: React.FC = () => {
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-900/50">
-           <main className="max-w-5xl mx-auto px-4 py-6 space-y-6 pb-24 md:pb-10">
+        <div className="flex-1 overflow-y-auto bg-slate-950">
+           <div className="animate-in fade-in duration-300 min-h-full">
               
-              {/* Desktop Header / Title Area */}
-              <div className="hidden md:flex items-center justify-between mb-2">
-                 <h1 className="text-2xl font-bold text-white">{getPageTitle()}</h1>
-                 {activeTab === 'dashboard' && (
-                   <Button 
-                     onClick={() => handleOpenModal()} 
-                     icon={<Plus size={18} />}
-                   >
-                     Nova Movimentação
-                   </Button>
-                 )}
-              </div>
-
-              {/* Filters Section (Only for specific tabs) */}
-              {['dashboard', 'list'].includes(activeTab) && (
-                <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4 shadow-sm">
-                  <div className="flex flex-col lg:flex-row gap-4 justify-between">
-                    <div className="flex gap-2">
-                      <select 
-                        value={filters.month}
-                        onChange={(e) => setFilters(prev => ({ ...prev, month: parseInt(e.target.value) }))}
-                        className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                      >
-                        {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
-                      </select>
-                      <select 
-                        value={filters.year}
-                        onChange={(e) => setFilters(prev => ({ ...prev, year: parseInt(e.target.value) }))}
-                        className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                      >
-                        {Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i).map(y => (
-                          <option key={y} value={y}>{y}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row flex-1 gap-2 lg:justify-end">
-                      <select 
-                        value={filters.accountId}
-                        onChange={(e) => setFilters(prev => ({ ...prev, accountId: e.target.value }))}
-                        className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                      >
-                        <option value="all">Todas as Contas</option>
-                        {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
-                      </select>
-
-                      <select 
-                        value={filters.type}
-                        onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as any }))}
-                        className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                      >
-                        <option value="all">Todos Tipos</option>
-                        <option value="income">Entradas</option>
-                        <option value="expense">Saídas</option>
-                        <option value="transfer">Transferências</option>
-                      </select>
-
-                      <div className="relative flex-1 lg:flex-none lg:w-48">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <input 
-                          type="text" 
-                          placeholder="Buscar..." 
-                          value={filters.search}
-                          onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                          className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab Content */}
-              <div className="animate-in fade-in duration-300">
-                {activeTab === 'dashboard' && (
+              {/* DASHBOARD TAB */}
+              {activeTab === 'dashboard' && (
+                <PageShell>
+                  <PageHeader 
+                    title="Dashboard" 
+                    subtitle="Visão geral das suas finanças neste mês."
+                    actions={
+                      <Button onClick={() => handleOpenModal()} icon={<Plus size={18} />}>
+                        Nova Movimentação
+                      </Button>
+                    }
+                    controls={
+                      <>
+                        <MonthSelector />
+                        <YearSelector />
+                      </>
+                    }
+                  />
                   <Dashboard 
                     stats={stats} 
                     chartData={chartData} 
@@ -325,9 +286,53 @@ const App: React.FC = () => {
                     getCategorySpending={getCategorySpending}
                     onNavigateToBudgets={() => setActiveTab('budgets')}
                   />
-                )}
-                
-                {activeTab === 'list' && (
+                </PageShell>
+              )}
+              
+              {/* LIST TAB */}
+              {activeTab === 'list' && (
+                <PageShell>
+                   <PageHeader 
+                      title="Extrato" 
+                      subtitle="Histórico completo de transações e transferências."
+                      controls={
+                        <>
+                          <MonthSelector />
+                          <YearSelector />
+                          <div className="h-6 w-px bg-slate-700 mx-1 hidden md:block"></div>
+                          <select 
+                            value={filters.accountId}
+                            onChange={(e) => setFilters(prev => ({ ...prev, accountId: e.target.value }))}
+                            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                          >
+                            <option value="all">Todas as Contas</option>
+                            {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
+                          </select>
+
+                          <select 
+                            value={filters.type}
+                            onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as any }))}
+                            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                          >
+                            <option value="all">Todos Tipos</option>
+                            <option value="income">Entradas</option>
+                            <option value="expense">Saídas</option>
+                            <option value="transfer">Transferências</option>
+                          </select>
+
+                          <div className="relative flex-1 min-w-[200px]">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <input 
+                              type="text" 
+                              placeholder="Buscar transação..." 
+                              value={filters.search}
+                              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                              className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none placeholder-slate-500"
+                            />
+                          </div>
+                        </>
+                      }
+                   />
                   <TransactionList 
                     transactions={unifiedList} 
                     categories={categories}
@@ -335,86 +340,88 @@ const App: React.FC = () => {
                     onEdit={handleOpenModal}
                     onDelete={handleDeleteItem}
                   />
-                )}
+                </PageShell>
+              )}
 
-                {activeTab === 'budgets' && (
-                  <BudgetManager
-                    budgets={budgets}
-                    categories={categories}
-                    currentMonth={currentDate.getMonth()}
-                    currentYear={currentDate.getFullYear()}
-                    onAddBudget={addBudget}
-                    onEditBudget={editBudget}
-                    onDeleteBudget={deleteBudget}
-                    getCategorySpending={getCategorySpending}
-                  />
-                )}
+              {/* OTHER TABS (Components manage their own shells/headers) */}
+              {activeTab === 'accounts' && (
+                <AccountList 
+                  accounts={accounts}
+                  getBalance={getAccountBalance}
+                  onAdd={addAccount}
+                  onEdit={editAccount}
+                  onDelete={deleteAccount}
+                />
+              )}
 
-                {activeTab === 'investments' && (
-                  <InvestmentDashboard 
-                      investmentAccounts={investmentAccounts}
-                      assets={assets}
-                      positions={positions}
-                      movements={investmentMovements}
-                      accounts={accounts}
-                      onAddAccount={addInvestmentAccount}
-                      onAddAsset={addAsset}
-                      onAddMovement={addInvestmentMovement}
-                      getInvestmentAccountBalance={getInvestmentAccountBalance}
-                      getPortfolioSummary={getPortfolioSummary}
-                  />
-                )}
+              {activeTab === 'cards' && (
+                <CreditCardManager 
+                  cards={creditCards}
+                  categories={categories}
+                  accounts={accounts}
+                  onAddCard={addCreditCard}
+                  onEditCard={editCreditCard}
+                  onDeleteCard={deleteCreditCard}
+                  onAddTransaction={addCreditCardTransaction}
+                  onPayInvoice={payInvoice}
+                  getInvoiceInfo={getCardInvoiceInfo}
+                />
+              )}
 
-                {activeTab === 'recurring' && (
-                  <RecurringManager 
-                    rules={recurringRules}
-                    categories={categories}
+              {activeTab === 'recurring' && (
+                <RecurringManager 
+                  rules={recurringRules}
+                  categories={categories}
+                  accounts={accounts}
+                  onAddRule={addRecurringRule}
+                  onEditRule={editRecurringRule}
+                  onDeleteRule={deleteRecurringRule}
+                  onToggleRule={toggleRecurringRule}
+                  onGeneratePreview={getRecurringPreview}
+                  onCommitGeneration={commitRecurringTransactions}
+                />
+              )}
+
+              {activeTab === 'forecast' && (
+                <ForecastView 
+                  accounts={accounts}
+                  onGetForecast={getForecast}
+                />
+              )}
+
+              {activeTab === 'budgets' && (
+                <BudgetManager
+                  budgets={budgets}
+                  categories={categories}
+                  currentMonth={currentDate.getMonth()}
+                  currentYear={currentDate.getFullYear()}
+                  onAddBudget={addBudget}
+                  onEditBudget={editBudget}
+                  onDeleteBudget={deleteBudget}
+                  getCategorySpending={getCategorySpending}
+                />
+              )}
+
+              {activeTab === 'investments' && (
+                <InvestmentDashboard 
+                    investmentAccounts={investmentAccounts}
+                    assets={assets}
+                    positions={positions}
+                    movements={investmentMovements}
                     accounts={accounts}
-                    onAddRule={addRecurringRule}
-                    onEditRule={editRecurringRule}
-                    onDeleteRule={deleteRecurringRule}
-                    onToggleRule={toggleRecurringRule}
-                    onGeneratePreview={getRecurringPreview}
-                    onCommitGeneration={commitRecurringTransactions}
-                  />
-                )}
+                    onAddAccount={addInvestmentAccount}
+                    onAddAsset={addAsset}
+                    onAddMovement={addInvestmentMovement}
+                    getInvestmentAccountBalance={getInvestmentAccountBalance}
+                    getPortfolioSummary={getPortfolioSummary}
+                />
+              )}
 
-                {activeTab === 'forecast' && (
-                  <ForecastView 
-                    accounts={accounts}
-                    onGetForecast={getForecast}
-                  />
-                )}
+              {activeTab === 'settings' && (
+                <SettingsView />
+              )}
 
-                {activeTab === 'accounts' && (
-                  <AccountList 
-                    accounts={accounts}
-                    getBalance={getAccountBalance}
-                    onAdd={addAccount}
-                    onEdit={editAccount}
-                    onDelete={deleteAccount}
-                  />
-                )}
-
-                {activeTab === 'cards' && (
-                  <CreditCardManager 
-                    cards={creditCards}
-                    categories={categories}
-                    accounts={accounts}
-                    onAddCard={addCreditCard}
-                    onEditCard={editCreditCard}
-                    onDeleteCard={deleteCreditCard}
-                    onAddTransaction={addCreditCardTransaction}
-                    onPayInvoice={payInvoice}
-                    getInvoiceInfo={getCardInvoiceInfo}
-                  />
-                )}
-
-                {activeTab === 'settings' && (
-                  <SettingsView />
-                )}
-              </div>
-           </main>
+           </div>
         </div>
       </div>
 

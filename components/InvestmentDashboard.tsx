@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { InvestmentAccount, Asset, InvestmentMovement, Position, Account, InvestmentMovementKind, AssetType } from '../types';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
+import { PageShell } from './ui/PageShell';
+import { PageHeader } from './ui/PageHeader';
 import { TrendingUp, Plus, ArrowUpRight, ArrowDownLeft, Building2, Briefcase, DollarSign, Wallet } from 'lucide-react';
 
 interface InvestmentDashboardProps {
@@ -71,67 +73,65 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
   const getInvAccountName = (id: string) => investmentAccounts.find(a => a.id === id)?.name || '-';
 
   return (
-    <div className="space-y-6 animate-in fade-in">
-       {/* Top Header */}
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-        <div>
-           <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-             <TrendingUp size={20} className="text-emerald-500" />
-             Investimentos
-           </h2>
-           <p className="text-xs text-slate-400">Acompanhe seu patrimônio e rentabilidade.</p>
-        </div>
-        <div className="flex gap-2">
-           <Button size="sm" onClick={() => { setMovForm(prev => ({...prev, type: 'deposit'})); setIsMovementModalOpen(true); }} icon={<ArrowUpRight size={16}/>}>Aportar</Button>
-           <Button size="sm" variant="secondary" onClick={() => { setMovForm(prev => ({...prev, type: 'buy'})); setIsMovementModalOpen(true); }} icon={<Briefcase size={16}/>}>Comprar Ativo</Button>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader 
+        title="Investimentos" 
+        subtitle="Monitore seu patrimônio, rentabilidade e alocação de ativos."
+        actions={
+          <>
+            <Button onClick={() => { setMovForm(prev => ({...prev, type: 'deposit'})); setIsMovementModalOpen(true); }} icon={<ArrowUpRight size={16}/>}>Aportar</Button>
+            <Button variant="secondary" onClick={() => { setMovForm(prev => ({...prev, type: 'buy'})); setIsMovementModalOpen(true); }} icon={<Briefcase size={16}/>}>Comprar Ativo</Button>
+          </>
+        }
+      />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-         <div className="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm">
-            <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Patrimônio Total Estimado</p>
-            <p className="text-2xl font-bold text-emerald-400">{formatCurrency(summary.totalPatrimony)}</p>
-            <p className="text-xs text-slate-500 mt-1">Soma de Posições + Caixa em Cta. Invest.</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm">
+            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-2">Patrimônio Total Estimado</p>
+            <p className="text-3xl font-bold text-emerald-400">{formatCurrency(summary.totalPatrimony)}</p>
+            <p className="text-xs text-slate-500 mt-2 font-medium">Soma de Posições + Caixa em Cta. Invest.</p>
          </div>
-         <div className="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm">
-            <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Total em Ativos</p>
-            <p className="text-2xl font-bold text-white">{formatCurrency(summary.totalInvested)}</p>
+         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm">
+            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-2">Total em Ativos</p>
+            <p className="text-3xl font-bold text-white">{formatCurrency(summary.totalInvested)}</p>
          </div>
-         <div className="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm">
-            <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Caixa Disponível</p>
-            <p className="text-2xl font-bold text-blue-400">{formatCurrency(summary.totalCash)}</p>
+         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm">
+            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-2">Caixa Disponível</p>
+            <p className="text-3xl font-bold text-blue-400">{formatCurrency(summary.totalCash)}</p>
          </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-700">
-         <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'overview' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400'}`}>Visão Geral</button>
-         <button onClick={() => setActiveTab('assets')} className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assets' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400'}`}>Carteira</button>
-         <button onClick={() => setActiveTab('movements')} className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'movements' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400'}`}>Movimentações</button>
+      <div className="border-b border-slate-700">
+         <div className="flex gap-4">
+            <button onClick={() => setActiveTab('overview')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'overview' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Visão Geral</button>
+            <button onClick={() => setActiveTab('assets')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assets' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Carteira de Ativos</button>
+            <button onClick={() => setActiveTab('movements')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'movements' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Histórico</button>
+         </div>
       </div>
 
       {/* TAB CONTENT */}
       {activeTab === 'overview' && (
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
-               <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-white">Minhas Contas</h3>
-                  <Button size="sm" variant="ghost" onClick={() => setIsAccountModalOpen(true)}><Plus size={16}/></Button>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+               <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-white text-lg">Contas de Investimento</h3>
+                  <Button size="sm" variant="ghost" onClick={() => setIsAccountModalOpen(true)} icon={<Plus size={16} />}>Nova Conta</Button>
                </div>
                <div className="space-y-3">
-                  {investmentAccounts.length === 0 && <p className="text-slate-500 text-sm text-center">Nenhuma conta cadastrada.</p>}
+                  {investmentAccounts.length === 0 && <div className="p-6 text-center border border-dashed border-slate-700 rounded-lg text-slate-500">Nenhuma conta cadastrada.</div>}
                   {investmentAccounts.map(acc => (
-                     <div key={acc.id} className="flex justify-between items-center bg-slate-700/30 p-3 rounded-lg">
-                        <div className="flex items-center gap-3">
-                           <div className="p-2 bg-slate-700 rounded text-slate-300"><Building2 size={18}/></div>
+                     <div key={acc.id} className="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
+                        <div className="flex items-center gap-4">
+                           <div className="p-3 bg-slate-700 rounded-lg text-slate-300"><Building2 size={20}/></div>
                            <div>
-                              <p className="text-sm font-medium text-slate-200">{acc.name}</p>
+                              <p className="text-sm font-bold text-slate-200">{acc.name}</p>
                               <p className="text-xs text-slate-500">{acc.institution}</p>
                            </div>
                         </div>
                         <div className="text-right">
-                           <p className="text-sm font-semibold text-white">{formatCurrency(getInvestmentAccountBalance(acc.id))}</p>
+                           <p className="text-sm font-bold text-white">{formatCurrency(getInvestmentAccountBalance(acc.id))}</p>
                            <p className="text-xs text-slate-500">Saldo em caixa</p>
                         </div>
                      </div>
@@ -139,23 +139,23 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
                </div>
             </div>
             
-            <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
-               <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-white">Alocação por Tipo</h3>
+            <div className="space-y-4">
+               <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-white text-lg">Alocação por Tipo</h3>
                </div>
-               <div className="space-y-3">
+               <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
                   {Object.entries(summary.byAssetType).map(([type, val]: any) => (
-                     <div key={type} className="flex justify-between items-center">
-                        <span className="text-sm text-slate-300 capitalize">{type.replace('_', ' ')}</span>
-                        <div className="flex items-center gap-2">
-                           <span className="text-sm font-medium text-white">{formatCurrency(val)}</span>
-                           <div className="w-20 bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                              <div className="bg-emerald-500 h-full" style={{ width: `${(val / summary.totalInvested) * 100}%` }}></div>
-                           </div>
+                     <div key={type} className="space-y-1">
+                        <div className="flex justify-between items-center text-sm">
+                           <span className="text-slate-300 capitalize font-medium">{type.replace('_', ' ')}</span>
+                           <span className="text-white font-bold">{formatCurrency(val)}</span>
+                        </div>
+                        <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+                           <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${(val / summary.totalInvested) * 100}%` }}></div>
                         </div>
                      </div>
                   ))}
-                  {Object.keys(summary.byAssetType).length === 0 && <p className="text-slate-500 text-sm text-center">Nenhum ativo na carteira.</p>}
+                  {Object.keys(summary.byAssetType).length === 0 && <p className="text-slate-500 text-sm text-center py-4">Nenhum ativo na carteira.</p>}
                </div>
             </div>
          </div>
@@ -170,26 +170,28 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
                 <table className="w-full text-left text-sm text-slate-400">
                    <thead className="bg-slate-900/50 text-xs uppercase font-medium">
                       <tr>
-                         <th className="px-4 py-3">Ativo</th>
-                         <th className="px-4 py-3">Tipo</th>
-                         <th className="px-4 py-3 text-right">Qtd.</th>
-                         <th className="px-4 py-3 text-right">Preço Médio</th>
-                         <th className="px-4 py-3 text-right">Total Investido</th>
+                         <th className="px-6 py-4">Ativo</th>
+                         <th className="px-6 py-4">Tipo</th>
+                         <th className="px-6 py-4 text-right">Qtd.</th>
+                         <th className="px-6 py-4 text-right">Preço Médio</th>
+                         <th className="px-6 py-4 text-right">Total Investido</th>
                       </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-700">
                       {positions.length === 0 && (
-                         <tr><td colSpan={5} className="text-center py-8 text-slate-500">Nenhuma posição em aberto.</td></tr>
+                         <tr><td colSpan={5} className="text-center py-10 text-slate-500">Nenhuma posição em aberto.</td></tr>
                       )}
                       {positions.map(pos => {
                          const asset = assets.find(a => a.id === pos.assetId);
                          return (
-                            <tr key={pos.id} className="hover:bg-slate-700/30">
-                               <td className="px-4 py-3 text-white font-medium">{asset?.name || 'Desconhecido'}</td>
-                               <td className="px-4 py-3 capitalize">{asset?.type?.replace('_', ' ')}</td>
-                               <td className="px-4 py-3 text-right">{pos.quantity}</td>
-                               <td className="px-4 py-3 text-right">{formatCurrency(pos.averagePrice)}</td>
-                               <td className="px-4 py-3 text-right text-emerald-400 font-medium">{formatCurrency(pos.quantity * pos.averagePrice)}</td>
+                            <tr key={pos.id} className="hover:bg-slate-700/30 transition-colors">
+                               <td className="px-6 py-4 text-white font-medium">{asset?.name || 'Desconhecido'}</td>
+                               <td className="px-6 py-4 capitalize">
+                                  <span className="bg-slate-700 px-2 py-1 rounded text-xs">{asset?.type?.replace('_', ' ')}</span>
+                               </td>
+                               <td className="px-6 py-4 text-right font-mono text-slate-300">{pos.quantity}</td>
+                               <td className="px-6 py-4 text-right font-mono text-slate-300">{formatCurrency(pos.averagePrice)}</td>
+                               <td className="px-6 py-4 text-right text-emerald-400 font-bold">{formatCurrency(pos.quantity * pos.averagePrice)}</td>
                             </tr>
                          )
                       })}
@@ -205,34 +207,34 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
                 <table className="w-full text-left text-sm text-slate-400">
                    <thead className="bg-slate-900/50 text-xs uppercase font-medium">
                       <tr>
-                         <th className="px-4 py-3">Data</th>
-                         <th className="px-4 py-3">Tipo</th>
-                         <th className="px-4 py-3">Conta / Ativo</th>
-                         <th className="px-4 py-3 text-right">Valor</th>
+                         <th className="px-6 py-4">Data</th>
+                         <th className="px-6 py-4">Tipo</th>
+                         <th className="px-6 py-4">Conta / Ativo</th>
+                         <th className="px-6 py-4 text-right">Valor</th>
                       </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-700">
                       {movements.length === 0 && (
-                         <tr><td colSpan={4} className="text-center py-8 text-slate-500">Nenhuma movimentação.</td></tr>
+                         <tr><td colSpan={4} className="text-center py-10 text-slate-500">Nenhuma movimentação registrada.</td></tr>
                       )}
                       {movements.map(mov => (
-                         <tr key={mov.id} className="hover:bg-slate-700/30">
-                            <td className="px-4 py-3">{new Date(mov.date).toLocaleDateString('pt-BR')}</td>
-                            <td className="px-4 py-3">
-                               <span className={`px-2 py-0.5 rounded text-xs uppercase font-bold 
+                         <tr key={mov.id} className="hover:bg-slate-700/30 transition-colors">
+                            <td className="px-6 py-4">{new Date(mov.date).toLocaleDateString('pt-BR')}</td>
+                            <td className="px-6 py-4">
+                               <span className={`px-2 py-1 rounded text-xs uppercase font-bold tracking-wide
                                   ${mov.kind === 'deposit' || mov.kind === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 
                                     mov.kind === 'withdraw' ? 'bg-red-500/10 text-red-400' : 
                                     'bg-blue-500/10 text-blue-400'}`}>
                                   {mov.kind === 'deposit' ? 'Aporte' : mov.kind === 'withdraw' ? 'Resgate' : mov.kind === 'buy' ? 'Compra' : mov.kind === 'sell' ? 'Venda' : 'Provento'}
                                </span>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-4">
                                <div className="flex flex-col">
-                                  <span className="text-white">{getInvAccountName(mov.investmentAccountId)}</span>
+                                  <span className="text-white font-medium">{getInvAccountName(mov.investmentAccountId)}</span>
                                   {mov.assetId && <span className="text-xs text-slate-500">{getAssetName(mov.assetId)} {mov.quantity && `(${mov.quantity}x)`}</span>}
                                </div>
                             </td>
-                            <td className="px-4 py-3 text-right font-medium text-white">{formatCurrency(mov.amount)}</td>
+                            <td className="px-6 py-4 text-right font-bold text-white">{formatCurrency(mov.amount)}</td>
                          </tr>
                       ))}
                    </tbody>
@@ -242,8 +244,6 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
       )}
 
       {/* MODALS */}
-      
-      {/* Account Modal */}
       <Modal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} title="Nova Conta de Investimento">
          <form onSubmit={(e) => { e.preventDefault(); onAddAccount(accForm); setIsAccountModalOpen(false); setAccForm({name:'', institution:''}); }} className="space-y-4">
             <div>
@@ -261,7 +261,6 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
          </form>
       </Modal>
 
-      {/* Asset Modal */}
       <Modal isOpen={isAssetModalOpen} onClose={() => setIsAssetModalOpen(false)} title="Novo Ativo">
          <form onSubmit={(e) => { e.preventDefault(); onAddAsset(assetForm); setIsAssetModalOpen(false); setAssetForm({name:'', type:'fixed_income', currency: 'BRL'}); }} className="space-y-4">
             <div>
@@ -286,7 +285,6 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
          </form>
       </Modal>
 
-      {/* Movement Modal */}
       <Modal isOpen={isMovementModalOpen} onClose={() => setIsMovementModalOpen(false)} title="Nova Movimentação">
          <form onSubmit={handleMovementSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-lg mb-4">
@@ -319,7 +317,6 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
                </select>
             </div>
 
-            {/* Linked Account for Deposit/Withdraw */}
             {(movForm.type === 'deposit' || movForm.type === 'withdraw') && (
                <div className="bg-slate-700/30 p-3 rounded-lg border border-slate-700">
                   <label className="block text-sm text-slate-300 mb-1">
@@ -333,7 +330,6 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
                </div>
             )}
 
-            {/* Asset Info for Buy/Sell */}
             {(movForm.type === 'buy' || movForm.type === 'sell') && (
                <div className="space-y-4">
                   <div>
@@ -356,6 +352,6 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
             </div>
          </form>
       </Modal>
-    </div>
+    </PageShell>
   );
 };

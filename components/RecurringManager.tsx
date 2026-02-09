@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { RecurringRule, Category, Account, TransactionType } from '../types';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
+import { PageShell } from './ui/PageShell';
+import { PageHeader } from './ui/PageHeader';
 import { Repeat, Plus, Trash2, Edit2, Play, CheckCircle, AlertCircle, ToggleLeft, ToggleRight, Calendar } from 'lucide-react';
 
 interface RecurringManagerProps {
@@ -129,53 +131,55 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
   const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
   return (
-    <div className="space-y-6 animate-in fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-         <div>
-           <h2 className="text-lg font-semibold text-slate-200">Regras de Recorrência</h2>
-           <p className="text-sm text-slate-400">Gerencie pagamentos automáticos como salários e assinaturas.</p>
-         </div>
-         <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => { setHasGeneratedPreview(false); setIsGenModalOpen(true); }}>
-              <Play size={16} /> Gerar Mês
+    <PageShell>
+      <PageHeader 
+        title="Regras de Recorrência" 
+        subtitle="Automatize lançamentos frequentes como salários e assinaturas."
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => { setHasGeneratedPreview(false); setIsGenModalOpen(true); }} icon={<Play size={16} />}>
+              Gerar Mês
             </Button>
-            <Button onClick={() => handleOpenForm()}>
-              <Plus size={16} /> Nova Regra
+            <Button onClick={() => handleOpenForm()} icon={<Plus size={16} />}>
+              Nova Regra
             </Button>
-         </div>
-      </div>
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-4">
         {rules.map(rule => (
-          <div key={rule.id} className={`bg-slate-800 border ${rule.isActive ? 'border-slate-700' : 'border-slate-800 opacity-60'} p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4`}>
-             <div className="flex items-center gap-4">
-                <button onClick={() => onToggleRule(rule.id)} className={`text-2xl ${rule.isActive ? 'text-blue-500' : 'text-slate-600'}`}>
-                   {rule.isActive ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
+          <div key={rule.id} className={`bg-slate-800 border ${rule.isActive ? 'border-slate-700' : 'border-slate-800 opacity-60'} p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition-all`}>
+             <div className="flex items-center gap-5">
+                <button onClick={() => onToggleRule(rule.id)} className={`transition-colors ${rule.isActive ? 'text-blue-500 hover:text-blue-400' : 'text-slate-600 hover:text-slate-500'}`}>
+                   {rule.isActive ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
                 </button>
                 <div>
-                   <h3 className="font-semibold text-white">{rule.description || getCategoryName(rule.categoryId)}</h3>
-                   <div className="flex flex-wrap gap-2 text-xs text-slate-400 mt-1">
-                      <span className="bg-slate-700 px-2 py-0.5 rounded text-slate-300">
+                   <h3 className="text-lg font-semibold text-white">{rule.description || getCategoryName(rule.categoryId)}</h3>
+                   <div className="flex flex-wrap gap-2 text-xs text-slate-400 mt-1.5">
+                      <span className={`px-2 py-0.5 rounded font-medium ${rule.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
                         {rule.type === 'income' ? 'Entrada' : 'Saída'}
                       </span>
-                      <span>
+                      <span className="bg-slate-700/50 px-2 py-0.5 rounded">
                         {rule.frequency === 'monthly' ? `Todo dia ${rule.dayOfMonth}` : `Toda ${daysOfWeek[rule.dayOfWeek || 0]}`}
                       </span>
-                      <span>• {getAccountName(rule.accountId)}</span>
+                      <span className="bg-slate-700/50 px-2 py-0.5 rounded">
+                        {getAccountName(rule.accountId)}
+                      </span>
                    </div>
                 </div>
              </div>
              
-             <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                <span className={`font-bold ${rule.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+             <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-slate-700/50 pt-4 md:pt-0">
+                <span className={`text-xl font-bold ${rule.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
                    {formatCurrency(rule.amount)}
                 </span>
-                <div className="flex gap-1">
-                   <button onClick={() => handleOpenForm(rule)} className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded-lg">
-                     <Edit2 size={16} />
+                <div className="flex gap-2">
+                   <button onClick={() => handleOpenForm(rule)} className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded-lg transition-colors">
+                     <Edit2 size={18} />
                    </button>
-                   <button onClick={() => { if(window.confirm('Excluir regra?')) onDeleteRule(rule.id) }} className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg">
-                     <Trash2 size={16} />
+                   <button onClick={() => { if(window.confirm('Excluir regra?')) onDeleteRule(rule.id) }} className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg transition-colors">
+                     <Trash2 size={18} />
                    </button>
                 </div>
              </div>
@@ -183,9 +187,10 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
         ))}
 
         {rules.length === 0 && (
-          <div className="text-center py-10 text-slate-500 border border-dashed border-slate-700 rounded-xl">
-             <Repeat size={48} className="mx-auto mb-3 opacity-20" />
-             <p>Nenhuma regra cadastrada.</p>
+          <div className="text-center py-16 text-slate-500 border-2 border-dashed border-slate-700 rounded-xl">
+             <Repeat size={48} className="mx-auto mb-4 opacity-20" />
+             <p className="text-lg font-medium">Nenhuma regra cadastrada.</p>
+             <p className="text-sm opacity-70">Crie regras para lançar contas fixas automaticamente.</p>
           </div>
         )}
       </div>
@@ -273,12 +278,12 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
       {/* GENERATE MODAL */}
       <Modal isOpen={isGenModalOpen} onClose={() => setIsGenModalOpen(false)} title="Gerar Lançamentos">
          <div className="space-y-4">
-            <div className="flex gap-2 items-center justify-center p-4 bg-slate-900 rounded-lg">
+            <div className="flex gap-2 items-center justify-center p-4 bg-slate-900 rounded-lg border border-slate-700">
                <Calendar className="text-blue-500" />
-               <select className="bg-slate-800 text-white border border-slate-600 rounded p-2" value={genMonth} onChange={e => { setGenMonth(parseInt(e.target.value)); setHasGeneratedPreview(false); }}>
+               <select className="bg-slate-800 text-white border border-slate-600 rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" value={genMonth} onChange={e => { setGenMonth(parseInt(e.target.value)); setHasGeneratedPreview(false); }}>
                   {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
                </select>
-               <select className="bg-slate-800 text-white border border-slate-600 rounded p-2" value={genYear} onChange={e => { setGenYear(parseInt(e.target.value)); setHasGeneratedPreview(false); }}>
+               <select className="bg-slate-800 text-white border border-slate-600 rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" value={genYear} onChange={e => { setGenYear(parseInt(e.target.value)); setHasGeneratedPreview(false); }}>
                   {Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
                </select>
             </div>
@@ -291,22 +296,22 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                </div>
             ) : (
                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-slate-400 uppercase">Resultado da Prévia</h3>
-                  <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Resultado da Prévia</h3>
+                  <div className="max-h-60 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                      {previewData.length === 0 ? (
-                        <p className="text-center text-slate-500 text-sm">Nenhuma regra ativa para este período.</p>
+                        <p className="text-center text-slate-500 text-sm py-4">Nenhuma regra ativa para este período.</p>
                      ) : (
                         previewData.map((item, idx) => (
-                           <div key={idx} className={`p-3 rounded border flex justify-between items-center ${item.isDuplicate ? 'bg-slate-800/50 border-slate-700 opacity-60' : 'bg-slate-800 border-slate-600'}`}>
+                           <div key={idx} className={`p-3 rounded-lg border flex justify-between items-center ${item.isDuplicate ? 'bg-slate-900/50 border-slate-800 opacity-60' : 'bg-slate-800 border-slate-700'}`}>
                               <div>
                                  <p className="text-sm font-medium text-white">{item.ruleName}</p>
                                  <p className="text-xs text-slate-400">{new Date(item.transaction.date).toLocaleDateString('pt-BR')} • {formatCurrency(item.transaction.amount)}</p>
                               </div>
                               <div className="text-xs">
                                  {item.isDuplicate ? (
-                                    <span className="flex items-center gap-1 text-slate-400"><AlertCircle size={14}/> Já existe</span>
+                                    <span className="flex items-center gap-1 text-slate-500 bg-slate-900 px-2 py-1 rounded"><AlertCircle size={12}/> Já existe</span>
                                  ) : (
-                                    <span className="flex items-center gap-1 text-emerald-400"><CheckCircle size={14}/> Criar</span>
+                                    <span className="flex items-center gap-1 text-emerald-400 bg-emerald-950/30 px-2 py-1 rounded"><CheckCircle size={12}/> Criar</span>
                                  )}
                               </div>
                            </div>
@@ -314,7 +319,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                      )}
                   </div>
                   
-                  <div className="flex justify-end gap-2 pt-2 border-t border-slate-700">
+                  <div className="flex justify-end gap-2 pt-4 border-t border-slate-700">
                      <Button variant="ghost" onClick={() => setIsGenModalOpen(false)}>Cancelar</Button>
                      <Button onClick={handleCommit} disabled={previewData.filter(p => !p.isDuplicate).length === 0}>
                         Confirmar Geração
@@ -324,6 +329,6 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
             )}
          </div>
       </Modal>
-    </div>
+    </PageShell>
   );
 };

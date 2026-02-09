@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Budget, Category } from '../types';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
+import { PageShell } from './ui/PageShell';
+import { PageHeader } from './ui/PageHeader';
 import { PieChart, Trash2, Edit2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface BudgetManagerProps {
@@ -92,36 +94,35 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
      .slice(0, 3);
 
   return (
-    <div className="space-y-6 animate-in fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-        <div>
-           <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-             <PieChart size={20} className="text-blue-500" />
-             Orçamentos
-           </h2>
-           <p className="text-xs text-slate-400">Defina limites de gastos por categoria.</p>
-        </div>
-        <div className="flex gap-2">
-           <select className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white" value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-              {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
-           </select>
-           <select className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white" value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-              {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
-           </select>
-           <Button onClick={() => openModal()} icon={<Plus size={16} />}>Novo Orçamento</Button>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader 
+        title="Orçamentos" 
+        subtitle="Defina limites de gastos por categoria para controlar suas finanças."
+        actions={
+          <Button onClick={() => openModal()} icon={<Plus size={18} />}>Novo Orçamento</Button>
+        }
+        controls={
+          <>
+             <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
+                {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
+             </select>
+             <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+                {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
+             </select>
+          </>
+        }
+      />
 
       {/* Suggestion Box */}
       {suggestions.length > 0 && (
-         <div className="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-xl">
-           <h3 className="text-sm font-medium text-slate-300 mb-2">Categorias com gastos sem orçamento:</h3>
+         <div className="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-xl shadow-sm">
+           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Sugerido para você</h3>
            <div className="flex flex-wrap gap-2">
               {suggestions.map(s => (
-                 <button key={s.category.id} onClick={() => { setForm({...form, categoryId: s.category.id}); openModal(); }} className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs text-slate-200 transition-colors">
+                 <button key={s.category.id} onClick={() => { setForm({...form, categoryId: s.category.id}); openModal(); }} className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-sm text-slate-200 transition-colors border border-slate-600">
                     <span>{s.category.emoji} {s.category.name}</span>
-                    <span className="text-slate-400">Gastou: {formatCurrency(s.spent)}</span>
-                    <Plus size={14} className="text-blue-400"/>
+                    <span className="text-slate-400 text-xs bg-slate-800 px-1.5 py-0.5 rounded">Gastou: {formatCurrency(s.spent)}</span>
+                    <Plus size={14} className="text-blue-400 ml-1"/>
                  </button>
               ))}
            </div>
@@ -129,7 +130,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
       )}
 
       {/* Budgets List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sortedBudgets.map(budget => {
            const category = getCategory(budget.categoryId);
            const spent = getCategorySpending(budget.categoryId, selectedMonth, selectedYear);
@@ -138,37 +139,37 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
            const isWarning = percent >= budget.alertAtPercent && !isDanger;
            
            return (
-             <div key={budget.id} className="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm relative group">
-                <div className="flex justify-between items-start mb-2">
-                   <div className="flex items-center gap-3">
-                      <div className="text-2xl bg-slate-700/50 p-2 rounded-lg">{category?.emoji}</div>
+             <div key={budget.id} className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-sm relative group hover:border-slate-600 transition-colors">
+                <div className="flex justify-between items-start mb-4">
+                   <div className="flex items-center gap-4">
+                      <div className="text-3xl bg-slate-700/30 p-2 rounded-xl">{category?.emoji}</div>
                       <div>
                          <h3 className="font-semibold text-white">{category?.name}</h3>
-                         <div className="text-xs font-medium flex gap-2 mt-0.5">
-                            {isDanger && <span className="text-red-400 flex items-center gap-1"><AlertTriangle size={12}/> Estourado</span>}
-                            {isWarning && <span className="text-amber-400 flex items-center gap-1"><AlertTriangle size={12}/> Atenção</span>}
-                            {!isDanger && !isWarning && <span className="text-emerald-400 flex items-center gap-1"><CheckCircle size={12}/> Dentro do limite</span>}
+                         <div className="text-xs font-bold flex gap-2 mt-1">
+                            {isDanger && <span className="text-red-400 flex items-center gap-1"><AlertTriangle size={12}/> ESTOURADO</span>}
+                            {isWarning && <span className="text-amber-400 flex items-center gap-1"><AlertTriangle size={12}/> ATENÇÃO</span>}
+                            {!isDanger && !isWarning && <span className="text-emerald-400 flex items-center gap-1"><CheckCircle size={12}/> DENTRO DO LIMITE</span>}
                          </div>
                       </div>
                    </div>
                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openModal(budget)} className="p-1.5 text-blue-400 hover:bg-slate-700 rounded"><Edit2 size={16}/></button>
-                      <button onClick={() => { if(window.confirm('Excluir orçamento?')) onDeleteBudget(budget.id) }} className="p-1.5 text-red-400 hover:bg-slate-700 rounded"><Trash2 size={16}/></button>
+                      <button onClick={() => openModal(budget)} className="p-2 text-blue-400 hover:bg-slate-700 rounded-lg transition-colors"><Edit2 size={16}/></button>
+                      <button onClick={() => { if(window.confirm('Excluir orçamento?')) onDeleteBudget(budget.id) }} className="p-2 text-red-400 hover:bg-slate-700 rounded-lg transition-colors"><Trash2 size={16}/></button>
                    </div>
                 </div>
 
-                <div className="space-y-1 mb-1">
+                <div className="space-y-2">
                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Gasto: <span className="text-slate-200">{formatCurrency(spent)}</span></span>
-                      <span className="text-slate-400">Limite: <span className="text-slate-200">{formatCurrency(budget.amountLimit)}</span></span>
+                      <span className="text-slate-400">Gasto: <span className="text-slate-200 font-medium">{formatCurrency(spent)}</span></span>
+                      <span className="text-slate-400">Limite: <span className="text-slate-200 font-medium">{formatCurrency(budget.amountLimit)}</span></span>
                    </div>
-                   <div className="h-2.5 w-full bg-slate-700 rounded-full overflow-hidden">
+                   <div className="h-3 w-full bg-slate-700 rounded-full overflow-hidden shadow-inner">
                       <div 
-                        className={`h-full rounded-full transition-all duration-500 ${isDanger ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                        className={`h-full rounded-full transition-all duration-500 shadow-sm ${isDanger ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'}`} 
                         style={{ width: `${Math.min(percent, 100)}%` }}
                       ></div>
                    </div>
-                   <div className="text-right text-xs text-slate-500">{percent.toFixed(0)}%</div>
+                   <div className="text-right text-xs text-slate-500 font-medium">{percent.toFixed(0)}% utilizado</div>
                 </div>
              </div>
            );
@@ -176,9 +177,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
       </div>
       
       {sortedBudgets.length === 0 && (
-         <div className="text-center py-10 text-slate-500 border border-dashed border-slate-700 rounded-xl">
-            <PieChart size={48} className="mx-auto mb-3 opacity-20" />
-            <p>Nenhum orçamento definido para este mês.</p>
+         <div className="text-center py-16 text-slate-500 border-2 border-dashed border-slate-700 rounded-xl">
+            <PieChart size={48} className="mx-auto mb-4 opacity-20" />
+            <p className="text-lg font-medium">Nenhum orçamento definido para este mês.</p>
+            <p className="text-sm opacity-70">Crie orçamentos para acompanhar seus gastos por categoria.</p>
          </div>
       )}
 
@@ -188,10 +190,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
             <div>
                <label className="block text-sm text-slate-300 mb-1">Categoria</label>
                <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" 
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" 
                   value={form.categoryId} 
                   onChange={e => setForm({...form, categoryId: e.target.value})}
-                  disabled={!!editingBudget} // Don't change category on edit to avoid duplicates easily
+                  disabled={!!editingBudget}
                   required
                >
                   <option value="">Selecione...</option>
@@ -213,6 +215,6 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
             </div>
          </form>
       </Modal>
-    </div>
+    </PageShell>
   );
 };

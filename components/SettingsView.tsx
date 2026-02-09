@@ -8,6 +8,8 @@ import { useUserProfile } from '../hooks/useUserProfile';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
 import { Avatar } from './ui/Avatar';
+import { PageShell } from './ui/PageShell';
+import { PageHeader } from './ui/PageHeader';
 import { 
   Download, Upload, HardDrive, AlertTriangle, FileText, 
   Trash2, Database, Server, RefreshCw, ShieldAlert, History,
@@ -15,7 +17,6 @@ import {
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
-  // We use the hook to get live stats
   const { 
     transactions, accounts, creditCards, recurringRules, 
     investmentAccounts, assets, investmentMovements 
@@ -118,7 +119,6 @@ export const SettingsView: React.FC = () => {
   // --- HEALTH ACTIONS ---
   const runHealthScan = () => {
      setIsScanning(true);
-     // Simulate loading for UX
      setTimeout(() => {
         const fullData = StorageService.load();
         const report = DataHealthService.scan(fullData);
@@ -135,7 +135,6 @@ export const SettingsView: React.FC = () => {
      if (confirm(`Isso aplicará correções automáticas para ${fixableIssues.length} tipos de problemas. Deseja continuar?`)) {
         const fullData = StorageService.load();
         DataHealthService.applySafeFixes(fullData, healthReport);
-        // Reload happens inside service
      }
   };
 
@@ -165,18 +164,13 @@ export const SettingsView: React.FC = () => {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in max-w-3xl mx-auto pb-10">
-      
-      {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
-          <HardDrive className="text-blue-500" />
-          Configurações
-        </h1>
-        <p className="text-slate-400 mt-1">Gerencie seus dados, backups e preferências do sistema.</p>
-      </div>
+    <PageShell className="max-w-4xl">
+      <PageHeader 
+        title="Configurações" 
+        subtitle="Gerencie seus dados, backups e preferências do sistema."
+      />
 
-      {/* 0. USER PROFILE (NEW) */}
+      {/* 0. USER PROFILE */}
       <SectionCard 
         title="Meu Perfil" 
         description="Personalize seu nome e foto de exibição."
@@ -235,9 +229,9 @@ export const SettingsView: React.FC = () => {
         <div className="space-y-6">
            {/* Status Bar */}
            {!healthReport ? (
-              <div className="text-center py-6 bg-slate-900/30 rounded-lg border border-slate-700 border-dashed">
-                 <Activity size={40} className="mx-auto text-slate-600 mb-3" />
-                 <p className="text-slate-400 mb-4">Execute uma verificação para detectar itens órfãos ou quebrados.</p>
+              <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-700 border-dashed">
+                 <Activity size={40} className="mx-auto text-slate-600 mb-4" />
+                 <p className="text-slate-400 mb-6">Execute uma verificação para detectar itens órfãos ou quebrados.</p>
                  <Button onClick={runHealthScan} disabled={isScanning} icon={isScanning ? <RefreshCw className="animate-spin" size={16}/> : <Activity size={16}/>}>
                     {isScanning ? 'Verificando...' : 'Executar Verificação'}
                  </Button>
@@ -320,7 +314,7 @@ export const SettingsView: React.FC = () => {
                     <h4 className="text-sm font-semibold text-slate-300 flex items-center gap-2"><History size={14}/> Histórico de Correções</h4>
                     <button onClick={() => { DataHealthService.clearLogs(); setFixLogs([]); }} className="text-xs text-red-400 hover:text-red-300">Limpar Histórico</button>
                  </div>
-                 <div className="bg-slate-900 rounded-lg p-3 max-h-40 overflow-y-auto space-y-2">
+                 <div className="bg-slate-900 rounded-lg p-3 max-h-40 overflow-y-auto space-y-2 custom-scrollbar">
                     {fixLogs.map(log => (
                        <div key={log.id} className="text-xs flex justify-between items-center border-b border-slate-800 last:border-0 pb-2 last:pb-0">
                           <div>
@@ -343,7 +337,7 @@ export const SettingsView: React.FC = () => {
         icon={<Download size={24} />}
       >
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
-           <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-2 rounded-lg border border-slate-700/50 w-full md:w-auto">
+           <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-slate-700/50 w-full md:w-auto">
               <History size={16} />
               {lastBackup ? (
                 <span>Último export: <span className="text-slate-200 font-medium">{new Date(lastBackup).toLocaleDateString()} às {new Date(lastBackup).toLocaleTimeString().slice(0,5)}</span></span>
@@ -354,7 +348,7 @@ export const SettingsView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <Button onClick={handleExport} className="w-full flex items-center justify-center gap-2 h-12">
+           <Button onClick={handleExport} className="w-full flex items-center justify-center gap-2 h-12 text-base">
               <Download size={18} /> Exportar Dados (.json)
            </Button>
            
@@ -369,7 +363,7 @@ export const SettingsView: React.FC = () => {
              <Button 
                 onClick={() => fileInputRef.current?.click()} 
                 variant="secondary" 
-                className="w-full flex items-center justify-center gap-2 h-12"
+                className="w-full flex items-center justify-center gap-2 h-12 text-base"
              >
                 <Upload size={18} /> Importar Backup
              </Button>
@@ -383,37 +377,23 @@ export const SettingsView: React.FC = () => {
         description="Resumo dos registros armazenados no seu navegador."
         icon={<Database size={24} />}
       >
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
-               <p className="text-2xl font-bold text-white">{transactions.length}</p>
-               <p className="text-xs text-slate-500 uppercase font-medium">Transações</p>
-            </div>
-            <div className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
-               <p className="text-2xl font-bold text-white">{accounts.length}</p>
-               <p className="text-xs text-slate-500 uppercase font-medium">Contas</p>
-            </div>
-            <div className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
-               <p className="text-2xl font-bold text-white">{creditCards.length}</p>
-               <p className="text-xs text-slate-500 uppercase font-medium">Cartões</p>
-            </div>
-            <div className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
-               <p className="text-2xl font-bold text-white">{recurringRules.length}</p>
-               <p className="text-xs text-slate-500 uppercase font-medium">Recorrências</p>
-            </div>
-            <div className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
-               <p className="text-2xl font-bold text-white">{investmentAccounts.length}</p>
-               <p className="text-xs text-slate-500 uppercase font-medium">Inv. Contas</p>
-            </div>
-            <div className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
-               <p className="text-2xl font-bold text-white">{assets.length}</p>
-               <p className="text-xs text-slate-500 uppercase font-medium">Inv. Ativos</p>
-            </div>
-            <div className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
-               <p className="text-2xl font-bold text-white">{investmentMovements.length}</p>
-               <p className="text-xs text-slate-500 uppercase font-medium">Inv. Movs</p>
-            </div>
+         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+            {[
+               { val: transactions.length, label: 'Transações' },
+               { val: accounts.length, label: 'Contas' },
+               { val: creditCards.length, label: 'Cartões' },
+               { val: recurringRules.length, label: 'Recorrências' },
+               { val: investmentAccounts.length, label: 'Inv. Contas' },
+               { val: assets.length, label: 'Inv. Ativos' },
+               { val: investmentMovements.length, label: 'Inv. Movs' },
+            ].map((stat, i) => (
+               <div key={i} className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
+                  <p className="text-xl font-bold text-white">{stat.val}</p>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{stat.label}</p>
+               </div>
+            ))}
          </div>
-         <div className="mt-4 flex justify-end">
+         <div className="mt-6 flex justify-end">
             <Button size="sm" variant="ghost" onClick={() => window.location.reload()} icon={<RefreshCw size={14}/>}>Recalcular Dados</Button>
          </div>
       </SectionCard>
@@ -533,6 +513,6 @@ export const SettingsView: React.FC = () => {
          </div>
       </Modal>
 
-    </div>
+    </PageShell>
   );
 };

@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { Account } from '../types';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { AlertTriangle, TrendingUp, TrendingDown, Calendar, ArrowRight, CreditCard, Repeat, RefreshCw } from 'lucide-react';
-import { format, parseISO, isSameDay } from 'date-fns';
+import { PageShell } from './ui/PageShell';
+import { PageHeader } from './ui/PageHeader';
+import { TrendingUp, Calendar, ArrowRight, CreditCard, Repeat } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface ForecastViewProps {
@@ -28,9 +30,9 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       bad: 'text-red-400 bg-red-900/10 border-red-900/30',
     };
     return (
-      <div className={`p-4 rounded-xl border ${colors[variant]} shadow-sm`}>
-        <p className="text-xs text-slate-400 mb-1 font-medium uppercase tracking-wider">{title}</p>
-        <p className="text-xl font-bold">{typeof value === 'number' ? formatCurrency(value) : value}</p>
+      <div className={`p-5 rounded-xl border ${colors[variant]} shadow-sm`}>
+        <p className="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider">{title}</p>
+        <p className="text-2xl font-bold">{typeof value === 'number' ? formatCurrency(value) : value}</p>
       </div>
     );
   };
@@ -49,28 +51,24 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
   const dayEvents = (dateStr: string) => forecastData.eventsByDay[dateStr] || [];
 
   return (
-    <div className="space-y-6 animate-in fade-in">
-      {/* Header Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-        <div>
-           <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-             <TrendingUp size={20} className="text-blue-500" />
-             Previsão Financeira
-           </h2>
-           <p className="text-xs text-slate-400">Simulação baseada em lançamentos, recorrências e faturas.</p>
-        </div>
-        <div className="flex gap-2">
-           <select className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white" value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-              {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
-           </select>
-           <select className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white" value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-              {Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
-           </select>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader 
+        title="Previsão Financeira" 
+        subtitle="Simulação futura baseada em lançamentos, recorrências e faturas."
+        controls={
+          <>
+             <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
+                {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
+             </select>
+             <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+                {Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
+             </select>
+          </>
+        }
+      />
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Saldo Inicial" value={forecastData.initialBalance} variant="neutral" />
         <StatCard title="Saldo Final Previsto" value={forecastData.endBalance} variant={forecastData.endBalance >= 0 ? 'good' : 'bad'} />
         <StatCard title="Pior Cenário" value={forecastData.minBalance} variant={forecastData.minBalance >= 0 ? 'good' : 'bad'} />
@@ -82,9 +80,9 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       </div>
 
       {/* Chart */}
-      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-300 mb-4">Projeção de Saldo Diário</h3>
-        <div className="h-64 w-full">
+      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm">
+        <h3 className="text-sm font-bold text-slate-300 mb-6 uppercase tracking-wider">Projeção de Saldo Diário</h3>
+        <div className="h-72 w-full">
            <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={forecastData.dailyData}>
                  <defs>
@@ -127,19 +125,19 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       </div>
 
       {/* Timeline View */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-slate-300">Linha do Tempo</h3>
-        <div className="space-y-2">
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-slate-200">Linha do Tempo Detalhada</h3>
+        <div className="space-y-4">
            {forecastData.dailyData.map((day: any) => {
               const events = dayEvents(day.date);
               if (events.length === 0) return null;
 
               return (
-                 <div key={day.date} className="bg-slate-800/60 border border-slate-700/50 rounded-lg overflow-hidden">
-                    <div className="bg-slate-800 px-4 py-2 flex justify-between items-center border-b border-slate-700/50">
-                       <span className="text-sm font-medium text-slate-200">{format(parseISO(day.date), 'dd ')} de {format(parseISO(day.date), 'MMMM', {locale: ptBR})}</span>
-                       <span className={`text-xs font-medium ${day.balance < 0 ? 'text-red-400' : 'text-slate-400'}`}>
-                          Saldo dia: {formatCurrency(day.balance)}
+                 <div key={day.date} className="bg-slate-800/60 border border-slate-700/50 rounded-xl overflow-hidden">
+                    <div className="bg-slate-800 px-4 py-3 flex justify-between items-center border-b border-slate-700/50">
+                       <span className="text-sm font-medium text-slate-200 capitalize">{format(parseISO(day.date), 'dd ')} de {format(parseISO(day.date), 'MMMM', {locale: ptBR})}</span>
+                       <span className={`text-xs font-bold ${day.balance < 0 ? 'text-red-400' : 'text-slate-400'}`}>
+                          Saldo do dia: {formatCurrency(day.balance)}
                        </span>
                     </div>
                     <div className="divide-y divide-slate-700/30">
@@ -150,14 +148,14 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                                 <div>
                                    <p className="text-sm text-slate-200 font-medium">
                                       {event.description || 'Sem descrição'}
-                                      {!event.isReal && <span className="ml-2 text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">Previsto</span>}
+                                      {!event.isReal && <span className="ml-2 text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded font-bold uppercase">Previsto</span>}
                                    </p>
                                    <p className="text-xs text-slate-500">
                                       {accounts.find(a => a.id === event.accountId)?.name || 'Conta não inf.'}
                                    </p>
                                 </div>
                              </div>
-                             <span className={`text-sm font-semibold ${event.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                             <span className={`text-sm font-bold ${event.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                 {event.amount > 0 ? '+' : ''}{formatCurrency(event.amount)}
                              </span>
                           </div>
@@ -168,6 +166,6 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
            })}
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 };

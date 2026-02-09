@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { CreditCard, CreditCardInvoice, Category, Account } from '../types';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
-import { CreditCard as CardIcon, Plus, Trash2, Calendar, DollarSign, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
+import { PageShell } from './ui/PageShell';
+import { PageHeader } from './ui/PageHeader';
+import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
 
 interface CreditCardManagerProps {
   cards: CreditCard[];
@@ -13,7 +15,7 @@ interface CreditCardManagerProps {
   onAddTransaction: (tx: any, installments: number) => void;
   onPayInvoice: (invoice: CreditCardInvoice, accountId: string) => void;
   getInvoiceInfo: (cardId: string, month: number, year: number) => any;
-  onEditCard?: (id: string, updates: any) => void; // Optional for backward compatibility if not passed yet
+  onEditCard?: (id: string, updates: any) => void;
 }
 
 export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
@@ -29,7 +31,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 }) => {
   const [view, setView] = useState<'list' | 'details'>('list');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [currentDate, setCurrentDate] = useState(new Date()); // For invoice navigation
+  const [currentDate, setCurrentDate] = useState(new Date()); 
   
   // Modals
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -100,7 +102,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     setIsPayModalOpen(false);
   };
 
-  // Derived Data
   const selectedCard = cards.find(c => c.id === selectedCardId);
   const invoiceInfo = selectedCard ? getInvoiceInfo(selectedCard.id, currentDate.getMonth(), currentDate.getFullYear()) : null;
 
@@ -112,51 +113,54 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
   const monthName = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
+  // DETAILS VIEW
   if (view === 'details' && selectedCard) {
     return (
-      <div className="space-y-4 animate-in slide-in-from-right duration-300">
-        <button onClick={() => setView('list')} className="flex items-center text-slate-400 hover:text-white mb-2">
-          <ChevronLeft size={16} /> Voltar
+      <PageShell>
+        <button onClick={() => setView('list')} className="flex items-center text-slate-400 hover:text-white mb-2 transition-colors">
+          <ChevronLeft size={16} /> Voltar para Cartões
         </button>
 
         {/* Card Header */}
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-6 rounded-xl shadow-sm">
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-1">{selectedCard.name}</h2>
-              <p className="text-slate-400 text-sm">Limite: {formatCurrency(selectedCard.limit)}</p>
-              {selectedCard.defaultPaymentAccountId && (
-                <p className="text-slate-500 text-xs mt-1">
-                  Conta Padrão: {accounts.find(a => a.id === selectedCard.defaultPaymentAccountId)?.name}
-                </p>
-              )}
+              <h2 className="text-3xl font-bold text-white mb-2">{selectedCard.name}</h2>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <p className="text-slate-400">Limite: <span className="text-slate-200 font-medium">{formatCurrency(selectedCard.limit)}</span></p>
+                {selectedCard.defaultPaymentAccountId && (
+                  <p className="text-slate-500">
+                    Conta Padrão: {accounts.find(a => a.id === selectedCard.defaultPaymentAccountId)?.name}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={() => openCardModal(selectedCard)} size="sm" variant="ghost" icon={<Edit2 size={16}/>}>Editar</Button>
-              <Button onClick={() => setIsTxModalOpen(true)} size="sm" icon={<Plus size={16}/>}>Nova Compra</Button>
+            <div className="flex gap-3">
+              <Button onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</Button>
+              <Button onClick={() => setIsTxModalOpen(true)} icon={<Plus size={16}/>}>Nova Compra</Button>
             </div>
           </div>
         </div>
 
         {/* Invoice Controls */}
-        <div className="flex items-center justify-between bg-slate-800 p-3 rounded-lg border border-slate-700">
-          <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-slate-700 rounded-full"><ChevronLeft size={20} /></button>
+        <div className="flex items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700">
+          <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors"><ChevronLeft size={24} /></button>
           <div className="text-center">
-            <span className="block text-sm text-slate-400 uppercase tracking-wide">Fatura de</span>
-            <span className="block text-lg font-semibold text-white capitalize">{monthName}</span>
+            <span className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Fatura de</span>
+            <span className="block text-xl font-bold text-white capitalize">{monthName}</span>
           </div>
-          <button onClick={() => changeMonth(1)} className="p-2 hover:bg-slate-700 rounded-full"><ChevronRight size={20} /></button>
+          <button onClick={() => changeMonth(1)} className="p-2 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors"><ChevronRight size={24} /></button>
         </div>
 
         {/* Invoice Summary */}
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-           <div className="flex justify-between items-end mb-6">
+           <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-8 pb-6 border-b border-slate-700/50">
              <div>
-               <p className="text-slate-400 text-sm">Vencimento em {new Date(invoiceInfo?.dueDate).toLocaleDateString('pt-BR')}</p>
-               <div className="text-3xl font-bold text-white mt-1">
+               <p className="text-slate-400 text-sm font-medium mb-2">Vencimento em {new Date(invoiceInfo?.dueDate).toLocaleDateString('pt-BR')}</p>
+               <div className="text-4xl font-bold text-white">
                  {formatCurrency(invoiceInfo?.amount || 0)}
                </div>
-               <p className={`text-sm mt-1 font-medium ${invoiceInfo?.isPaid ? 'text-emerald-400' : 'text-blue-400'}`}>
+               <p className={`text-sm mt-2 font-bold uppercase tracking-wider ${invoiceInfo?.isPaid ? 'text-emerald-400' : 'text-blue-400'}`}>
                  {invoiceInfo?.isPaid ? 'Fatura Paga' : 'Fatura Aberta'}
                </p>
              </div>
@@ -164,25 +168,25 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                <Button onClick={() => {
                  setPayAccount(selectedCard.defaultPaymentAccountId || '');
                  setIsPayModalOpen(true);
-               }} variant="primary">Pagar Fatura</Button>
+               }} variant="primary" size="lg">Pagar Fatura</Button>
              )}
            </div>
 
            {/* Transaction List */}
-           <div className="space-y-3">
-             <h3 className="text-sm font-semibold text-slate-500 uppercase">Transações</h3>
+           <div className="space-y-4">
+             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Transações da Fatura</h3>
              {invoiceInfo?.transactions && (invoiceInfo.transactions as any[]).length > 0 ? (
                (invoiceInfo.transactions as any[]).map((tx: any) => (
-                 <div key={tx.id} className="flex justify-between items-center py-2 border-b border-slate-700 last:border-0">
-                   <div className="flex items-center gap-3">
-                     <div className="bg-slate-700/50 p-2 rounded-lg text-lg">
+                 <div key={tx.id} className="flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0 hover:bg-slate-700/20 px-2 -mx-2 rounded transition-colors">
+                   <div className="flex items-center gap-4">
+                     <div className="bg-slate-700/50 p-2.5 rounded-lg text-xl shadow-inner">
                        {categories.find(c => c.id === tx.categoryId)?.emoji || '🛒'}
                      </div>
                      <div>
-                       <p className="text-slate-200 text-sm font-medium">{tx.description || 'Compra'}</p>
-                       <p className="text-slate-500 text-xs">
+                       <p className="text-slate-200 text-sm font-semibold">{tx.description || 'Compra'}</p>
+                       <p className="text-slate-500 text-xs mt-0.5">
                          {new Date(tx.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
-                         {tx.installment.total > 1 && ` • ${tx.installment.current}/${tx.installment.total}`}
+                         {tx.installment.total > 1 && ` • Parcela ${tx.installment.current}/${tx.installment.total}`}
                        </p>
                      </div>
                    </div>
@@ -190,12 +194,14 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  </div>
                ))
              ) : (
-               <p className="text-slate-500 text-sm text-center py-4">Nenhuma compra nesta fatura.</p>
+               <div className="text-center py-10 bg-slate-800/50 rounded-lg border border-slate-700 border-dashed">
+                 <p className="text-slate-500">Nenhuma compra nesta fatura.</p>
+               </div>
              )}
            </div>
         </div>
-
-        {/* Add Transaction Modal */}
+        
+        {/* Modals reused */}
         <Modal isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} title="Nova Compra no Cartão">
           <form onSubmit={handleTxSubmit} className="space-y-4">
              <div>
@@ -230,7 +236,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
           </form>
         </Modal>
 
-        {/* Pay Invoice Modal */}
         <Modal isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title="Pagar Fatura">
           <form onSubmit={handlePaySubmit} className="space-y-4">
             <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 text-center">
@@ -251,7 +256,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
           </form>
         </Modal>
 
-        {/* Card Edit/Create Modal (Repeated from List View) */}
         <Modal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
             <form onSubmit={handleCardSubmit} className="space-y-4">
                <div>
@@ -286,56 +290,65 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                </div>
             </form>
         </Modal>
-      </div>
+      </PageShell>
     );
   }
 
   // LIST VIEW
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-slate-200">Meus Cartões</h2>
-        <Button onClick={() => openCardModal()} size="sm" icon={<Plus size={16}/>}>Novo Cartão</Button>
-      </div>
+    <PageShell>
+      <PageHeader 
+        title="Meus Cartões" 
+        subtitle="Gerencie faturas e limites dos seus cartões de crédito."
+        actions={
+          <Button onClick={() => openCardModal()} icon={<Plus size={18}/>}>Novo Cartão</Button>
+        }
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map(card => (
-          <div key={card.id} onClick={() => { setSelectedCardId(card.id); setView('details'); }} className="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm hover:border-slate-500 transition-all cursor-pointer group relative overflow-hidden">
+          <div key={card.id} onClick={() => { setSelectedCardId(card.id); setView('details'); }} className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-sm hover:border-slate-500 transition-all cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56">
              {/* Decorative Background */}
-             <div className="absolute top-0 right-0 p-8 opacity-5 transform translate-x-4 -translate-y-4">
-                <CardIcon size={120} />
+             <div className="absolute top-0 right-0 p-6 opacity-[0.03] transform translate-x-4 -translate-y-4">
+                <CardIcon size={160} />
              </div>
              
              <div className="relative z-10">
                <div className="flex justify-between items-start mb-6">
                  <div>
-                   <h3 className="text-xl font-bold text-white">{card.name}</h3>
-                   <p className="text-xs text-slate-400">Fecha dia {card.closingDay} • Vence dia {card.dueDay}</p>
+                   <h3 className="text-xl font-bold text-white tracking-tight">{card.name}</h3>
+                   <div className="flex gap-2 text-xs text-slate-400 mt-1">
+                      <span className="bg-slate-700/50 px-2 py-0.5 rounded">Fecha dia {card.closingDay}</span>
+                      <span className="bg-slate-700/50 px-2 py-0.5 rounded">Vence dia {card.dueDay}</span>
+                   </div>
                  </div>
-                 <div className="bg-slate-700 p-2 rounded-lg">
+                 <div className="bg-slate-700 p-2.5 rounded-lg shadow-inner">
                    <CardIcon className="text-blue-400" size={24} />
                  </div>
                </div>
                
-               <div className="mt-4">
-                 <p className="text-xs text-slate-400 mb-1">Limite Total</p>
-                 <p className="text-lg font-semibold text-slate-200">{formatCurrency(card.limit)}</p>
+               <div>
+                 <p className="text-xs text-slate-400 uppercase tracking-wide font-medium mb-1">Limite Total</p>
+                 <p className="text-2xl font-bold text-slate-200">{formatCurrency(card.limit)}</p>
                </div>
+             </div>
                
-               <div className="mt-4 flex gap-2">
-                  <span className="text-xs font-medium text-blue-400 bg-blue-400/10 px-2 py-1 rounded">Ver Fatura</span>
-               </div>
+             <div className="relative z-10 mt-auto pt-4 border-t border-slate-700/50">
+                <span className="text-sm font-semibold text-blue-400 group-hover:text-blue-300 flex items-center gap-1 transition-colors">
+                  Ver Fatura e Lançamentos <ChevronRight size={16}/>
+                </span>
              </div>
           </div>
         ))}
+        
+        {cards.length === 0 && (
+           <div className="col-span-full text-center py-16 text-slate-500 border-2 border-dashed border-slate-700 rounded-xl">
+             <CardIcon size={48} className="mx-auto mb-4 opacity-20" />
+             <p className="text-lg font-medium">Nenhum cartão cadastrado.</p>
+             <p className="text-sm opacity-70">Adicione um cartão para controlar seus gastos a crédito.</p>
+           </div>
+        )}
       </div>
-      
-      {cards.length === 0 && (
-         <div className="text-center py-10 text-slate-500 border border-dashed border-slate-700 rounded-xl">
-           <CardIcon size={48} className="mx-auto mb-3 opacity-20" />
-           <p>Nenhum cartão cadastrado.</p>
-         </div>
-      )}
 
       {/* Add/Edit Card Modal */}
       <Modal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
@@ -372,6 +385,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
            </div>
         </form>
       </Modal>
-    </div>
+    </PageShell>
   );
 };

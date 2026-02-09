@@ -84,20 +84,20 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   return (
     <div className="space-y-6">
       {/* Hero Section Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Total Balance Hero */}
-        <div className="bg-gradient-to-r from-blue-900 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-lg">
-          <h2 className="text-slate-400 text-sm font-medium mb-1">Saldo Geral Acumulado</h2>
-          <div className="text-3xl font-bold text-white mb-4">
+        <div className="bg-gradient-to-br from-blue-900 via-slate-800 to-slate-900 p-8 rounded-2xl border border-slate-700 shadow-lg flex flex-col justify-center">
+          <h2 className="text-blue-200 text-sm font-medium mb-1 tracking-wide uppercase">Saldo Geral Acumulado</h2>
+          <div className="text-4xl font-bold text-white mb-6">
             {formatCurrency(totalBalance)}
           </div>
           
           {/* Account Balances Mini-List */}
-          <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="grid grid-cols-2 gap-3 mt-auto">
             {accounts.map(acc => {
                const bal = getAccountBalance(acc.id);
                return (
-                 <div key={acc.id} className="bg-slate-800/50 p-2.5 rounded-lg border border-slate-700/50">
+                 <div key={acc.id} className="bg-slate-900/40 backdrop-blur-sm p-3 rounded-lg border border-slate-700/50 flex flex-col">
                    <div className="flex items-center gap-2 mb-1">
                      {acc.type === 'bank' ? <Building2 size={14} className="text-slate-400"/> : <Banknote size={14} className="text-slate-400"/>}
                      <span className="text-xs text-slate-300 truncate font-medium">{acc.name}</span>
@@ -113,28 +113,28 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
 
         <div className="space-y-6">
             {/* Credit Card Summary Card */}
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
                 <div className="p-1.5 bg-slate-700 rounded text-slate-300">
-                  <CreditCard size={16} />
+                  <CreditCard size={18} />
                 </div>
-                <h2 className="text-slate-400 text-sm font-medium">Cartões de Crédito</h2>
+                <h2 className="text-slate-200 font-semibold">Cartões de Crédito</h2>
               </div>
               
-              <div className="flex justify-between items-end mt-4 mb-2">
+              <div className="flex justify-between items-end mb-2">
                 <div>
                   <p className="text-xs text-slate-400 mb-1">Limite em uso (Estimado)</p>
                   <p className="text-2xl font-bold text-slate-200">{formatCurrency(creditCardStats.usedLimit)}</p>
                 </div>
                 <div className="text-right">
-                    <p className="text-xs text-slate-400 mb-1">Limite Disponível</p>
+                    <p className="text-xs text-slate-400 mb-1">Disponível</p>
                     <p className="text-lg font-semibold text-emerald-400">{formatCurrency(creditCardStats.availableLimit)}</p>
                 </div>
               </div>
               
-              <div className="w-full bg-slate-700 rounded-full h-2.5 mt-4">
+              <div className="w-full bg-slate-700 rounded-full h-2.5 mt-4 overflow-hidden">
                   <div 
-                    className="bg-blue-600 h-2.5 rounded-full" 
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" 
                     style={{ width: `${Math.min((creditCardStats.usedLimit / creditCardStats.totalLimit) * 100, 100)}%` }}
                   ></div>
               </div>
@@ -142,29 +142,29 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
 
             {/* Budgets Summary Card */}
             {currentBudgets.length > 0 && (
-                <div onClick={onNavigateToBudgets} className="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm cursor-pointer hover:border-slate-500 transition-colors">
-                    <div className="flex items-center justify-between mb-3">
+                <div onClick={onNavigateToBudgets} className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-sm cursor-pointer hover:border-slate-500 transition-colors">
+                    <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <PieChart size={16} className="text-blue-400"/>
-                            <h2 className="text-slate-300 text-sm font-medium">Orçamentos ({currentMonthName})</h2>
+                            <PieChart size={18} className="text-blue-400"/>
+                            <h2 className="text-slate-300 font-medium">Orçamentos ({currentMonthName})</h2>
                         </div>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex gap-6">
                         <div className="flex flex-col">
                             <span className="text-2xl font-bold text-emerald-400">{budgetsOk}</span>
-                            <span className="text-xs text-slate-500">No Limite</span>
+                            <span className="text-xs text-slate-500 uppercase font-bold tracking-wider">OK</span>
                         </div>
                         {(budgetsWarning > 0 || budgetsDanger > 0) && <div className="w-px bg-slate-700"></div>}
                         {budgetsWarning > 0 && (
                             <div className="flex flex-col">
                                 <span className="text-2xl font-bold text-amber-400">{budgetsWarning}</span>
-                                <span className="text-xs text-slate-500">Atenção</span>
+                                <span className="text-xs text-slate-500 uppercase font-bold tracking-wider">Atenção</span>
                             </div>
                         )}
                         {budgetsDanger > 0 && (
                              <div className="flex flex-col">
                                 <span className="text-2xl font-bold text-red-400">{budgetsDanger}</span>
-                                <span className="text-xs text-slate-500">Estourados</span>
+                                <span className="text-xs text-slate-500 uppercase font-bold tracking-wider">Estourado</span>
                             </div>
                         )}
                     </div>
@@ -174,7 +174,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
       </div>
 
       {/* Monthly Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard title="Entradas" value={stats.income} type="income" />
         <StatCard title="Saídas" value={stats.expense} type="expense" />
         <StatCard title="Saldo do Mês" value={currentMonthlyBalance} type="balance" />
@@ -185,15 +185,15 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
         <h3 className="text-lg font-semibold text-white mb-6">Despesas por Categoria ({currentMonthName})</h3>
         
         {chartData.length > 0 ? (
-          <div className="h-64 w-full">
+          <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RePieChart>
                 <Pie
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
+                  innerRadius={70}
+                  outerRadius={100}
                   paddingAngle={5}
                   dataKey="value"
                 >
@@ -203,7 +203,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                 </Pie>
                 <Tooltip 
                   formatter={(value: number) => formatCurrency(value)}
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px' }}
                   itemStyle={{ color: '#f8fafc' }}
                 />
                 <Legend 

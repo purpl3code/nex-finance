@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Account, AccountType } from '../types';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
+import { PageShell } from './ui/PageShell';
+import { PageHeader } from './ui/PageHeader';
 import { Building2, Wallet, Banknote, Edit2, Trash2, Plus, Lock, AlertTriangle } from 'lucide-react';
 
 interface AccountListProps {
@@ -15,8 +17,6 @@ interface AccountListProps {
 export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, onAdd, onEdit, onDelete }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAcc, setEditingAcc] = useState<Account | undefined>(undefined);
-  
-  // State for Delete Confirmation Modal
   const [deletingAcc, setDeletingAcc] = useState<Account | null>(null);
 
   // Form State
@@ -57,21 +57,8 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
     setIsModalOpen(false);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent, acc: Account) => {
-    e.stopPropagation();
-    console.debug('Clique em excluir conta detectado:', acc.id, acc.name);
-
-    if (acc.isDefault) {
-      alert("Esta é uma conta padrão do sistema e não pode ser excluída.");
-      return;
-    }
-
-    setDeletingAcc(acc);
-  };
-
   const confirmDelete = () => {
     if (deletingAcc) {
-      console.debug('Confirmando exclusão da conta:', deletingAcc.id);
       onDelete(deletingAcc.id);
       setDeletingAcc(null);
     }
@@ -89,35 +76,38 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-slate-200">Minhas Contas</h2>
-        <Button onClick={() => openModal()} size="sm" icon={<Plus size={16}/>}>Nova Conta</Button>
-      </div>
+    <PageShell>
+      <PageHeader 
+        title="Minhas Contas" 
+        subtitle="Gerencie suas contas bancárias, carteiras e dinheiro físico."
+        actions={
+          <Button onClick={() => openModal()} icon={<Plus size={18}/>}>Nova Conta</Button>
+        }
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {accounts.map(acc => {
           const balance = getBalance(acc.id);
           return (
-            <div key={acc.id} className="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm flex flex-col justify-between group hover:border-slate-600 transition-colors">
+            <div key={acc.id} className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-sm flex flex-col justify-between group hover:border-slate-600 transition-colors">
               <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-slate-700/50 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-slate-700/50 rounded-lg shadow-inner">
                     {getIcon(acc.type)}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-white">{acc.name}</h3>
+                      <h3 className="text-lg font-semibold text-white">{acc.name}</h3>
                       {acc.isDefault && (
                         <span title="Conta padrão do sistema">
-                          <Lock size={12} className="text-slate-500" />
+                          <Lock size={14} className="text-slate-500" />
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-slate-400 uppercase tracking-wider">{acc.type === 'bank' ? 'Banco' : acc.type === 'cash' ? 'Dinheiro' : 'Carteira'}</span>
+                    <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">{acc.type === 'bank' ? 'Banco' : acc.type === 'cash' ? 'Dinheiro' : 'Carteira'}</span>
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-2">
                    <button 
                      type="button"
                      onClick={(e) => { e.stopPropagation(); openModal(acc); }} 
@@ -128,20 +118,21 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                    </button>
                    <button 
                      type="button"
-                     onClick={(e) => handleDeleteClick(e, acc)}
+                     onClick={(e) => { e.stopPropagation(); setDeletingAcc(acc); }}
                      className={`p-2 rounded-lg transition-colors ${
                        acc.isDefault 
                          ? 'text-slate-600 cursor-not-allowed' 
                          : 'text-slate-400 hover:text-red-400 hover:bg-slate-700'
                      }`}
+                     disabled={!!acc.isDefault}
                      title={acc.isDefault ? "Conta padrão não pode ser excluída" : "Excluir conta"}
                    >
                      <Trash2 size={16} />
                    </button>
                 </div>
               </div>
-              <div className="mt-2">
-                <p className="text-slate-400 text-xs mb-1">Saldo Atual</p>
+              <div className="mt-4 pt-4 border-t border-slate-700/50">
+                <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-1">Saldo Atual</p>
                 <p className={`text-2xl font-bold ${balance >= 0 ? 'text-white' : 'text-red-400'}`}>
                   {formatCurrency(balance)}
                 </p>
@@ -151,7 +142,6 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         })}
       </div>
 
-      {/* Edit/Create Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingAcc ? 'Editar Conta' : 'Nova Conta'}>
         <form onSubmit={handleSubmit} className="space-y-4">
            <div>
@@ -182,7 +172,6 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         </form>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <Modal isOpen={!!deletingAcc} onClose={() => setDeletingAcc(null)} title="Excluir Conta">
         <div className="text-center space-y-4">
           <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
@@ -202,6 +191,6 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
           </div>
         </div>
       </Modal>
-    </div>
+    </PageShell>
   );
 };
