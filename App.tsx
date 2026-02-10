@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useAuth } from './hooks/useAuth';
 import { useFinance } from './hooks/useFinance';
+import { SyncService } from './services/syncService';
 import { Dashboard } from './components/Dashboard';
 import { TransactionList } from './components/TransactionList';
 import { TransactionForm } from './components/TransactionForm';
@@ -18,7 +20,8 @@ import { PageShell } from './components/ui/PageShell';
 import { PageHeader } from './components/ui/PageHeader';
 import { ThemeService } from './services/themeService';
 import { FilterState } from './types';
-import { Plus, Search, Menu } from 'lucide-react';
+import { Plus, Search, Menu, CloudDownload, CloudOff } from 'lucide-react';
+import { LoginScreen } from './components/auth/LoginScreen';
 
 // Define valid tabs for type safety
 type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'investments' | 'goals';
@@ -28,6 +31,8 @@ const VALID_TABS: AppTab[] = [
 ];
 
 const App: React.FC = () => {
+  const { session, loading: authLoading } = useAuth();
+  
   const { 
     categories, 
     accounts,
@@ -81,7 +86,8 @@ const App: React.FC = () => {
     editGoal,
     toggleArchiveGoal,
     addValueToGoal,
-    loading
+    refreshData, // Pulled from useFinance
+    loading: financeLoading
   } = useFinance();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -111,6 +117,17 @@ const App: React.FC = () => {
   useEffect(() => {
     ThemeService.initialize();
   }, []);
+
+  // Sync Logic on Auth Change
+  useEffect(() => {
+    if (session) {
+      SyncService.initialize().then((updated) => {
+        if (updated) {
+          refreshData();
+        }
+      });
+    }
+  }, [session, refreshData]);
 
   const setActiveTab = (tab: AppTab) => {
     window.location.hash = tab;
@@ -180,7 +197,20 @@ const App: React.FC = () => {
     }
   };
 
-  if (loading) {
+  // --- AUTH GATES ---
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <LoginScreen />;
+  }
+
+  if (financeLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

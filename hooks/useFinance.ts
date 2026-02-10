@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement, Goal } from '../types';
 import { StorageService } from '../services/storageService';
+import { SyncService } from '../services/syncService'; // IMPORT SYNC SERVICE
 import { COLORS } from '../constants';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
 import { addMonths, isAfter, endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth } from 'date-fns';
@@ -33,8 +34,7 @@ export const useFinance = () => {
 
   // --- PERSISTENCE ---
 
-  // Initial Load
-  useEffect(() => {
+  const loadData = useCallback(() => {
     const data = StorageService.load();
     setTransactions(data.transactions);
     setCategories(data.categories);
@@ -53,10 +53,15 @@ export const useFinance = () => {
     setLoading(false);
   }, []);
 
-  // Save on change (Debounced slightly by React batching, but explicit here)
+  // Initial Load
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Save on change (Intercepted to use SyncService)
   useEffect(() => {
     if (!loading && dataVersion > 0) {
-      StorageService.save({
+      const currentData = {
         version: 10,
         transactions,
         categories,
@@ -72,12 +77,21 @@ export const useFinance = () => {
         positions,
         investmentMovements,
         goals
-      });
+      };
+      
+      // Use SyncService instead of direct StorageService
+      SyncService.saveAndSync(currentData);
     }
-  }, [dataVersion, loading]); // Dependent only on version bump
+  }, [dataVersion, loading, transactions, categories, accounts, creditCards, creditCardTransactions, creditCardInvoices, transfers, recurringRules, budgets, investmentAccounts, assets, positions, investmentMovements, goals]);
 
   // Helper to bump version
   const touchData = useCallback(() => setDataVersion(v => v + 1), []);
+
+  // External reload trigger (used after Cloud Sync)
+  const refreshData = useCallback(() => {
+    console.log('Refreshing data from local storage...');
+    loadData();
+  }, [loadData]);
 
   // --- MEMOIZED CALCULATIONS (SELECTORS) ---
 
@@ -681,6 +695,7 @@ export const useFinance = () => {
     creditCards, creditCardTransactions, investmentAccounts, assets, positions, investmentMovements,
     goals,
     loading,
+    refreshData, // New Method
     
     // Actions
     addTransaction, editTransaction, deleteTransaction,
