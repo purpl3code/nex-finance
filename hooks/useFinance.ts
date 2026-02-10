@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement, Goal } from '../types';
 import { StorageService } from '../services/storageService';
+import { SyncService } from '../services/syncService';
 import { COLORS } from '../constants';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
 import { addMonths, isAfter, endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth } from 'date-fns';
@@ -35,6 +36,7 @@ export const useFinance = () => {
 
   // Initial Load
   useEffect(() => {
+    // Try to load local data first
     const data = StorageService.load();
     setTransactions(data.transactions);
     setCategories(data.categories);
@@ -51,12 +53,34 @@ export const useFinance = () => {
     setInvestmentMovements(data.investmentMovements || []);
     setGoals(data.goals || []);
     setLoading(false);
+
+    // Then try to sync with cloud (if logged in)
+    SyncService.initialize().then((updated) => {
+      if (updated) {
+        // If updated, reload from local storage
+        const newData = StorageService.load();
+        setTransactions(newData.transactions);
+        setCategories(newData.categories);
+        setAccounts(newData.accounts);
+        setCreditCards(newData.creditCards);
+        setCreditCardTransactions(newData.creditCardTransactions);
+        setCreditCardInvoices(newData.creditCardInvoices);
+        setTransfers(newData.transfers || []); 
+        setRecurringRules(newData.recurringRules || []);
+        setBudgets(newData.budgets || []);
+        setInvestmentAccounts(newData.investmentAccounts || []);
+        setAssets(newData.assets || []);
+        setPositions(newData.positions || []);
+        setInvestmentMovements(newData.investmentMovements || []);
+        setGoals(newData.goals || []);
+      }
+    });
   }, []);
 
   // Save on change (Debounced slightly by React batching, but explicit here)
   useEffect(() => {
     if (!loading && dataVersion > 0) {
-      StorageService.save({
+      const data = {
         version: 10,
         transactions,
         categories,
@@ -72,7 +96,10 @@ export const useFinance = () => {
         positions,
         investmentMovements,
         goals
-      });
+      };
+      
+      // Use SyncService to save locally AND trigger cloud sync
+      SyncService.saveAndSync(data);
     }
   }, [dataVersion, loading]); // Dependent only on version bump
 

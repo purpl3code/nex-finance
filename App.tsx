@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useFinance } from './hooks/useFinance';
+import { useAuth } from './hooks/useAuth';
 import { Dashboard } from './components/Dashboard';
 import { TransactionList } from './components/TransactionList';
 import { TransactionForm } from './components/TransactionForm';
@@ -19,6 +20,7 @@ import { PageHeader } from './components/ui/PageHeader';
 import { ThemeService } from './services/themeService';
 import { FilterState } from './types';
 import { Plus, Search, Menu } from 'lucide-react';
+import { LoginScreen } from './components/auth/LoginScreen';
 
 // Define valid tabs for type safety
 type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'investments' | 'goals';
@@ -28,6 +30,8 @@ const VALID_TABS: AppTab[] = [
 ];
 
 const App: React.FC = () => {
+  const { session, loading: authLoading } = useAuth();
+
   const { 
     categories, 
     accounts,
@@ -81,7 +85,7 @@ const App: React.FC = () => {
     editGoal,
     toggleArchiveGoal,
     addValueToGoal,
-    loading
+    loading: dataLoading
   } = useFinance();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -180,7 +184,22 @@ const App: React.FC = () => {
     }
   };
 
-  if (loading) {
+  // --- AUTH LOADING STATE ---
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // --- SHOW LOGIN SCREEN IF NOT AUTHENTICATED ---
+  if (!session) {
+    return <LoginScreen />;
+  }
+
+  // --- DATA LOADING STATE ---
+  if (dataLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

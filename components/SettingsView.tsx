@@ -3,6 +3,9 @@ import { BackupService } from '../services/backupService';
 import { StorageService } from '../services/storageService';
 import { DataHealthService } from '../services/dataHealthService';
 import { ThemeService, AppTheme } from '../services/themeService';
+import { SyncService } from '../services/syncService';
+import { supabase, isDemoMode, disableDemoMode } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
 import { BackupFile, DataHealthReport, FixLogEntry } from '../types';
 import { useFinance } from '../hooks/useFinance';
 import { useUserProfile } from '../hooks/useUserProfile';
@@ -15,16 +18,18 @@ import { ThemeSelector } from './ThemeSelector';
 import { 
   Download, Upload, HardDrive, AlertTriangle, FileText, 
   Trash2, Database, Server, RefreshCw, ShieldAlert, History,
-  Activity, CheckCircle, Stethoscope, ChevronDown, ChevronUp, User, Camera, Palette
+  Activity, CheckCircle, Stethoscope, ChevronDown, ChevronUp, User, Camera, Palette, Cloud, LogOut
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
+  const { session } = useAuth();
   const { 
     transactions, accounts, creditCards, recurringRules, 
     investmentAccounts, assets, investmentMovements 
   } = useFinance();
 
   const { profile, updateName, updateAvatar, removeAvatar } = useUserProfile();
+  const isDemo = isDemoMode();
 
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   
@@ -34,6 +39,9 @@ export const SettingsView: React.FC = () => {
   // Profile State
   const [profileName, setProfileName] = useState(profile.displayName);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync State
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Import State
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,6 +81,52 @@ export const SettingsView: React.FC = () => {
     if (file) {
       updateAvatar(file);
       if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
+
+  const handleLogout = async () => {
+    if(confirm('Tem certeza que deseja sair?')) {
+      if (isDemoMode()) {
+        disableDemoMode();
+        window.location.reload();
+      } else {
+        await supabase.auth.signOut();
+        window.location.reload();
+      }
+    }
+  };
+
+  // Sync Handlers
+  const handlePushToCloud = async () => {
+    if (isDemo) {
+       alert("Sincronização na nuvem indisponível no Modo Demo.");
+       return;
+    }
+    if(!session) return;
+    setIsSyncing(true);
+    const data = SyncService.getLocalData();
+    await SyncService.pushToCloud(data, session.user.id);
+    setIsSyncing(false);
+    alert('Dados enviados para a nuvem com sucesso!');
+  };
+
+  const handlePullFromCloud = async () => {
+    if (isDemo) {
+       alert("Sincronização na nuvem indisponível no Modo Demo.");
+       return;
+    }
+    if(!session) return;
+    if(!confirm('Isso irá substituir os dados atuais do dispositivo pelos dados da nuvem. Continuar?')) return;
+    
+    setIsSyncing(true);
+    const updated = await SyncService.initialize();
+    setIsSyncing(false);
+    
+    if(updated) {
+      alert('Dados baixados com sucesso! A página será recarregada.');
+      window.location.reload();
+    } else {
+      alert('Nenhum dado encontrado na nuvem ou erro ao baixar.');
     }
   };
 
@@ -174,12 +228,28 @@ export const SettingsView: React.FC = () => {
       <PageHeader 
         title="Configurações" 
         subtitle="Gerencie seus dados, backups e preferências do sistema."
+        actions={
+          <Button variant="secondary" onClick={handleLogout} icon={<LogOut size={16} />}>Sair</Button>
+        }
       />
+
+      {isDemo && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3 mb-6">
+          <AlertTriangle className="text-amber-500" size={24} />
+          <div>
+            <h3 className="font-bold text-white">Modo Offline (Demo) Ativo</h3>
+            <p className="text-sm text-slate-400">
+              Você está usando uma versão sem conexão com banco de dados. 
+              Para ativar a sincronização, configure o arquivo <code>.env</code> e faça login novamente.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 0. USER PROFILE */}
       <SectionCard 
         title="Meu Perfil" 
-        description="Personalize seu nome e foto de exibição."
+        description={`Logado como: ${session?.user.email}`}
         icon={<User size={24} />}
       >
         <div className="flex flex-col md:flex-row gap-8 items-start">
@@ -226,7 +296,33 @@ export const SettingsView: React.FC = () => {
         </div>
       </SectionCard>
 
-      {/* 0.5. THEME SELECTOR */}
+      {/* 0.5 CLOUD SYNC */}
+      <SectionCard
+        title="Sincronização na Nuvem"
+        description="Mantenha seus dados salvos e sincronizados entre dispositivos."
+        icon={<Cloud size={24} />}
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-slate-700/50">
+             <div className={`w-2 h-2 rounded-full ${navigator.onLine ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+             <span>Status da conexão: <span className="text-slate-200 font-medium">{navigator.onLine ? 'Online' : 'Offline'}</span></span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <Button onClick={handlePushToCloud} disabled={isSyncing || isDemo} className="w-full flex justify-center">
+                {isSyncing ? 'Enviando...' : 'Enviar Dados para Nuvem'}
+             </Button>
+             <Button onClick={handlePullFromCloud} variant="secondary" disabled={isSyncing || isDemo} className="w-full flex justify-center">
+                {isSyncing ? 'Baixando...' : 'Baixar Dados da Nuvem'}
+             </Button>
+          </div>
+          <p className="text-xs text-slate-500 text-center">
+            {isDemo ? 'Recurso desativado no modo demo.' : 'Seus dados são salvos automaticamente na nuvem ao fazer alterações.'}
+          </p>
+        </div>
+      </SectionCard>
+
+      {/* 0.6. THEME SELECTOR */}
       <SectionCard
         title="Aparência"
         description="Escolha o tema que mais combina com você."
@@ -429,7 +525,7 @@ export const SettingsView: React.FC = () => {
             </div>
             <div className="flex justify-between items-center py-2">
                <span className="text-slate-400 text-sm">Status</span>
-               <span className="text-emerald-400 text-sm font-medium">Online (Offline-first)</span>
+               <span className="text-emerald-400 text-sm font-medium">{isDemo ? 'Offline (Demo)' : 'Online (Sync)'}</span>
             </div>
          </div>
       </SectionCard>
