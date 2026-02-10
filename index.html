@@ -6,6 +6,113 @@
     <title>Nex Finance</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+      /* 
+        THEMING SYSTEM 
+        Values are RGB channels to support Tailwind's opacity modifier syntax.
+      */
+      :root {
+        /* DEFAULT (DARK / SLATE) */
+        --c-bg-950: 2 6 23;    /* slate-950 */
+        --c-bg-900: 15 23 42;  /* slate-900 */
+        --c-bg-800: 30 41 59;  /* slate-800 */
+        --c-bg-700: 51 65 85;  /* slate-700 */
+        --c-bg-600: 71 85 105; /* slate-600 */
+        --c-text-500: 100 116 139; /* slate-500 */
+        --c-text-400: 148 163 184; /* slate-400 */
+        --c-text-300: 203 213 225; /* slate-300 */
+        --c-text-200: 226 232 240; /* slate-200 */
+        --c-text-100: 241 245 249; /* slate-100 */
+
+        /* Primary (Blue) */
+        --c-primary-400: 96 165 250; /* blue-400 */
+        --c-primary-500: 59 130 246; /* blue-500 */
+        --c-primary-600: 37 99 235;  /* blue-600 */
+        --c-primary-700: 29 78 216;  /* blue-700 */
+      }
+
+      /* MIDNIGHT (DEEP BLUE) */
+      [data-theme="midnight"] {
+        --c-bg-950: 5 10 20;
+        --c-bg-900: 10 15 30;  /* deep navy */
+        --c-bg-800: 23 32 56;  
+        --c-bg-700: 38 50 82;
+        --c-bg-600: 58 75 110;
+        --c-text-500: 110 130 160;
+        --c-text-400: 140 160 190;
+        --c-text-300: 200 215 235;
+        --c-text-200: 225 235 245;
+        --c-text-100: 240 248 255;
+
+        /* Primary (Cyan/Sky) */
+        --c-primary-400: 56 189 248; /* sky-400 */
+        --c-primary-500: 14 165 233; /* sky-500 */
+        --c-primary-600: 2 132 199;  /* sky-600 */
+        --c-primary-700: 3 105 161;  /* sky-700 */
+      }
+
+      /* GRAPHITE (NEUTRAL/GRAY) */
+      [data-theme="graphite"] {
+        --c-bg-950: 10 10 10;
+        --c-bg-900: 23 23 23;  /* neutral-900 */
+        --c-bg-800: 38 38 38;  /* neutral-800 */
+        --c-bg-700: 64 64 64;
+        --c-bg-600: 82 82 82;
+        --c-text-500: 115 115 115;
+        --c-text-400: 163 163 163;
+        --c-text-300: 212 212 212;
+        --c-text-200: 229 229 229;
+        --c-text-100: 245 245 245;
+
+        /* Primary (Emerald) */
+        --c-primary-400: 52 211 153; /* emerald-400 */
+        --c-primary-500: 16 185 129; /* emerald-500 */
+        --c-primary-600: 5 150 105;  /* emerald-600 */
+        --c-primary-700: 4 120 87;   /* emerald-700 */
+      }
+
+      /* ROYAL (PURPLE/ZINC) */
+      [data-theme="royal"] {
+        --c-bg-950: 9 9 11;
+        --c-bg-900: 24 24 27; /* zinc-900 */
+        --c-bg-800: 39 39 42; /* zinc-800 */
+        --c-bg-700: 63 63 70;
+        --c-bg-600: 82 82 91;
+        --c-text-500: 113 113 122;
+        --c-text-400: 161 161 170;
+        --c-text-300: 212 212 216;
+        --c-text-200: 228 228 231;
+        --c-text-100: 244 244 245;
+
+        /* Primary (Violet) */
+        --c-primary-400: 167 139 250; /* violet-400 */
+        --c-primary-500: 139 92 246;  /* violet-500 */
+        --c-primary-600: 124 58 237;  /* violet-600 */
+        --c-primary-700: 109 40 217;  /* violet-700 */
+      }
+
+      body {
+        background-color: rgb(var(--c-bg-900));
+        color: rgb(var(--c-text-100));
+      }
+      /* Custom scrollbar for webkit */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgb(var(--c-bg-900)); 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgb(var(--c-bg-700)); 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgb(var(--c-bg-600)); 
+      }
+    </style>
+
     <script>
       tailwind.config = {
         theme: {
@@ -14,38 +121,44 @@
               sans: ['Inter', 'sans-serif'],
             },
             colors: {
-              background: '#0f172a', // slate-900
-              surface: '#1e293b',    // slate-800
-              primary: '#3b82f6',    // blue-500
-              accent: '#8b5cf6',     // violet-500
-              danger: '#ef4444',     // red-500
-              success: '#10b981',    // emerald-500
+              // Override 'slate' to use our theme variables
+              // This allows switching backgrounds/borders without changing class names in components
+              slate: {
+                50:  'rgb(var(--c-text-100) / <alpha-value>)', // Inverted for light/dark logic mostly used for text
+                100: 'rgb(var(--c-text-100) / <alpha-value>)',
+                200: 'rgb(var(--c-text-200) / <alpha-value>)',
+                300: 'rgb(var(--c-text-300) / <alpha-value>)',
+                400: 'rgb(var(--c-text-400) / <alpha-value>)',
+                500: 'rgb(var(--c-text-500) / <alpha-value>)',
+                600: 'rgb(var(--c-bg-600) / <alpha-value>)',
+                700: 'rgb(var(--c-bg-700) / <alpha-value>)',
+                800: 'rgb(var(--c-bg-800) / <alpha-value>)',
+                900: 'rgb(var(--c-bg-900) / <alpha-value>)',
+                950: 'rgb(var(--c-bg-950) / <alpha-value>)',
+              },
+              // Override 'blue' to be the primary accent color
+              blue: {
+                400: 'rgb(var(--c-primary-400) / <alpha-value>)',
+                500: 'rgb(var(--c-primary-500) / <alpha-value>)',
+                600: 'rgb(var(--c-primary-600) / <alpha-value>)',
+                700: 'rgb(var(--c-primary-700) / <alpha-value>)',
+                // Keep default low/high values to prevent breaking changes if used
+                50: '#eff6ff', 
+                100: '#dbeafe', 
+                200: '#bfdbfe', 
+                300: '#93c5fd', 
+                800: '#1e40af', 
+                900: '#1e3a8a', 
+                950: '#172554',
+              },
+              // Static aliases for readability
+              background: 'rgb(var(--c-bg-900) / <alpha-value>)',
+              surface: 'rgb(var(--c-bg-800) / <alpha-value>)',
             }
           }
         }
       }
     </script>
-    <style>
-      body {
-        background-color: #0f172a;
-        color: #f8fafc;
-      }
-      /* Custom scrollbar for webkit */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #0f172a; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #334155; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #475569; 
-      }
-    </style>
   <script type="importmap">
 {
   "imports": {

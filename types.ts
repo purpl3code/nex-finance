@@ -163,6 +163,22 @@ export interface InvestmentMovement {
   createdAt: number;
 }
 
+// --- Goal Types (New) ---
+
+export interface Goal {
+  id: string;
+  title: string;
+  description?: string;
+  targetAmount: number;
+  currentAmount: number;
+  monthlyContribution: number;
+  startDate: string; // YYYY-MM-DD
+  deadline?: string; // YYYY-MM-DD
+  color?: string; // UI Color
+  isArchived: boolean;
+  createdAt: number;
+}
+
 // -------------------------
 
 export interface AppData {
@@ -182,6 +198,9 @@ export interface AppData {
   assets: Asset[];
   positions: Position[];
   investmentMovements: InvestmentMovement[];
+
+  // Goals
+  goals: Goal[];
 }
 
 export interface BackupFile {

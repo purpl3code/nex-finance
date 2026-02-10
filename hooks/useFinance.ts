@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement } from '../types';
+import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement, Goal } from '../types';
 import { StorageService } from '../services/storageService';
 import { COLORS } from '../constants';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
@@ -26,6 +26,9 @@ export const useFinance = () => {
   const [positions, setPositions] = useState<Position[]>([]);
   const [investmentMovements, setInvestmentMovements] = useState<InvestmentMovement[]>([]);
 
+  // Goals State
+  const [goals, setGoals] = useState<Goal[]>([]);
+
   const [loading, setLoading] = useState(true);
 
   // --- PERSISTENCE ---
@@ -46,6 +49,7 @@ export const useFinance = () => {
     setAssets(data.assets || []);
     setPositions(data.positions || []);
     setInvestmentMovements(data.investmentMovements || []);
+    setGoals(data.goals || []);
     setLoading(false);
   }, []);
 
@@ -53,7 +57,7 @@ export const useFinance = () => {
   useEffect(() => {
     if (!loading && dataVersion > 0) {
       StorageService.save({
-        version: 9,
+        version: 10,
         transactions,
         categories,
         accounts,
@@ -66,7 +70,8 @@ export const useFinance = () => {
         investmentAccounts,
         assets,
         positions,
-        investmentMovements
+        investmentMovements,
+        goals
       });
     }
   }, [dataVersion, loading]); // Dependent only on version bump
@@ -346,6 +351,33 @@ export const useFinance = () => {
      setInvestmentMovements(prev => [newMovement, ...prev]);
      touchData();
   }, [addTransaction, touchData]);
+
+  // --- GOALS (New) ---
+  const addGoal = useCallback((goal: Omit<Goal, 'id' | 'createdAt' | 'isArchived'>) => {
+    const newGoal: Goal = { 
+      ...goal, 
+      id: crypto.randomUUID(), 
+      isArchived: false, 
+      createdAt: Date.now() 
+    };
+    setGoals(prev => [newGoal, ...prev]);
+    touchData();
+  }, [touchData]);
+
+  const editGoal = useCallback((id: string, updates: Partial<Goal>) => {
+    setGoals(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
+    touchData();
+  }, [touchData]);
+
+  const toggleArchiveGoal = useCallback((id: string) => {
+    setGoals(prev => prev.map(g => g.id === id ? { ...g, isArchived: !g.isArchived } : g));
+    touchData();
+  }, [touchData]);
+
+  const addValueToGoal = useCallback((id: string, amount: number) => {
+    setGoals(prev => prev.map(g => g.id === id ? { ...g, currentAmount: g.currentAmount + amount } : g));
+    touchData();
+  }, [touchData]);
 
   // --- HEAVY CALCULATORS (Memoized) ---
 
@@ -647,6 +679,7 @@ export const useFinance = () => {
     // Data
     transactions, transfers, recurringRules, budgets, categories, accounts,
     creditCards, creditCardTransactions, investmentAccounts, assets, positions, investmentMovements,
+    goals,
     loading,
     
     // Actions
@@ -659,6 +692,9 @@ export const useFinance = () => {
     addCreditCardTransaction, payInvoice,
     addInvestmentAccount, deleteInvestmentAccount, addAsset, addInvestmentMovement,
     commitRecurringTransactions,
+    
+    // Goal Actions
+    addGoal, editGoal, toggleArchiveGoal, addValueToGoal,
 
     // Selectors / Calculators
     getAccountBalance,

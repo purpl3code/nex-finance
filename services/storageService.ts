@@ -2,7 +2,7 @@ import { AppData } from '../types';
 import { STORAGE_KEY, INITIAL_CATEGORIES, INITIAL_ACCOUNTS } from '../constants';
 import { LocalStorageAdapter } from './storageAdapter';
 
-const CURRENT_VERSION = 9;
+const CURRENT_VERSION = 10;
 
 const DEFAULT_DATA: AppData = {
   version: CURRENT_VERSION,
@@ -19,6 +19,7 @@ const DEFAULT_DATA: AppData = {
   assets: [],
   positions: [],
   investmentMovements: [],
+  goals: [],
 };
 
 // We use the adapter instead of direct localStorage calls
@@ -123,6 +124,11 @@ export const StorageService = {
                 parsed.categories.push(cat);
              }
           });
+        }
+
+        // V9 -> V10 Migration (Goals)
+        if (parsed.version < 10) {
+          parsed.goals = [];
         }
 
         parsed.version = CURRENT_VERSION;

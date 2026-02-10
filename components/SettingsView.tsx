@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { BackupService } from '../services/backupService';
 import { StorageService } from '../services/storageService';
 import { DataHealthService } from '../services/dataHealthService';
+import { ThemeService, AppTheme } from '../services/themeService';
 import { BackupFile, DataHealthReport, FixLogEntry } from '../types';
 import { useFinance } from '../hooks/useFinance';
 import { useUserProfile } from '../hooks/useUserProfile';
@@ -10,10 +11,11 @@ import { Modal } from './ui/Modal';
 import { Avatar } from './ui/Avatar';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
+import { ThemeSelector } from './ThemeSelector';
 import { 
   Download, Upload, HardDrive, AlertTriangle, FileText, 
   Trash2, Database, Server, RefreshCw, ShieldAlert, History,
-  Activity, CheckCircle, Stethoscope, ChevronDown, ChevronUp, User, Camera
+  Activity, CheckCircle, Stethoscope, ChevronDown, ChevronUp, User, Camera, Palette
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
@@ -26,6 +28,9 @@ export const SettingsView: React.FC = () => {
 
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   
+  // Theme State
+  const [currentTheme, setCurrentTheme] = useState<AppTheme>('dark');
+
   // Profile State
   const [profileName, setProfileName] = useState(profile.displayName);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +56,7 @@ export const SettingsView: React.FC = () => {
     setLastBackup(dateStr);
     setFixLogs(DataHealthService.getFixLogs());
     setProfileName(profile.displayName);
+    setCurrentTheme(ThemeService.getTheme());
   }, [profile.displayName]);
 
   // Profile Handlers
@@ -218,6 +224,15 @@ export const SettingsView: React.FC = () => {
               </div>
            </form>
         </div>
+      </SectionCard>
+
+      {/* 0.5. THEME SELECTOR */}
+      <SectionCard
+        title="Aparência"
+        description="Escolha o tema que mais combina com você."
+        icon={<Palette size={24} />}
+      >
+        <ThemeSelector currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
       </SectionCard>
 
       {/* 1. DATA HEALTH */}

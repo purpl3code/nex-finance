@@ -10,19 +10,21 @@ import { ForecastView } from './components/ForecastView';
 import { BudgetManager } from './components/BudgetManager';
 import { SettingsView } from './components/SettingsView';
 import { InvestmentDashboard } from './components/InvestmentDashboard';
+import { GoalManager } from './components/GoalManager';
 import { Sidebar } from './components/Sidebar';
 import { Modal } from './components/ui/Modal';
 import { Button } from './components/ui/Button';
 import { PageShell } from './components/ui/PageShell';
 import { PageHeader } from './components/ui/PageHeader';
+import { ThemeService } from './services/themeService';
 import { FilterState } from './types';
 import { Plus, Search, Menu } from 'lucide-react';
 
 // Define valid tabs for type safety
-type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'investments';
+type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'investments' | 'goals';
 
 const VALID_TABS: AppTab[] = [
-  'dashboard', 'list', 'accounts', 'cards', 'recurring', 'forecast', 'budgets', 'settings', 'investments'
+  'dashboard', 'list', 'accounts', 'cards', 'recurring', 'forecast', 'budgets', 'settings', 'investments', 'goals'
 ];
 
 const App: React.FC = () => {
@@ -36,6 +38,7 @@ const App: React.FC = () => {
     assets,
     positions,
     investmentMovements,
+    goals,
     addTransaction, 
     editTransaction, 
     deleteTransaction, 
@@ -74,6 +77,10 @@ const App: React.FC = () => {
     getForecast,
     getInvestmentAccountBalance,
     getPortfolioSummary,
+    addGoal,
+    editGoal,
+    toggleArchiveGoal,
+    addValueToGoal,
     loading
   } = useFinance();
 
@@ -98,6 +105,11 @@ const App: React.FC = () => {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Initialize Theme
+  useEffect(() => {
+    ThemeService.initialize();
   }, []);
 
   const setActiveTab = (tab: AppTab) => {
@@ -192,6 +204,7 @@ const App: React.FC = () => {
         case 'budgets': return 'Orçamentos';
         case 'settings': return 'Configurações';
         case 'investments': return 'Investimentos';
+        case 'goals': return 'Metas';
         default: return 'Nex Finance';
      }
   };
@@ -415,6 +428,16 @@ const App: React.FC = () => {
                     onAddMovement={addInvestmentMovement}
                     getInvestmentAccountBalance={getInvestmentAccountBalance}
                     getPortfolioSummary={getPortfolioSummary}
+                />
+              )}
+
+              {activeTab === 'goals' && (
+                <GoalManager
+                  goals={goals}
+                  onAddGoal={addGoal}
+                  onEditGoal={editGoal}
+                  onArchiveGoal={toggleArchiveGoal}
+                  onAddValueToGoal={addValueToGoal}
                 />
               )}
 
