@@ -97,7 +97,7 @@ export interface CreditCard {
 export interface CreditCardTransaction {
   id: string;
   cardId: string;
-  amount: number;
+  amount: number; // Negative if refund
   date: string; // YYYY-MM-DD
   categoryId: string;
   description?: string;
@@ -106,6 +106,11 @@ export interface CreditCardTransaction {
     total: number;
   };
   invoiceId?: string; // Link to a paid invoice (optional)
+  
+  // New fields for Refund Logic
+  type?: 'purchase' | 'refund';
+  originalTransactionId?: string; // If type is refund, points to the purchase
+
   createdAt: number;
 }
 

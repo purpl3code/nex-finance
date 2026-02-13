@@ -1,11 +1,13 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { DashboardStats, ChartDataPoint, Account, Budget } from '../types';
 import { TrendingUp, TrendingDown, Wallet, Building2, Banknote, CreditCard, PieChart } from 'lucide-react';
+import { COLORS, INITIAL_CATEGORIES } from '../constants';
 
 interface DashboardProps {
   stats: DashboardStats;
-  chartData: ChartDataPoint[];
+  chartData: ChartDataPoint[]; // Deprecated, we calculate locally now
   currentMonthName: string;
   totalBalance: number;
   accounts: Account[];
@@ -14,11 +16,15 @@ interface DashboardProps {
   budgets?: Budget[]; 
   getCategorySpending?: (catId: string, m: number, y: number) => number;
   onNavigateToBudgets?: () => void;
+  // Context props for calculating chart
+  categories?: any[]; // Passed via useFinance but implicit here if we just use the getter
+  month: number;
+  year: number;
 }
 
 export const Dashboard: React.FC<DashboardProps> = React.memo(({ 
   stats, 
-  chartData, 
+  // chartData, // Ignored, we rebuild it to include credit cards
   currentMonthName,
   totalBalance,
   accounts,
@@ -26,14 +32,40 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   creditCardStats,
   budgets = [],
   getCategorySpending,
-  onNavigateToBudgets
+  onNavigateToBudgets,
+  categories = INITIAL_CATEGORIES,
+  month,
+  year
 }) => {
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
+  // Re-calculate Chart Data using the robust selector that includes Credit Cards
+  const comprehensiveChartData = useMemo(() => {
+    if (!getCategorySpending) return [];
+    
+    const data: ChartDataPoint[] = [];
+    categories.forEach((cat: any) => {
+       if (cat.kind === 'expense') {
+          const val = getCategorySpending(cat.id, month, year);
+          if (val > 0) {
+             data.push({
+                name: cat.name,
+                value: val,
+                color: '' // Assigned later
+             });
+          }
+       }
+    });
+    
+    return data
+      .sort((a, b) => b.value - a.value)
+      .map((item, idx) => ({ ...item, color: COLORS[idx % COLORS.length] }));
+
+  }, [getCategorySpending, categories, month, year]);
+
   // Budget Calc
-  const currentDate = new Date();
-  const currentBudgets = budgets.filter(b => b.month === currentDate.getMonth() && b.year === currentDate.getFullYear());
+  const currentBudgets = budgets.filter(b => b.month === month && b.year === year);
   let budgetsOk = 0;
   let budgetsWarning = 0;
   let budgetsDanger = 0;
@@ -175,21 +207,24 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
 
       {/* Monthly Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard title="Entradas" value={stats.income} type="income" />
-        <StatCard title="Saídas" value={stats.expense} type="expense" />
-        <StatCard title="Saldo do Mês" value={currentMonthlyBalance} type="balance" />
+        <StatCard title="Entradas (Caixa)" value={stats.income} type="income" />
+        <StatCard title="Saídas (Caixa)" value={stats.expense} type="expense" />
+        <StatCard title="Saldo (Caixa)" value={currentMonthlyBalance} type="balance" />
       </div>
 
       {/* Charts Section */}
       <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-white mb-6">Despesas por Categoria ({currentMonthName})</h3>
+        <div className="flex justify-between items-start mb-6">
+            <h3 className="text-lg font-semibold text-white">Despesas por Categoria ({currentMonthName})</h3>
+            <span className="text-xs text-slate-500 max-w-[150px] text-right">Inclui compras no cartão. Pagamento de fatura ignorado para evitar duplicidade.</span>
+        </div>
         
-        {chartData.length > 0 ? (
+        {comprehensiveChartData.length > 0 ? (
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RePieChart>
                 <Pie
-                  data={chartData}
+                  data={comprehensiveChartData}
                   cx="50%"
                   cy="50%"
                   innerRadius={70}
@@ -197,7 +232,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {chartData.map((entry, index) => (
+                  {comprehensiveChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} stroke="#1e293b" strokeWidth={2} />
                   ))}
                 </Pie>

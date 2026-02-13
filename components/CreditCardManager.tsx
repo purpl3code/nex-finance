@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
-import { CreditCard, CreditCardInvoice, Category, Account } from '../types';
+import { CreditCard, CreditCardInvoice, Category, Account, CreditCardTransaction } from '../types';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
-import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
+import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle } from 'lucide-react';
 
 interface CreditCardManagerProps {
   cards: CreditCard[];
@@ -13,6 +14,9 @@ interface CreditCardManagerProps {
   onAddCard: (card: any) => void;
   onDeleteCard: (id: string) => void;
   onAddTransaction: (tx: any, installments: number) => void;
+  onEditTransaction?: (id: string, updates: any) => void;
+  onDeleteTransaction?: (id: string) => void;
+  onAddRefund?: (originalTx: CreditCardTransaction, amount: number, date: string, desc: string) => void;
   onPayInvoice: (invoice: CreditCardInvoice, accountId: string) => void;
   getInvoiceInfo: (cardId: string, month: number, year: number) => any;
   onEditCard?: (id: string, updates: any) => void;
@@ -25,6 +29,9 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   onAddCard,
   onDeleteCard,
   onAddTransaction,
+  onEditTransaction,
+  onDeleteTransaction,
+  onAddRefund,
   onPayInvoice,
   getInvoiceInfo,
   onEditCard
@@ -37,11 +44,17 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+
+  // Edit/Add Logic
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
+  const [editingTx, setEditingTx] = useState<CreditCardTransaction | null>(null);
+  const [refundingTx, setRefundingTx] = useState<CreditCardTransaction | null>(null);
 
   // Form States
   const [cardForm, setCardForm] = useState({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '' });
   const [txForm, setTxForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], categoryId: '', description: '', installments: '1' });
+  const [refundForm, setRefundForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], description: '' });
   const [payAccount, setPayAccount] = useState('');
 
   const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -81,18 +94,75 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     setIsCardModalOpen(false);
   };
 
+  const openTxModal = (tx?: CreditCardTransaction) => {
+    if (tx) {
+      setEditingTx(tx);
+      setTxForm({
+        amount: tx.amount.toString(),
+        date: tx.date,
+        categoryId: tx.categoryId,
+        description: tx.description || '',
+        installments: '1' // Editing always treats as single unit unless complex logic added
+      });
+    } else {
+      setEditingTx(null);
+      setTxForm({ amount: '', date: new Date().toISOString().split('T')[0], categoryId: '', description: '', installments: '1' });
+    }
+    setIsTxModalOpen(true);
+  };
+
   const handleTxSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCardId) return;
-    onAddTransaction({
-      cardId: selectedCardId,
-      amount: parseFloat(txForm.amount),
-      date: txForm.date,
-      categoryId: txForm.categoryId,
-      description: txForm.description
-    }, parseInt(txForm.installments));
+
+    if (editingTx && onEditTransaction) {
+       // Edit Mode
+       onEditTransaction(editingTx.id, {
+          amount: parseFloat(txForm.amount),
+          date: txForm.date,
+          categoryId: txForm.categoryId,
+          description: txForm.description
+       });
+    } else {
+       // Add Mode
+       onAddTransaction({
+         cardId: selectedCardId,
+         amount: parseFloat(txForm.amount),
+         date: txForm.date,
+         categoryId: txForm.categoryId,
+         description: txForm.description
+       }, parseInt(txForm.installments));
+    }
     setIsTxModalOpen(false);
-    setTxForm({ amount: '', date: new Date().toISOString().split('T')[0], categoryId: '', description: '', installments: '1' });
+  };
+
+  const handleDeleteTx = (id: string) => {
+    if (confirm('Tem certeza que deseja excluir esta compra? Se houver estornos vinculados, eles também serão removidos.')) {
+      if (onDeleteTransaction) onDeleteTransaction(id);
+    }
+  };
+
+  const openRefundModal = (tx: CreditCardTransaction) => {
+    setRefundingTx(tx);
+    setRefundForm({
+      amount: tx.amount.toString(), // Default to full amount
+      date: new Date().toISOString().split('T')[0],
+      description: `Estorno: ${tx.description}`
+    });
+    setIsRefundModalOpen(true);
+  };
+
+  const handleRefundSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (refundingTx && onAddRefund) {
+      const amt = parseFloat(refundForm.amount);
+      if (amt > refundingTx.amount) {
+        alert('O valor do estorno não pode ser maior que o valor da compra.');
+        return;
+      }
+      onAddRefund(refundingTx, amt, refundForm.date, refundForm.description);
+      setIsRefundModalOpen(false);
+    }
   };
 
   const handlePaySubmit = (e: React.FormEvent) => {
@@ -137,7 +207,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             </div>
             <div className="flex gap-3">
               <Button onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</Button>
-              <Button onClick={() => setIsTxModalOpen(true)} icon={<Plus size={16}/>}>Nova Compra</Button>
+              <Button onClick={() => openTxModal()} icon={<Plus size={16}/>}>Nova Compra</Button>
             </div>
           </div>
         </div>
@@ -176,23 +246,55 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
            <div className="space-y-4">
              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Transações da Fatura</h3>
              {invoiceInfo?.transactions && (invoiceInfo.transactions as any[]).length > 0 ? (
-               (invoiceInfo.transactions as any[]).map((tx: any) => (
-                 <div key={tx.id} className="flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0 hover:bg-slate-700/20 px-2 -mx-2 rounded transition-colors">
-                   <div className="flex items-center gap-4">
-                     <div className="bg-slate-700/50 p-2.5 rounded-lg text-xl shadow-inner">
-                       {categories.find(c => c.id === tx.categoryId)?.emoji || '🛒'}
-                     </div>
-                     <div>
-                       <p className="text-slate-200 text-sm font-semibold">{tx.description || 'Compra'}</p>
-                       <p className="text-slate-500 text-xs mt-0.5">
-                         {new Date(tx.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
-                         {tx.installment.total > 1 && ` • Parcela ${tx.installment.current}/${tx.installment.total}`}
-                       </p>
-                     </div>
-                   </div>
-                   <span className="text-white font-medium">{formatCurrency(tx.amount)}</span>
-                 </div>
-               ))
+               (invoiceInfo.transactions as any[]).map((tx: CreditCardTransaction) => {
+                 const isRefund = tx.type === 'refund';
+                 return (
+                  <div key={tx.id} className={`flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0 hover:bg-slate-700/20 px-2 -mx-2 rounded transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
+                    <div className="flex items-center gap-4">
+                      <div className={`p-2.5 rounded-lg text-xl shadow-inner ${isRefund ? 'bg-red-900/20 text-red-400' : 'bg-slate-700/50'}`}>
+                        {isRefund ? <RotateCcw size={20}/> : (categories.find(c => c.id === tx.categoryId)?.emoji || '🛒')}
+                      </div>
+                      <div>
+                        <p className={`text-sm font-semibold ${isRefund ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
+                           {tx.description || (isRefund ? 'Estorno' : 'Compra')}
+                        </p>
+                        <p className="text-slate-500 text-xs mt-0.5">
+                          {new Date(tx.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
+                          {!isRefund && tx.installment.total > 1 && ` • Parcela ${tx.installment.current}/${tx.installment.total}`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span className={`font-medium ${isRefund ? 'text-emerald-400' : 'text-white'}`}>
+                           {formatCurrency(tx.amount)}
+                        </span>
+                        
+                        {/* Actions (Only for unpaid invoices and not already refunds) */}
+                        {!invoiceInfo.isPaid && !isRefund && (
+                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => openRefundModal(tx)} className="p-1.5 text-amber-400 hover:bg-slate-600 rounded" title="Estornar">
+                                 <RotateCcw size={14} />
+                              </button>
+                              <button onClick={() => openTxModal(tx)} className="p-1.5 text-blue-400 hover:bg-slate-600 rounded" title="Editar">
+                                 <Edit2 size={14} />
+                              </button>
+                              <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-slate-600 rounded" title="Excluir">
+                                 <Trash2 size={14} />
+                              </button>
+                           </div>
+                        )}
+                        {/* Delete action for manual refunds if mistake made */}
+                        {!invoiceInfo.isPaid && isRefund && (
+                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-slate-600 rounded" title="Excluir Estorno">
+                                 <Trash2 size={14} />
+                              </button>
+                           </div>
+                        )}
+                    </div>
+                  </div>
+                 );
+               })
              ) : (
                <div className="text-center py-10 bg-slate-800/50 rounded-lg border border-slate-700 border-dashed">
                  <p className="text-slate-500">Nenhuma compra nesta fatura.</p>
@@ -202,8 +304,14 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         </div>
         
         {/* Modals reused */}
-        <Modal isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} title="Nova Compra no Cartão">
+        <Modal isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} title={editingTx ? "Editar Compra" : "Nova Compra"}>
           <form onSubmit={handleTxSubmit} className="space-y-4">
+             {editingTx && (
+                <div className="bg-amber-500/10 p-3 rounded text-amber-400 text-xs flex items-center gap-2 mb-4">
+                   <AlertTriangle size={14} />
+                   <span>Editando apenas esta parcela. O limite total não será recalculado automaticamente para outras parcelas.</span>
+                </div>
+             )}
              <div>
                <label className="block text-sm text-slate-300 mb-1">Valor</label>
                <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.amount} onChange={e => setTxForm({...txForm, amount: e.target.value})} required />
@@ -223,17 +331,46 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                <label className="block text-sm text-slate-300 mb-1">Descrição</label>
                <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.description} onChange={e => setTxForm({...txForm, description: e.target.value})} />
              </div>
-             <div>
-               <label className="block text-sm text-slate-300 mb-1">Parcelas</label>
-               <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.installments} onChange={e => setTxForm({...txForm, installments: e.target.value})}>
-                 {Array.from({length: 12}, (_, i) => i + 1).map(i => <option key={i} value={i}>{i}x {i === 1 ? '(À vista)' : ''}</option>)}
-               </select>
-             </div>
+             {!editingTx && (
+                 <div>
+                   <label className="block text-sm text-slate-300 mb-1">Parcelas</label>
+                   <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.installments} onChange={e => setTxForm({...txForm, installments: e.target.value})}>
+                     {Array.from({length: 12}, (_, i) => i + 1).map(i => <option key={i} value={i}>{i}x {i === 1 ? '(À vista)' : ''}</option>)}
+                   </select>
+                 </div>
+             )}
              <div className="flex justify-end gap-2 pt-2">
                <Button type="button" variant="ghost" onClick={() => setIsTxModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Adicionar</Button>
+               <Button type="submit">Salvar</Button>
              </div>
           </form>
+        </Modal>
+
+        {/* Refund Modal */}
+        <Modal isOpen={isRefundModalOpen} onClose={() => setIsRefundModalOpen(false)} title="Estornar Compra">
+           <form onSubmit={handleRefundSubmit} className="space-y-4">
+              <div className="bg-slate-900 p-3 rounded text-sm text-slate-400 mb-2">
+                 Compra original: <span className="text-white font-bold">{refundingTx?.description}</span> <br/>
+                 Valor original: <span className="text-white font-bold">{formatCurrency(refundingTx?.amount || 0)}</span>
+              </div>
+              <div>
+                 <label className="block text-sm text-slate-300 mb-1">Valor do Estorno (R$)</label>
+                 <input type="number" step="0.01" max={refundingTx?.amount} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={refundForm.amount} onChange={e => setRefundForm({...refundForm, amount: e.target.value})} required />
+                 <p className="text-xs text-slate-500 mt-1">O valor será subtraído da fatura.</p>
+              </div>
+              <div>
+                 <label className="block text-sm text-slate-300 mb-1">Data do Estorno</label>
+                 <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={refundForm.date} onChange={e => setRefundForm({...refundForm, date: e.target.value})} required />
+              </div>
+              <div>
+                 <label className="block text-sm text-slate-300 mb-1">Descrição</label>
+                 <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={refundForm.description} onChange={e => setRefundForm({...refundForm, description: e.target.value})} />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                 <Button type="button" variant="ghost" onClick={() => setIsRefundModalOpen(false)}>Cancelar</Button>
+                 <Button type="submit">Confirmar Estorno</Button>
+              </div>
+           </form>
         </Modal>
 
         <Modal isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title="Pagar Fatura">

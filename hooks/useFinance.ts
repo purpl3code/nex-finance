@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement, Goal } from '../types';
 import { StorageService } from '../services/storageService';
@@ -122,10 +123,10 @@ export const useFinance = () => {
     return Object.values(balancesMap).reduce((acc: number, val: number) => acc + val, 0);
   }, [balancesMap]);
 
-  // 2. Category Spending Map
+  // 2. Category Spending Map (Now includes Credit Card Data)
   const spendingMap = useMemo(() => {
-    return calculateSpendingMap(transactions);
-  }, [dataVersion, transactions]);
+    return calculateSpendingMap(transactions, creditCardTransactions);
+  }, [dataVersion, transactions, creditCardTransactions]);
 
   const getCategorySpending = useCallback((categoryId: string, month: number, year: number) => {
     const key = `${categoryId}_${month}_${year}`;
@@ -261,7 +262,7 @@ export const useFinance = () => {
   }, [touchData]);
 
   const addCreditCardTransaction = useCallback((
-    tx: Omit<CreditCardTransaction, 'id' | 'createdAt' | 'installment'>, 
+    tx: Omit<CreditCardTransaction, 'id' | 'createdAt' | 'installment' | 'type'>, 
     installments: number
   ) => {
     const baseDate = new Date(tx.date + 'T12:00:00');
@@ -272,6 +273,7 @@ export const useFinance = () => {
       const dateStr = txDate.toISOString().split('T')[0];
       newTxs.push({
         ...tx,
+        type: 'purchase',
         date: dateStr,
         amount: tx.amount / installments, 
         installment: { current: i + 1, total: installments },
@@ -280,6 +282,44 @@ export const useFinance = () => {
       });
     }
     setCreditCardTransactions(prev => [...newTxs, ...prev]);
+    touchData();
+  }, [touchData]);
+
+  // New: Edit Credit Card Transaction
+  const editCreditCardTransaction = useCallback((id: string, updates: Partial<CreditCardTransaction>) => {
+    setCreditCardTransactions(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+    touchData();
+  }, [touchData]);
+
+  // New: Delete Credit Card Transaction
+  const deleteCreditCardTransaction = useCallback((id: string) => {
+    setCreditCardTransactions(prev => {
+       // Also delete any refunds attached to this transaction to prevent orphans
+       return prev.filter(t => t.id !== id && t.originalTransactionId !== id);
+    });
+    touchData();
+  }, [touchData]);
+
+  // New: Add Refund
+  const addCreditCardRefund = useCallback((
+    originalTx: CreditCardTransaction,
+    amountToRefund: number,
+    date: string,
+    description: string
+  ) => {
+    const refundTx: CreditCardTransaction = {
+      id: crypto.randomUUID(),
+      cardId: originalTx.cardId,
+      amount: -Math.abs(amountToRefund), // Always negative
+      date: date,
+      categoryId: originalTx.categoryId, // Keep same category for dashboard math
+      description: description || `Estorno: ${originalTx.description}`,
+      installment: { current: 1, total: 1 },
+      type: 'refund',
+      originalTransactionId: originalTx.id,
+      createdAt: Date.now()
+    };
+    setCreditCardTransactions(prev => [refundTx, ...prev]);
     touchData();
   }, [touchData]);
 
@@ -501,6 +541,7 @@ export const useFinance = () => {
     const closingDate = new Date(year, month, card.closingDay);
     const prevMonthClosing = new Date(year, month - 1, card.closingDay);
     
+    // Updated: Now includes refunds and purchases
     const invoiceTxs = creditCardTransactions.filter(t => {
       if (t.cardId !== cardId) return false;
       const isPaid = creditCardInvoices.some(inv => inv.cardId === cardId && inv.isPaid);
@@ -516,6 +557,7 @@ export const useFinance = () => {
       year,
       dueDate: dueDate.toISOString().split('T')[0],
       closingDate: closingDate.toISOString().split('T')[0],
+      // Amount automatically subtracts negative values from refunds
       amount: invoiceTxs.reduce((sum, t) => sum + t.amount, 0),
       isPaid: false,
       transactions: invoiceTxs
@@ -524,7 +566,7 @@ export const useFinance = () => {
 
   const getCreditCardStats = useCallback(() => {
     const totalLimit = creditCards.reduce((sum, c) => sum + c.limit, 0);
-    const totalTxAmount = creditCardTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const totalTxAmount = creditCardTransactions.reduce((sum, t) => sum + t.amount, 0); // Refunds reduce this naturally
     const totalPaidAmount = creditCardInvoices.filter(i => i.isPaid).reduce((sum, i) => sum + i.amount, 0);
     const usedLimit = totalTxAmount - totalPaidAmount;
     return { totalLimit, usedLimit, availableLimit: totalLimit - usedLimit };
@@ -546,7 +588,6 @@ export const useFinance = () => {
     const startOfForecastStr = startOfForecastMonth.toISOString().split('T')[0];
 
     // 1. Calculate Initial Balance (Optimization: This is still heavy, but now cached)
-    // For a real production app, we would use a cumulative balance table, but for now this cache helps enough
     const initialBalances: Record<string, number> = {};
     let totalInitialBalance = 0;
 
@@ -626,7 +667,6 @@ export const useFinance = () => {
 
     const result = { initialBalance: totalInitialBalance, endBalance: currentTotal, minBalance, riskDate, dailyData, eventsByDay };
     
-    // Cleanup old cache keys (optional, primitive GC)
     if (Object.keys(forecastCache.current).length > 20) forecastCache.current = {};
     forecastCache.current[cacheKey] = result;
     
@@ -635,8 +675,6 @@ export const useFinance = () => {
 
   // --- FILTERING (Memoized) ---
   const getUnifiedList = useCallback((filters: FilterState) => {
-    // This looks simple but is O(N). Since it runs on render if deps change, wrapping it in useMemo inside the Component is better.
-    // However, the hook provides the function. We will keep it as is, but components should use useMemo on the RESULT of this function.
     const filteredTxs = transactions.filter(t => {
       const txDate = new Date(t.date + 'T12:00:00'); 
       const matchMonth = txDate.getMonth() === filters.month;
@@ -687,20 +725,37 @@ export const useFinance = () => {
 
   const getChartData = useCallback((unifiedList: any[]): ChartDataPoint[] => {
     const expenses = unifiedList.filter(item => !item.isTransfer && item.type === 'expense');
-    const grouped = expenses.reduce((acc, t) => {
-      const catName = categories.find(c => c.id === t.categoryId)?.name || 'Outros';
-      acc[catName] = (acc[catName] || 0) + t.amount;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return Object.entries(grouped)
-      .map(([name, value], index) => ({
-        name,
-        value: value as number,
-        color: COLORS[index % COLORS.length]
-      }))
-      .sort((a, b) => b.value - a.value);
-  }, [categories]);
+    
+    // Now unified list includes standard transactions. 
+    // We already filter `cat_invoice_payment` inside the selector `calculateSpendingMap`.
+    // BUT `getChartData` here uses `unifiedList` which is based on `transactions` state.
+    // It does NOT include credit card transactions. 
+    // The Dashboard component requests `chartData` separately.
+    // We should probably rely on `getCategorySpending` selector for the PieChart data in the dashboard
+    // to include credit card data, OR update this `getChartData` to use `spendingMap`.
+    
+    // Let's defer this logic change to the Dashboard component where it uses `getCategorySpending`
+    // to build the chart, or update this function to use the `spendingMap`.
+    // Updating this to use `spendingMap` is cleaner.
+    
+    // We need to access the spendingMap here or calculate it.
+    // Since this is inside the hook, we can access `spendingMap` from the closure.
+    
+    // HOWEVER, `spendingMap` is calculated for the whole dataset? No, calculateSpendingMap
+    // iterates all transactions. We need to filter by month/year matching the unifiedList.
+    // Re-calculating here is redundant but safe.
+    
+    // ACTUALLY, sticking to the existing pattern: `getChartData` takes a list. 
+    // The unified list is only cash transactions.
+    // To support credit cards in charts, we need to merge them.
+    // But `unifiedList` is used for the "Extrato" view which splits cash flow.
+    // A pie chart of expenses SHOULD include credit cards.
+    
+    // Refactor strategy: 
+    // Return empty here, and let Dashboard use `spendingMap` (which is robust) to build chart data.
+    
+    return []; // Deprecated in favor of Dashboard building it from spendingMap
+  }, []);
 
   return {
     // Data
@@ -716,7 +771,8 @@ export const useFinance = () => {
     addBudget, editBudget, deleteBudget,
     addAccount, editAccount, deleteAccount,
     addCreditCard, editCreditCard, deleteCreditCard,
-    addCreditCardTransaction, payInvoice,
+    addCreditCardTransaction, editCreditCardTransaction, deleteCreditCardTransaction, addCreditCardRefund,
+    payInvoice,
     addInvestmentAccount, deleteInvestmentAccount, addAsset, addInvestmentMovement,
     commitRecurringTransactions,
     

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useFinance } from './hooks/useFinance';
 import { useAuth } from './hooks/useAuth';
@@ -56,6 +57,9 @@ const App: React.FC = () => {
     editCreditCard,
     deleteCreditCard,
     addCreditCardTransaction,
+    editCreditCardTransaction,
+    deleteCreditCardTransaction,
+    addCreditCardRefund,
     payInvoice,
     addRecurringRule,
     editRecurringRule,
@@ -141,6 +145,7 @@ const App: React.FC = () => {
     return getStats(unifiedList);
   }, [getStats, unifiedList]);
 
+  // chartData from hook is now deprecated/empty as Dashboard builds it via selector
   const chartData = useMemo(() => 
     getChartData(unifiedList),
     [getChartData, unifiedList]
@@ -318,6 +323,10 @@ const App: React.FC = () => {
                     budgets={budgets}
                     getCategorySpending={getCategorySpending}
                     onNavigateToBudgets={() => setActiveTab('budgets')}
+                    // Props for calculating chart data locally in dashboard
+                    categories={categories}
+                    month={filters.month}
+                    year={filters.year}
                   />
                 </PageShell>
               )}
@@ -396,6 +405,9 @@ const App: React.FC = () => {
                   onEditCard={editCreditCard}
                   onDeleteCard={deleteCreditCard}
                   onAddTransaction={addCreditCardTransaction}
+                  onEditTransaction={editCreditCardTransaction}
+                  onDeleteTransaction={deleteCreditCardTransaction}
+                  onAddRefund={addCreditCardRefund}
                   onPayInvoice={payInvoice}
                   getInvoiceInfo={getCardInvoiceInfo}
                 />
