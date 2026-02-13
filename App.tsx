@@ -34,9 +34,11 @@ const App: React.FC = () => {
   const { session, loading: authLoading } = useAuth();
 
   const { 
+    transactions, // Added to props
     categories, 
     accounts,
     creditCards,
+    creditCardTransactions, // Added to props
     recurringRules,
     budgets,
     investmentAccounts,
@@ -323,8 +325,14 @@ const App: React.FC = () => {
                     budgets={budgets}
                     getCategorySpending={getCategorySpending}
                     onNavigateToBudgets={() => setActiveTab('budgets')}
-                    // Props for calculating chart data locally in dashboard
+                    
+                    // --- NEW PROPS FOR PREMIUM DASHBOARD ---
                     categories={categories}
+                    transactions={transactions}
+                    creditCardTransactions={creditCardTransactions}
+                    creditCards={creditCards}
+                    recurringRules={recurringRules}
+                    getCardInvoiceInfo={getCardInvoiceInfo}
                     month={filters.month}
                     year={filters.year}
                   />
