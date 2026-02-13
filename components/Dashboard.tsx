@@ -82,9 +82,10 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
     getFinancialForecast(accounts, recurringRules, invoicesForForecast, month, year),
   [accounts, recurringRules, invoicesForForecast, month, year]);
 
+  // Updated to pass month/year filter
   const recentActivity = useMemo(() => 
-    getRecentActivity(transactions, creditCardTransactions, categories, 6),
-  [transactions, creditCardTransactions, categories]);
+    getRecentActivity(transactions, creditCardTransactions, categories, month, year, 8),
+  [transactions, creditCardTransactions, categories, month, year]);
 
   const balanceHistory = useMemo(() => 
     getBalanceHistory(accounts, transactions, month, year),

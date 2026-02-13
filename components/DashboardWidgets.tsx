@@ -68,34 +68,39 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
 
 // --- 3. RECENT ACTIVITY LIST ---
 export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities }) => {
-  if (activities.length === 0) return null;
-
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-sm">
+    <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-sm h-full">
       <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/50">
         <h3 className="text-sm font-bold text-slate-200">Últimas Movimentações</h3>
       </div>
       <div className="divide-y divide-slate-700/50">
-        {activities.map(item => (
-          <div key={`${item.source}-${item.id}`} className="px-6 py-3 flex items-center justify-between hover:bg-slate-700/20 transition-colors">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="text-xl bg-slate-700/30 p-2 rounded-lg shrink-0">
-                {item.category?.emoji || (item.isCard ? '💳' : '💰')}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-200 truncate">{item.description || item.category?.name || 'Sem descrição'}</p>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <span>{new Date(item.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</span>
-                  <span>•</span>
-                  <span className={`${item.isCard ? 'text-purple-400' : 'text-slate-400'}`}>{item.source}</span>
+        {activities.length === 0 ? (
+          <div className="p-8 flex flex-col items-center justify-center text-slate-500">
+             <Calendar size={32} className="mb-2 opacity-20" />
+             <p className="text-sm">Nenhuma movimentação neste mês.</p>
+          </div>
+        ) : (
+          activities.map(item => (
+            <div key={`${item.source}-${item.id}`} className="px-6 py-3 flex items-center justify-between hover:bg-slate-700/20 transition-colors">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="text-xl bg-slate-700/30 p-2 rounded-lg shrink-0">
+                  {item.category?.emoji || (item.isCard ? '💳' : '💰')}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-200 truncate">{item.description || item.category?.name || 'Sem descrição'}</p>
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <span>{new Date(item.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</span>
+                    <span>•</span>
+                    <span className={`${item.isCard ? 'text-purple-400' : 'text-slate-400'}`}>{item.source}</span>
+                  </div>
                 </div>
               </div>
+              <div className={`text-sm font-bold whitespace-nowrap ${item.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                {item.type === 'income' ? '+' : '-'} {formatCurrency(item.amount)}
+              </div>
             </div>
-            <div className={`text-sm font-bold whitespace-nowrap ${item.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
-              {item.type === 'income' ? '+' : '-'} {formatCurrency(item.amount)}
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

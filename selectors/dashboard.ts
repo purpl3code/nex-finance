@@ -139,6 +139,8 @@ export const getRecentActivity = (
   transactions: Transaction[],
   cardTransactions: CreditCardTransaction[],
   categories: Category[],
+  month: number, // Added: Filter by month
+  year: number,  // Added: Filter by year
   limit: number = 5
 ) => {
   const unified = [
@@ -165,6 +167,11 @@ export const getRecentActivity = (
   ];
 
   return unified
+    .filter(item => {
+      // Use T12:00:00 to prevent timezone shifts
+      const d = new Date(item.date + 'T12:00:00');
+      return d.getMonth() === month && d.getFullYear() === year;
+    })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, limit)
     .map(item => ({
