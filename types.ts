@@ -1,7 +1,7 @@
 
 export type TransactionType = 'income' | 'expense';
 
-export type CategoryGroup = 'Essencial' | 'Estilo de Vida' | 'Investimentos e Dívidas' | 'Renda';
+export type CategoryGroup = 'Essencial' | 'Estilo de Vida' | 'Investimentos e Dívidas' | 'Renda' | 'Personalizado';
 
 export type AccountType = 'cash' | 'bank' | 'wallet' | 'other';
 
@@ -13,6 +13,9 @@ export interface Category {
   emoji: string;
   group: CategoryGroup;
   kind: TransactionType;
+  color?: string; // Hex color for UI badges
+  isSystem?: boolean; // If true, cannot be renamed or deleted (critical for app logic)
+  isArchived?: boolean; // If true, hides from selection but keeps history
 }
 
 export interface Account {

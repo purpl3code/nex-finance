@@ -1,3 +1,4 @@
+
 import { Category, Account } from './types';
 
 export const STORAGE_KEY = 'nex-finance-db-v1';
@@ -39,8 +40,8 @@ export const INITIAL_CATEGORIES: Category[] = [
   { id: 'cat_pharmacy', name: 'Farmácia', emoji: '💊', group: 'Essencial', kind: 'expense' },
   { id: 'cat_needs', name: 'Necessidades', emoji: '⚠️', group: 'Essencial', kind: 'expense' },
   { id: 'cat_cleaner', name: 'Diarista', emoji: '🧹', group: 'Essencial', kind: 'expense' },
-  { id: 'cat_invoice_payment', name: 'Pagamento de Fatura', emoji: '💳', group: 'Essencial', kind: 'expense' }, 
-  { id: 'cat_investment_deposit', name: 'Aporte/Investimento', emoji: '📈', group: 'Investimentos e Dívidas', kind: 'expense' }, // New
+  { id: 'cat_invoice_payment', name: 'Pagamento de Fatura', emoji: '💳', group: 'Essencial', kind: 'expense', isSystem: true }, 
+  { id: 'cat_investment_deposit', name: 'Aporte/Investimento', emoji: '📈', group: 'Investimentos e Dívidas', kind: 'expense', isSystem: true }, // New
   
   // Estilo de Vida
   { id: 'cat_gym', name: 'Academia', emoji: '🏋️‍♀️', group: 'Estilo de Vida', kind: 'expense' },
@@ -62,7 +63,7 @@ export const INITIAL_CATEGORIES: Category[] = [
   { id: 'inc_yield', name: 'Rendimentos', emoji: '🏦', group: 'Renda', kind: 'income' },
   { id: 'inc_sales', name: 'Venda (OLX/Mkt)', emoji: '📦', group: 'Renda', kind: 'income' },
   { id: 'inc_transfer', name: 'Transferência Recebida', emoji: '🔁', group: 'Renda', kind: 'income' },
-  { id: 'inc_investment_withdraw', name: 'Resgate/Investimento', emoji: '🏦', group: 'Renda', kind: 'income' }, // New
+  { id: 'inc_investment_withdraw', name: 'Resgate/Investimento', emoji: '🏦', group: 'Renda', kind: 'income', isSystem: true }, // New
   { id: 'inc_other', name: 'Outros', emoji: '➕', group: 'Renda', kind: 'income' },
 ];
 

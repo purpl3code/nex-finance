@@ -82,7 +82,7 @@ export const useFinance = () => {
   useEffect(() => {
     if (!loading && dataVersion > 0) {
       const data = {
-        version: 10,
+        version: 11, // Current version from StorageService logic
         transactions,
         categories,
         accounts,
@@ -135,6 +135,47 @@ export const useFinance = () => {
 
 
   // --- ACTIONS (WRITERS) ---
+
+  // --- CATEGORIES (NEW) ---
+  const addCategory = useCallback((cat: Omit<Category, 'id'>) => {
+    const newCat: Category = { 
+      ...cat, 
+      id: `cat_${Date.now()}`,
+      isArchived: false,
+      isSystem: false
+    };
+    setCategories(prev => [...prev, newCat]);
+    touchData();
+  }, [touchData]);
+
+  const editCategory = useCallback((id: string, updates: Partial<Category>) => {
+    setCategories(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    touchData();
+  }, [touchData]);
+
+  const archiveCategory = useCallback((id: string) => {
+    setCategories(prev => prev.map(c => c.id === id ? { ...c, isArchived: true } : c));
+    touchData();
+  }, [touchData]);
+
+  const reassignCategory = useCallback((oldId: string, newId: string) => {
+    // 1. Update Standard Transactions
+    setTransactions(prev => prev.map(t => t.categoryId === oldId ? { ...t, categoryId: newId } : t));
+    
+    // 2. Update Credit Card Transactions
+    setCreditCardTransactions(prev => prev.map(t => t.categoryId === oldId ? { ...t, categoryId: newId } : t));
+    
+    // 3. Update Recurring Rules
+    setRecurringRules(prev => prev.map(r => r.categoryId === oldId ? { ...r, categoryId: newId } : r));
+    
+    // 4. Update Budgets
+    setBudgets(prev => prev.map(b => b.categoryId === oldId ? { ...b, categoryId: newId } : b));
+
+    // 5. Finally Archive the old category
+    setCategories(prev => prev.map(c => c.id === oldId ? { ...c, isArchived: true } : c));
+    
+    touchData();
+  }, [touchData]);
 
   // --- Transactions ---
   const addTransaction = useCallback((tx: Omit<Transaction, 'id' | 'createdAt'>) => {
@@ -724,36 +765,6 @@ export const useFinance = () => {
   }, []);
 
   const getChartData = useCallback((unifiedList: any[]): ChartDataPoint[] => {
-    const expenses = unifiedList.filter(item => !item.isTransfer && item.type === 'expense');
-    
-    // Now unified list includes standard transactions. 
-    // We already filter `cat_invoice_payment` inside the selector `calculateSpendingMap`.
-    // BUT `getChartData` here uses `unifiedList` which is based on `transactions` state.
-    // It does NOT include credit card transactions. 
-    // The Dashboard component requests `chartData` separately.
-    // We should probably rely on `getCategorySpending` selector for the PieChart data in the dashboard
-    // to include credit card data, OR update this `getChartData` to use `spendingMap`.
-    
-    // Let's defer this logic change to the Dashboard component where it uses `getCategorySpending`
-    // to build the chart, or update this function to use the `spendingMap`.
-    // Updating this to use `spendingMap` is cleaner.
-    
-    // We need to access the spendingMap here or calculate it.
-    // Since this is inside the hook, we can access `spendingMap` from the closure.
-    
-    // HOWEVER, `spendingMap` is calculated for the whole dataset? No, calculateSpendingMap
-    // iterates all transactions. We need to filter by month/year matching the unifiedList.
-    // Re-calculating here is redundant but safe.
-    
-    // ACTUALLY, sticking to the existing pattern: `getChartData` takes a list. 
-    // The unified list is only cash transactions.
-    // To support credit cards in charts, we need to merge them.
-    // But `unifiedList` is used for the "Extrato" view which splits cash flow.
-    // A pie chart of expenses SHOULD include credit cards.
-    
-    // Refactor strategy: 
-    // Return empty here, and let Dashboard use `spendingMap` (which is robust) to build chart data.
-    
     return []; // Deprecated in favor of Dashboard building it from spendingMap
   }, []);
 
@@ -775,6 +786,9 @@ export const useFinance = () => {
     payInvoice,
     addInvestmentAccount, deleteInvestmentAccount, addAsset, addInvestmentMovement,
     commitRecurringTransactions,
+    
+    // Category Actions (NEW)
+    addCategory, editCategory, archiveCategory, reassignCategory,
     
     // Goal Actions
     addGoal, editGoal, toggleArchiveGoal, addValueToGoal,

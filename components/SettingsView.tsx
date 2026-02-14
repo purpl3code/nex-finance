@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { BackupService } from '../services/backupService';
 import { StorageService } from '../services/storageService';
@@ -15,17 +16,20 @@ import { Avatar } from './ui/Avatar';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { ThemeSelector } from './ThemeSelector';
+import { CategoryManager } from './CategoryManager';
 import { 
   Download, Upload, HardDrive, AlertTriangle, FileText, 
   Trash2, Database, Server, RefreshCw, ShieldAlert, History,
-  Activity, CheckCircle, Stethoscope, ChevronDown, ChevronUp, User, Camera, Palette, Cloud, LogOut
+  Activity, CheckCircle, Stethoscope, ChevronDown, ChevronUp, User, Camera, Palette, Cloud, LogOut, Tag
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
   const { session } = useAuth();
   const { 
     transactions, accounts, creditCards, recurringRules, 
-    investmentAccounts, assets, investmentMovements 
+    investmentAccounts, assets, investmentMovements,
+    categories, creditCardTransactions,
+    addCategory, editCategory, archiveCategory, reassignCategory
   } = useFinance();
 
   const { profile, updateName, updateAvatar, removeAvatar } = useUserProfile();
@@ -49,6 +53,9 @@ export const SettingsView: React.FC = () => {
   const [importError, setImportError] = useState<string | null>(null);
   const [importWarning, setImportWarning] = useState<string | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  // Category Manager State
+  const [isCatManagerOpen, setIsCatManagerOpen] = useState(false);
 
   // Danger Zone State
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
@@ -233,23 +240,10 @@ export const SettingsView: React.FC = () => {
         }
       />
 
-      {isDemo && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3 mb-6">
-          <AlertTriangle className="text-amber-500" size={24} />
-          <div>
-            <h3 className="font-bold text-white">Modo Offline (Demo) Ativo</h3>
-            <p className="text-sm text-slate-400">
-              Você está usando uma versão sem conexão com banco de dados. 
-              Para ativar a sincronização, configure o arquivo <code>.env</code> e faça login novamente.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* 0. USER PROFILE */}
       <SectionCard 
         title="Meu Perfil" 
-        description={`Logado como: ${session?.user.email}`}
+        description={`Logado como: ${session?.user.email || 'Usuário Local'}`}
         icon={<User size={24} />}
       >
         <div className="flex flex-col md:flex-row gap-8 items-start">
@@ -329,6 +323,21 @@ export const SettingsView: React.FC = () => {
         icon={<Palette size={24} />}
       >
         <ThemeSelector currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
+      </SectionCard>
+
+      {/* 0.7 CATEGORY MANAGER */}
+      <SectionCard
+        title="Categorias"
+        description="Personalize, crie ou arquive categorias de entradas e saídas."
+        icon={<Tag size={24} />}
+      >
+        <div className="flex items-center justify-between">
+           <div>
+              <p className="text-slate-300 font-medium">{categories.length} categorias cadastradas</p>
+              <p className="text-xs text-slate-500 mt-1">Gerencie ícones, cores e grupos.</p>
+           </div>
+           <Button onClick={() => setIsCatManagerOpen(true)}>Gerenciar Categorias</Button>
+        </div>
       </SectionCard>
 
       {/* 1. DATA HEALTH */}
@@ -547,6 +556,19 @@ export const SettingsView: React.FC = () => {
             </Button>
          </div>
       </SectionCard>
+
+      {/* CATEGORY MANAGER MODAL */}
+      <Modal isOpen={isCatManagerOpen} onClose={() => setIsCatManagerOpen(false)} title="Gerenciar Categorias">
+         <CategoryManager 
+            categories={categories}
+            transactions={transactions}
+            creditCardTransactions={creditCardTransactions}
+            onAdd={addCategory}
+            onEdit={editCategory}
+            onArchive={archiveCategory}
+            onReassign={reassignCategory}
+         />
+      </Modal>
 
       {/* IMPORT PREVIEW MODAL */}
       <Modal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Restaurar Backup">

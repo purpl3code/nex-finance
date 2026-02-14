@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer } from '../types';
 import { Button } from './ui/Button';
@@ -42,8 +43,19 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   // Filter categories based on selected type
   const availableCategories = useMemo(() => {
     if (mode === 'transfer') return [];
-    return categories.filter(c => c.kind === mode);
-  }, [categories, mode]);
+    
+    // Filter categories by type
+    // AND check if archived.
+    // However, if we are editing an existing transaction (initialData) that uses an archived category,
+    // we MUST include it so the user can see/save it without changing category involuntarily.
+    return categories.filter(c => {
+      const isCorrectType = c.kind === mode;
+      const isNotArchived = !c.isArchived;
+      const isCurrentSelected = c.id === initialData?.categoryId;
+      
+      return isCorrectType && (isNotArchived || isCurrentSelected);
+    });
+  }, [categories, mode, initialData]);
 
   // Group filtered categories
   const groupedCategories = useMemo(() => {
@@ -260,7 +272,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               <optgroup key={group} label={group} className="bg-slate-900 text-slate-300">
                 {(cats as Category[])?.map(cat => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.emoji} {cat.name}
+                    {cat.emoji} {cat.name} {cat.isArchived ? '(Arquivada)' : ''}
                   </option>
                 ))}
               </optgroup>

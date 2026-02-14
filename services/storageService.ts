@@ -1,8 +1,9 @@
+
 import { AppData } from '../types';
 import { STORAGE_KEY, INITIAL_CATEGORIES, INITIAL_ACCOUNTS } from '../constants';
 import { LocalStorageAdapter } from './storageAdapter';
 
-const CURRENT_VERSION = 10;
+const CURRENT_VERSION = 11;
 
 const DEFAULT_DATA: AppData = {
   version: CURRENT_VERSION,
@@ -129,6 +130,17 @@ export const StorageService = {
         // V9 -> V10 Migration (Goals)
         if (parsed.version < 10) {
           parsed.goals = [];
+        }
+
+        // V10 -> V11 Migration (Categories System Flags)
+        if (parsed.version < 11) {
+          const systemIds = new Set(['cat_invoice_payment', 'cat_investment_deposit', 'inc_investment_withdraw']);
+          parsed.categories = parsed.categories.map((c: any) => ({
+            ...c,
+            isArchived: c.isArchived || false,
+            isSystem: c.isSystem || systemIds.has(c.id),
+            color: c.color || undefined
+          }));
         }
 
         parsed.version = CURRENT_VERSION;
