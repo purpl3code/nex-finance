@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
 import { Category, CategoryGroup, TransactionType } from '../types';
+import { PageShell } from './ui/PageShell';
+import { PageHeader } from './ui/PageHeader';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
-import { Plus, Edit2, Archive, AlertTriangle, Lock, RotateCcw } from 'lucide-react';
+import { Plus, Edit2, Archive, AlertTriangle, ArrowRightLeft, Lock, CheckCircle, RotateCcw } from 'lucide-react';
 
 interface CategoryManagerProps {
   categories: Category[];
@@ -138,70 +140,58 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
   };
 
   return (
-    <div className="min-h-full flex flex-col">
-      {/* Sticky Toolbar */}
-      <div className="sticky -top-4 -mx-4 px-4 py-3 bg-slate-800/95 backdrop-blur z-10 border-b border-slate-700/50 mb-4 flex flex-wrap gap-3 items-center justify-between shadow-sm">
-         <div className="flex bg-slate-900 p-1 rounded-lg shrink-0">
-            <button onClick={() => setActiveTab('expense')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${activeTab === 'expense' ? 'bg-red-500/20 text-red-400' : 'text-slate-400 hover:text-slate-200'}`}>Despesas</button>
-            <button onClick={() => setActiveTab('income')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${activeTab === 'income' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>Entradas</button>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+         <div className="flex bg-slate-800 p-1 rounded-lg">
+            <button onClick={() => setActiveTab('expense')} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'expense' ? 'bg-red-500/20 text-red-400' : 'text-slate-400 hover:text-slate-200'}`}>Despesas</button>
+            <button onClick={() => setActiveTab('income')} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'income' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>Entradas</button>
          </div>
-         
-         <div className="flex items-center gap-3 w-full sm:w-auto">
-            <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 cursor-pointer select-none">
-               <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-blue-500/20" />
-               Arquivadas
+         <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
+               <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-blue-500/20" />
+               Mostrar Arquivadas
             </label>
-            <Button onClick={() => handleOpenModal()} icon={<Plus size={16}/>} className="flex-1 sm:flex-none">Nova</Button>
+            <Button onClick={() => handleOpenModal()} icon={<Plus size={16}/>}>Nova Categoria</Button>
          </div>
       </div>
 
-      {/* Grid Content */}
-      {displayedCategories.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-500 border-2 border-dashed border-slate-700/50 rounded-xl">
-           <div className="bg-slate-800 p-3 rounded-full mb-3">
-              <Archive size={24} className="opacity-50" />
-           </div>
-           <p className="text-sm">Nenhuma categoria encontrada.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-2">
-           {displayedCategories.map(cat => (
-              <div key={cat.id} className={`bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between group h-20 transition-all hover:border-slate-600 ${cat.isArchived ? 'opacity-50 grayscale' : ''}`}>
-                 <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-slate-700/30 shrink-0 border border-slate-700/50" style={{ color: cat.color }}>
-                       {cat.emoji}
-                    </div>
-                    <div className="min-w-0">
-                       <div className="flex items-center gap-1.5">
-                          <span className={`font-semibold text-slate-200 text-sm truncate ${cat.isArchived ? 'line-through' : ''}`} title={cat.name}>{cat.name}</span>
-                          {cat.isSystem && <span title="Protegido pelo Sistema" className="bg-blue-900/30 text-blue-400 text-[10px] px-1 py-0.5 rounded border border-blue-500/20 shrink-0"><Lock size={10}/></span>}
-                          {cat.isArchived && <span className="bg-slate-700 text-slate-400 text-[10px] px-1 py-0.5 rounded shrink-0">Arq.</span>}
-                       </div>
-                       <span className="text-xs text-slate-500 truncate block opacity-80" title={cat.group}>{cat.group}</span>
-                    </div>
-                 </div>
-                 
-                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
-                    {!cat.isArchived && (
-                       <button onClick={() => handleOpenModal(cat)} className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded-lg" disabled={cat.isSystem && false} title="Editar">
-                          <Edit2 size={16} />
-                       </button>
-                    )}
-                    {!cat.isSystem && !cat.isArchived && (
-                       <button onClick={() => handleInitiateArchive(cat)} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg" title="Arquivar">
-                          <Archive size={16} />
-                       </button>
-                    )}
-                    {cat.isArchived && !cat.isSystem && (
-                       <button onClick={() => onEdit(cat.id, { isArchived: false })} className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-700 rounded-lg" title="Restaurar">
-                          <RotateCcw size={16} />
-                       </button>
-                    )}
-                 </div>
-              </div>
-           ))}
-        </div>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+         {displayedCategories.map(cat => (
+            <div key={cat.id} className={`bg-slate-800 border border-slate-700 p-4 rounded-xl flex items-center justify-between group ${cat.isArchived ? 'opacity-50' : ''}`}>
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-slate-700/50" style={{ color: cat.color }}>
+                     {cat.emoji}
+                  </div>
+                  <div>
+                     <div className="flex items-center gap-2">
+                        <span className={`font-semibold text-slate-200 ${cat.isArchived ? 'line-through' : ''}`}>{cat.name}</span>
+                        {cat.isSystem && <span title="Sistema" className="bg-blue-900/30 text-blue-400 text-[10px] px-1.5 py-0.5 rounded border border-blue-500/20"><Lock size={10}/></span>}
+                        {cat.isArchived && <span className="bg-slate-700 text-slate-400 text-[10px] px-1.5 py-0.5 rounded">Arquivada</span>}
+                     </div>
+                     <span className="text-xs text-slate-500">{cat.group}</span>
+                  </div>
+               </div>
+               
+               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!cat.isArchived && (
+                     <button onClick={() => handleOpenModal(cat)} className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded-lg" disabled={cat.isSystem && false}>
+                        <Edit2 size={16} />
+                     </button>
+                  )}
+                  {!cat.isSystem && !cat.isArchived && (
+                     <button onClick={() => handleInitiateArchive(cat)} className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg" title="Arquivar">
+                        <Archive size={16} />
+                     </button>
+                  )}
+                  {cat.isArchived && !cat.isSystem && (
+                     <button onClick={() => onEdit(cat.id, { isArchived: false })} className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-700 rounded-lg" title="Restaurar">
+                        <RotateCcw size={16} />
+                     </button>
+                  )}
+               </div>
+            </div>
+         ))}
+      </div>
 
       {/* CREATE/EDIT MODAL */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCategory ? 'Editar Categoria' : 'Nova Categoria'}>

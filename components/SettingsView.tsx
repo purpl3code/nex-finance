@@ -240,9 +240,306 @@ export const SettingsView: React.FC = () => {
         }
       />
 
-      {/* ... [Rest of the file remains unchanged until CategoryManager Modal] ... */}
-      
-      {/* 5. DANGER ZONE (Kept for context location, no changes inside) */}
+      {/* 0. USER PROFILE */}
+      <SectionCard 
+        title="Meu Perfil" 
+        description={`Logado como: ${session?.user.email || 'Usuário Local'}`}
+        icon={<User size={24} />}
+      >
+        <div className="flex flex-col md:flex-row gap-8 items-start">
+           <div className="flex flex-col items-center gap-3">
+              <div className="relative group">
+                 <Avatar src={profile.avatarDataUrl} name={profile.displayName} size="xl" />
+                 <button 
+                   onClick={() => avatarInputRef.current?.click()}
+                   className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                 >
+                   <Camera size={24} className="text-white" />
+                 </button>
+                 <input 
+                   type="file" 
+                   ref={avatarInputRef} 
+                   className="hidden" 
+                   accept="image/png, image/jpeg, image/webp" 
+                   onChange={handleAvatarSelect}
+                 />
+              </div>
+              {profile.avatarDataUrl && (
+                 <button onClick={removeAvatar} className="text-xs text-red-400 hover:text-red-300 underline">
+                   Remover foto
+                 </button>
+              )}
+           </div>
+           
+           <form onSubmit={handleSaveProfile} className="flex-1 w-full space-y-4">
+              <div>
+                 <label className="block text-sm text-slate-300 mb-1">Nome de Exibição</label>
+                 <input 
+                    type="text" 
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none" 
+                    value={profileName} 
+                    onChange={e => setProfileName(e.target.value)} 
+                    maxLength={30}
+                    placeholder="Seu nome"
+                 />
+              </div>
+              <div className="pt-2">
+                 <Button type="submit">Salvar Alterações</Button>
+              </div>
+           </form>
+        </div>
+      </SectionCard>
+
+      {/* 0.5 CLOUD SYNC */}
+      <SectionCard
+        title="Sincronização na Nuvem"
+        description="Mantenha seus dados salvos e sincronizados entre dispositivos."
+        icon={<Cloud size={24} />}
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-slate-700/50">
+             <div className={`w-2 h-2 rounded-full ${navigator.onLine ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+             <span>Status da conexão: <span className="text-slate-200 font-medium">{navigator.onLine ? 'Online' : 'Offline'}</span></span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <Button onClick={handlePushToCloud} disabled={isSyncing || isDemo} className="w-full flex justify-center">
+                {isSyncing ? 'Enviando...' : 'Enviar Dados para Nuvem'}
+             </Button>
+             <Button onClick={handlePullFromCloud} variant="secondary" disabled={isSyncing || isDemo} className="w-full flex justify-center">
+                {isSyncing ? 'Baixando...' : 'Baixar Dados da Nuvem'}
+             </Button>
+          </div>
+          <p className="text-xs text-slate-500 text-center">
+            {isDemo ? 'Recurso desativado no modo demo.' : 'Seus dados são salvos automaticamente na nuvem ao fazer alterações.'}
+          </p>
+        </div>
+      </SectionCard>
+
+      {/* 0.6. THEME SELECTOR */}
+      <SectionCard
+        title="Aparência"
+        description="Escolha o tema que mais combina com você."
+        icon={<Palette size={24} />}
+      >
+        <ThemeSelector currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
+      </SectionCard>
+
+      {/* 0.7 CATEGORY MANAGER */}
+      <SectionCard
+        title="Categorias"
+        description="Personalize, crie ou arquive categorias de entradas e saídas."
+        icon={<Tag size={24} />}
+      >
+        <div className="flex items-center justify-between">
+           <div>
+              <p className="text-slate-300 font-medium">{categories.length} categorias cadastradas</p>
+              <p className="text-xs text-slate-500 mt-1">Gerencie ícones, cores e grupos.</p>
+           </div>
+           <Button onClick={() => setIsCatManagerOpen(true)}>Gerenciar Categorias</Button>
+        </div>
+      </SectionCard>
+
+      {/* 1. DATA HEALTH */}
+      <SectionCard
+        title="Saúde dos Dados"
+        description="Verifique inconsistências e corrija referências quebradas."
+        icon={<Stethoscope size={24} />}
+      >
+        <div className="space-y-6">
+           {/* Status Bar */}
+           {!healthReport ? (
+              <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-700 border-dashed">
+                 <Activity size={40} className="mx-auto text-slate-600 mb-4" />
+                 <p className="text-slate-400 mb-6">Execute uma verificação para detectar itens órfãos ou quebrados.</p>
+                 <Button onClick={runHealthScan} disabled={isScanning} icon={isScanning ? <RefreshCw className="animate-spin" size={16}/> : <Activity size={16}/>}>
+                    {isScanning ? 'Verificando...' : 'Executar Verificação'}
+                 </Button>
+              </div>
+           ) : (
+              <div className="space-y-4">
+                 <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                    <div className={`p-3 rounded-full ${healthReport.summary.errorCount > 0 ? 'bg-red-500/20 text-red-400' : healthReport.summary.warningCount > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                       {healthReport.summary.errorCount > 0 || healthReport.summary.warningCount > 0 ? <AlertTriangle size={24}/> : <CheckCircle size={24}/>}
+                    </div>
+                    <div className="flex-1">
+                       <h4 className="font-semibold text-white">
+                          {healthReport.summary.errorCount === 0 && healthReport.summary.warningCount === 0 
+                             ? 'Tudo certo com seus dados!' 
+                             : 'Problemas encontrados'}
+                       </h4>
+                       <p className="text-xs text-slate-400">
+                          {healthReport.summary.errorCount} erros críticos • {healthReport.summary.warningCount} avisos
+                       </p>
+                    </div>
+                    <div className="flex gap-2">
+                       <Button size="sm" variant="secondary" onClick={runHealthScan} disabled={isScanning}>Re-escanear</Button>
+                       {healthReport.issues.some(i => i.canAutoFix) && (
+                          <Button size="sm" onClick={runAutoFix} className="bg-emerald-600 hover:bg-emerald-700 text-white">Corrigir Automático</Button>
+                       )}
+                       {healthReport.issues.some(i => !i.canAutoFix) && (
+                          <Button size="sm" variant="ghost" onClick={exportOrphans} icon={<Download size={14}/>}>Exportar Órfãos</Button>
+                       )}
+                    </div>
+                 </div>
+
+                 {/* Issues List */}
+                 {healthReport.issues.length > 0 && (
+                    <div className="space-y-2">
+                       {healthReport.issues.map(issue => (
+                          <div key={issue.id} className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800">
+                             <button 
+                                onClick={() => setExpandedIssue(expandedIssue === issue.id ? null : issue.id)}
+                                className="w-full flex justify-between items-center p-3 hover:bg-slate-700/50 transition-colors"
+                             >
+                                <div className="flex items-center gap-3">
+                                   <div className={`w-2 h-2 rounded-full ${issue.severity === 'error' ? 'bg-red-500' : 'bg-amber-500'}`}></div>
+                                   <span className="text-sm font-medium text-slate-200">{issue.title}</span>
+                                   <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">{issue.affectedCount} itens</span>
+                                </div>
+                                {expandedIssue === issue.id ? <ChevronUp size={16} className="text-slate-500"/> : <ChevronDown size={16} className="text-slate-500"/>}
+                             </button>
+                             
+                             {expandedIssue === issue.id && (
+                                <div className="p-3 bg-slate-900/30 border-t border-slate-700 text-sm">
+                                   <p className="text-slate-400 mb-2">{issue.description}</p>
+                                   <div className="space-y-1 mb-2">
+                                      {issue.examples.map(ex => (
+                                         <div key={ex.id} className="flex justify-between text-xs text-slate-500 bg-slate-900/50 p-1.5 rounded">
+                                            <span>{ex.label}</span>
+                                            <span>{ex.info}</span>
+                                         </div>
+                                      ))}
+                                   </div>
+                                   <div className="text-xs font-medium mt-2">
+                                      {issue.canAutoFix ? (
+                                         <span className="text-emerald-400 flex items-center gap-1"><CheckCircle size={12}/> Correção Segura Disponível</span>
+                                      ) : (
+                                         <span className="text-amber-400 flex items-center gap-1"><AlertTriangle size={12}/> Requer Revisão Manual (Exporte a lista)</span>
+                                      )}
+                                   </div>
+                                </div>
+                             )}
+                          </div>
+                       ))}
+                    </div>
+                 )}
+              </div>
+           )}
+
+           {/* Log History */}
+           {fixLogs.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-slate-700/50">
+                 <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-sm font-semibold text-slate-300 flex items-center gap-2"><History size={14}/> Histórico de Correções</h4>
+                    <button onClick={() => { DataHealthService.clearLogs(); setFixLogs([]); }} className="text-xs text-red-400 hover:text-red-300">Limpar Histórico</button>
+                 </div>
+                 <div className="bg-slate-900 rounded-lg p-3 max-h-40 overflow-y-auto space-y-2 custom-scrollbar">
+                    {fixLogs.map(log => (
+                       <div key={log.id} className="text-xs flex justify-between items-center border-b border-slate-800 last:border-0 pb-2 last:pb-0">
+                          <div>
+                             <p className="text-slate-300 font-medium">{log.action}</p>
+                             <p className="text-slate-500">{log.details}</p>
+                          </div>
+                          <span className="text-slate-600 ml-2 whitespace-nowrap">{new Date(log.dateISO).toLocaleDateString()}</span>
+                       </div>
+                    ))}
+                 </div>
+              </div>
+           )}
+        </div>
+      </SectionCard>
+
+      {/* 2. BACKUP & RESTORE */}
+      <SectionCard 
+        title="Backup e Restauração" 
+        description="Mantenha seus dados seguros exportando regularmente."
+        icon={<Download size={24} />}
+      >
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
+           <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-slate-700/50 w-full md:w-auto">
+              <History size={16} />
+              {lastBackup ? (
+                <span>Último export: <span className="text-slate-200 font-medium">{new Date(lastBackup).toLocaleDateString()} às {new Date(lastBackup).toLocaleTimeString().slice(0,5)}</span></span>
+              ) : (
+                <span>Nenhum backup exportado ainda.</span>
+              )}
+           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <Button onClick={handleExport} className="w-full flex items-center justify-center gap-2 h-12 text-base">
+              <Download size={18} /> Exportar Dados (.json)
+           </Button>
+           
+           <div className="relative">
+             <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept=".json"
+                onChange={handleFileSelect}
+             />
+             <Button 
+                onClick={() => fileInputRef.current?.click()} 
+                variant="secondary" 
+                className="w-full flex items-center justify-center gap-2 h-12 text-base"
+             >
+                <Upload size={18} /> Importar Backup
+             </Button>
+           </div>
+        </div>
+      </SectionCard>
+
+      {/* 3. APP DATA STATS */}
+      <SectionCard 
+        title="Dados do Aplicativo" 
+        description="Resumo dos registros armazenados no seu navegador."
+        icon={<Database size={24} />}
+      >
+         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+            {[
+               { val: transactions.length, label: 'Transações' },
+               { val: accounts.length, label: 'Contas' },
+               { val: creditCards.length, label: 'Cartões' },
+               { val: recurringRules.length, label: 'Recorrências' },
+               { val: investmentAccounts.length, label: 'Inv. Contas' },
+               { val: assets.length, label: 'Inv. Ativos' },
+               { val: investmentMovements.length, label: 'Inv. Movs' },
+            ].map((stat, i) => (
+               <div key={i} className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
+                  <p className="text-xl font-bold text-white">{stat.val}</p>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{stat.label}</p>
+               </div>
+            ))}
+         </div>
+         <div className="mt-6 flex justify-end">
+            <Button size="sm" variant="ghost" onClick={() => window.location.reload()} icon={<RefreshCw size={14}/>}>Recalcular Dados</Button>
+         </div>
+      </SectionCard>
+
+      {/* 4. SYSTEM INFO */}
+      <SectionCard 
+        title="Sistema" 
+        icon={<Server size={24} />}
+      >
+         <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+               <span className="text-slate-400 text-sm">Versão do Schema (Banco de Dados)</span>
+               <span className="text-slate-200 font-mono text-sm bg-slate-900 px-2 py-1 rounded">v{StorageService.load().version}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+               <span className="text-slate-400 text-sm">Armazenamento</span>
+               <span className="text-emerald-400 text-sm font-medium flex items-center gap-1"><HardDrive size={14}/> LocalStorage (Browser)</span>
+            </div>
+            <div className="flex justify-between items-center py-2">
+               <span className="text-slate-400 text-sm">Status</span>
+               <span className="text-emerald-400 text-sm font-medium">{isDemo ? 'Offline (Demo)' : 'Online (Sync)'}</span>
+            </div>
+         </div>
+      </SectionCard>
+
+      {/* 5. DANGER ZONE */}
       <SectionCard 
         title="Zona de Perigo" 
         description="Ações irreversíveis que afetam seus dados."
@@ -261,12 +558,7 @@ export const SettingsView: React.FC = () => {
       </SectionCard>
 
       {/* CATEGORY MANAGER MODAL */}
-      <Modal 
-        isOpen={isCatManagerOpen} 
-        onClose={() => setIsCatManagerOpen(false)} 
-        title="Gerenciar Categorias"
-        className="w-[min(920px,92vw)]" // Added custom wide width
-      >
+      <Modal isOpen={isCatManagerOpen} onClose={() => setIsCatManagerOpen(false)} title="Gerenciar Categorias">
          <CategoryManager 
             categories={categories}
             transactions={transactions}
@@ -278,8 +570,6 @@ export const SettingsView: React.FC = () => {
          />
       </Modal>
 
-      {/* ... [Rest of modals] ... */}
-      
       {/* IMPORT PREVIEW MODAL */}
       <Modal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Restaurar Backup">
         <div className="space-y-4">

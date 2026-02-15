@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 
@@ -7,10 +6,9 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-  className?: string; // Allow width overrides
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, className }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,19 +29,15 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
   if (!isOpen) return null;
 
-  // Default width if not provided
-  const widthClass = className || 'w-full max-w-lg';
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div 
         ref={modalRef}
-        className={`relative bg-slate-800 rounded-xl shadow-2xl border border-slate-700 max-h-[85vh] flex flex-col ${widthClass}`}
+        className="relative w-full max-w-lg bg-slate-800 rounded-xl shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
       >
-        {/* Fixed Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700 shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <h2 className="text-xl font-semibold text-white">{title}</h2>
           <button 
             onClick={onClose}
@@ -52,9 +46,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
             <X size={20} />
           </button>
         </div>
-        
-        {/* Scrollable Content Body */}
-        <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
+        <div className="p-4">
           {children}
         </div>
       </div>
