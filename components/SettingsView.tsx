@@ -558,7 +558,12 @@ export const SettingsView: React.FC = () => {
       </SectionCard>
 
       {/* CATEGORY MANAGER MODAL */}
-      <Modal isOpen={isCatManagerOpen} onClose={() => setIsCatManagerOpen(false)} title="Gerenciar Categorias">
+      <Modal 
+        isOpen={isCatManagerOpen} 
+        onClose={() => setIsCatManagerOpen(false)} 
+        title="Gerenciar Categorias"
+        className="w-full max-w-lg md:max-w-none md:w-[min(980px,92vw)]" // Added responsive width override
+      >
          <CategoryManager 
             categories={categories}
             transactions={transactions}
@@ -570,6 +575,8 @@ export const SettingsView: React.FC = () => {
          />
       </Modal>
 
+      {/* ... [Rest of modals] ... */}
+      
       {/* IMPORT PREVIEW MODAL */}
       <Modal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Restaurar Backup">
         <div className="space-y-4">
