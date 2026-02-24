@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { ArrowUp, ArrowDown, CreditCard, Calendar, TrendingUp, AlertTriangle, Info, CheckCircle, ShoppingBag } from 'lucide-react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip, CartesianGrid } from 'recharts';
 import { MonthlySummary, ForecastSummary, DailyBalance, Insight } from '../selectors/dashboard';
-import { Category, CreditCard as CreditCardType } from '../types';
+import { CreditCard as CreditCardType } from '../types';
+import { GlassCard } from './ui/GlassCard';
 
 const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
@@ -12,27 +13,31 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
   const isPositive = summary.remainingBalance >= 0;
   
   return (
-    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 shadow-sm relative overflow-hidden">
-      <div className={`absolute top-0 right-0 p-4 opacity-10 ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+    <GlassCard className="relative overflow-hidden group">
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/5 opacity-50 group-hover:opacity-70 transition-opacity" />
+      
+      <div className={`absolute top-0 right-0 p-4 opacity-10 ${isPositive ? 'text-emerald-500' : 'text-red-500'} group-hover:scale-110 transition-transform duration-500`}>
         <ShoppingBag size={80} />
       </div>
       
-      <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Saldo Restante no Mês</h3>
-      <div className={`text-3xl font-bold mb-4 ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
-        {formatCurrency(summary.remainingBalance)}
-      </div>
-      
-      <div className="flex gap-4 text-xs font-medium">
-        <div className="flex items-center gap-1.5 text-slate-300 bg-slate-800/50 px-2 py-1 rounded border border-slate-700/50">
-          <ArrowUp size={12} className="text-emerald-500" />
-          <span>Renda: {formatCurrency(summary.income)}</span>
+      <div className="relative z-10">
+        <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Saldo Restante no Mês</h3>
+        <div className={`text-3xl font-bold mb-6 ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+          {formatCurrency(summary.remainingBalance)}
         </div>
-        <div className="flex items-center gap-1.5 text-slate-300 bg-slate-800/50 px-2 py-1 rounded border border-slate-700/50">
-          <ArrowDown size={12} className="text-red-500" />
-          <span>Gastos: {formatCurrency(summary.totalSpent)}</span>
+        
+        <div className="flex gap-4 text-xs font-medium">
+          <div className="flex items-center gap-1.5 text-slate-300 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+            <ArrowUp size={12} className="text-emerald-400" />
+            <span>Renda: {formatCurrency(summary.income)}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-slate-300 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">
+            <ArrowDown size={12} className="text-red-400" />
+            <span>Gastos: {formatCurrency(summary.totalSpent)}</span>
+          </div>
         </div>
       </div>
-    </div>
+    </GlassCard>
   );
 };
 
@@ -42,56 +47,60 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
   const isPositive = predicted >= 0;
 
   return (
-    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 shadow-sm relative overflow-hidden">
-      <div className="absolute top-0 right-0 p-4 opacity-10 text-blue-500">
+    <GlassCard className="relative overflow-hidden group">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-violet-500/5 opacity-50 group-hover:opacity-70 transition-opacity" />
+
+      <div className="absolute top-0 right-0 p-4 opacity-10 text-blue-500 group-hover:scale-110 transition-transform duration-500">
         <TrendingUp size={80} />
       </div>
 
-      <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Previsão (Fim do Mês)</h3>
-      <div className={`text-3xl font-bold mb-4 ${isPositive ? 'text-blue-400' : 'text-amber-400'}`}>
-        {formatCurrency(predicted)}
-      </div>
+      <div className="relative z-10">
+        <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Previsão (Fim do Mês)</h3>
+        <div className={`text-3xl font-bold mb-6 ${isPositive ? 'text-blue-400' : 'text-amber-400'}`}>
+          {formatCurrency(predicted)}
+        </div>
 
-      <div className="space-y-1">
-        <p className="text-xs text-slate-400 flex justify-between">
-          <span>Saldo Atual:</span>
-          <span className="text-white">{formatCurrency(totalCurrentBalance)}</span>
-        </p>
-        <p className="text-xs text-slate-400 flex justify-between">
-          <span>Compromissos Restantes:</span>
-          <span className="text-red-400">- {formatCurrency(summary.pendingRecurring + summary.pendingInvoices)}</span>
-        </p>
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs bg-white/5 p-2 rounded-lg border border-white/5">
+            <span className="text-slate-400">Saldo Atual</span>
+            <span className="text-white font-medium">{formatCurrency(totalCurrentBalance)}</span>
+          </div>
+          <div className="flex justify-between text-xs bg-red-500/5 p-2 rounded-lg border border-red-500/10">
+            <span className="text-slate-400">Compromissos Restantes</span>
+            <span className="text-red-400 font-medium">- {formatCurrency(summary.pendingRecurring + summary.pendingInvoices)}</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </GlassCard>
   );
 };
 
 // --- 3. RECENT ACTIVITY LIST ---
 export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities }) => {
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-sm h-full">
-      <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/50">
-        <h3 className="text-sm font-bold text-slate-200">Últimas Movimentações</h3>
+    <GlassCard className="h-full flex flex-col p-0 overflow-hidden">
+      <div className="px-6 py-4 border-b border-white/5 bg-white/5 backdrop-blur-md">
+        <h3 className="text-sm font-bold text-white">Últimas Movimentações</h3>
       </div>
-      <div className="divide-y divide-slate-700/50">
+      <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-white/5">
         {activities.length === 0 ? (
-          <div className="p-8 flex flex-col items-center justify-center text-slate-500">
+          <div className="p-8 flex flex-col items-center justify-center text-slate-500 h-full">
              <Calendar size={32} className="mb-2 opacity-20" />
              <p className="text-sm">Nenhuma movimentação neste mês.</p>
           </div>
         ) : (
           activities.map(item => (
-            <div key={`${item.source}-${item.id}`} className="px-6 py-3 flex items-center justify-between hover:bg-slate-700/20 transition-colors">
+            <div key={`${item.source}-${item.id}`} className="px-6 py-3.5 flex items-center justify-between hover:bg-white/5 transition-colors group">
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="text-xl bg-slate-700/30 p-2 rounded-lg shrink-0">
+                <div className="text-xl bg-white/5 p-2.5 rounded-xl shrink-0 border border-white/5 group-hover:border-white/10 transition-colors">
                   {item.category?.emoji || (item.isCard ? '💳' : '💰')}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-200 truncate">{item.description || item.category?.name || 'Sem descrição'}</p>
+                  <p className="text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">{item.description || item.category?.name || 'Sem descrição'}</p>
                   <div className="flex items-center gap-2 text-xs text-slate-500">
                     <span>{new Date(item.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</span>
                     <span>•</span>
-                    <span className={`${item.isCard ? 'text-purple-400' : 'text-slate-400'}`}>{item.source}</span>
+                    <span className={`${item.isCard ? 'text-violet-400' : 'text-blue-400'}`}>{item.source}</span>
                   </div>
                 </div>
               </div>
@@ -102,14 +111,14 @@ export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities
           ))
         )}
       </div>
-    </div>
+    </GlassCard>
   );
 };
 
 // --- 4. BALANCE CHART ---
 export const BalanceChart: React.FC<{ data: DailyBalance[] }> = ({ data }) => {
   return (
-    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm h-full flex flex-col">
+    <GlassCard className="h-full flex flex-col">
       <h3 className="text-sm font-bold text-slate-200 mb-6">Evolução do Saldo (Mês Atual)</h3>
       <div className="flex-1 min-h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
@@ -120,7 +129,7 @@ export const BalanceChart: React.FC<{ data: DailyBalance[] }> = ({ data }) => {
                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis 
               dataKey="day" 
               tick={{fontSize: 10, fill: '#64748b'}} 
@@ -129,7 +138,7 @@ export const BalanceChart: React.FC<{ data: DailyBalance[] }> = ({ data }) => {
               minTickGap={15}
             />
             <Tooltip 
-              contentStyle={{backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px'}}
+              contentStyle={{backgroundColor: 'rgba(15, 23, 42, 0.8)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', backdropFilter: 'blur(8px)'}}
               itemStyle={{color: '#fff'}}
               formatter={(val: number) => formatCurrency(val)}
               labelFormatter={(label) => `Dia ${label}`}
@@ -145,7 +154,7 @@ export const BalanceChart: React.FC<{ data: DailyBalance[] }> = ({ data }) => {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </GlassCard>
   );
 };
 
@@ -156,10 +165,10 @@ export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) =>
   return (
     <div className="space-y-3">
       {insights.map(insight => (
-        <div key={insight.id} className={`p-4 rounded-xl border flex gap-3 ${
-          insight.type === 'success' ? 'bg-emerald-900/10 border-emerald-900/30' :
-          insight.type === 'warning' ? 'bg-amber-900/10 border-amber-900/30' :
-          'bg-blue-900/10 border-blue-900/30'
+        <div key={insight.id} className={`p-4 rounded-xl border flex gap-3 backdrop-blur-sm transition-all hover:scale-[1.02] ${
+          insight.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20' :
+          insight.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20' :
+          'bg-blue-500/10 border-blue-500/20'
         }`}>
           <div className={`mt-0.5 ${
             insight.type === 'success' ? 'text-emerald-400' :
@@ -187,13 +196,13 @@ export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) =>
 // --- 6. ENHANCED CARD ITEM ---
 export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, invoiceAmount: number, usedPercentage: number }> = ({ card, invoiceAmount, usedPercentage }) => {
   return (
-    <div className="bg-slate-800 border border-slate-700 p-4 rounded-xl flex items-center justify-between">
+    <div className="bg-white/5 border border-white/5 p-4 rounded-xl flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer group">
       <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-slate-700/50 rounded-lg text-slate-300">
+        <div className="p-2.5 bg-slate-800 rounded-lg text-slate-300 group-hover:text-white group-hover:bg-blue-600 transition-colors">
           <CreditCard size={20} />
         </div>
         <div>
-          <p className="text-sm font-bold text-white">{card.name}</p>
+          <p className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{card.name}</p>
           <div className="flex gap-2 text-[10px] text-slate-500 uppercase font-medium mt-0.5">
             <span>Fecha: {card.closingDay}</span>
             <span>Vence: {card.dueDay}</span>
@@ -203,9 +212,17 @@ export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, invoiceAmou
       
       <div className="text-right">
         <p className="text-sm font-bold text-white">{formatCurrency(invoiceAmount)}</p>
-        <p className={`text-xs ${usedPercentage > 80 ? 'text-red-400' : 'text-slate-400'}`}>
-          {usedPercentage}% do limite
-        </p>
+        <div className="flex items-center justify-end gap-2">
+          <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div 
+              className={`h-full rounded-full ${usedPercentage > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 
+              style={{ width: `${Math.min(usedPercentage, 100)}%` }}
+            />
+          </div>
+          <p className={`text-[10px] ${usedPercentage > 80 ? 'text-red-400' : 'text-slate-400'}`}>
+            {usedPercentage}%
+          </p>
+        </div>
       </div>
     </div>
   );

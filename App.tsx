@@ -14,14 +14,16 @@ import { SettingsView } from './components/SettingsView';
 import { InvestmentDashboard } from './components/InvestmentDashboard';
 import { GoalManager } from './components/GoalManager';
 import { Sidebar } from './components/Sidebar';
-import { Modal } from './components/ui/Modal';
-import { Button } from './components/ui/Button';
+import { GlassModal } from './components/ui/GlassModal';
+import { GlassButton } from './components/ui/GlassButton';
+import { GlassSelect } from './components/ui/GlassSelect';
 import { PageShell } from './components/ui/PageShell';
 import { PageHeader } from './components/ui/PageHeader';
 import { ThemeService } from './services/themeService';
 import { FilterState } from './types';
-import { Plus, Search, Menu } from 'lucide-react';
+import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft } from 'lucide-react';
 import { LoginScreen } from './components/auth/LoginScreen';
+import { MobileFab } from './components/ui/MobileFab';
 
 // Define valid tabs for type safety
 type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'investments' | 'goals';
@@ -194,7 +196,7 @@ const App: React.FC = () => {
   // --- AUTH LOADING STATE ---
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
@@ -208,7 +210,7 @@ const App: React.FC = () => {
   // --- DATA LOADING STATE ---
   if (dataLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
@@ -237,29 +239,27 @@ const App: React.FC = () => {
 
   // --- COMMON CONTROLS ---
   const MonthSelector = () => (
-    <select 
-      value={filters.month}
-      onChange={(e) => setFilters(prev => ({ ...prev, month: parseInt(e.target.value) }))}
-      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none hover:bg-slate-700 transition-colors"
-    >
-      {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
-    </select>
+    <div className="w-32">
+      <GlassSelect 
+        value={filters.month}
+        onChange={(e) => setFilters(prev => ({ ...prev, month: parseInt(e.target.value) }))}
+        options={months.map((m, i) => ({ value: i, label: m }))}
+      />
+    </div>
   );
 
   const YearSelector = () => (
-    <select 
-      value={filters.year}
-      onChange={(e) => setFilters(prev => ({ ...prev, year: parseInt(e.target.value) }))}
-      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none hover:bg-slate-700 transition-colors"
-    >
-      {Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i).map(y => (
-        <option key={y} value={y}>{y}</option>
-      ))}
-    </select>
+    <div className="w-24">
+      <GlassSelect 
+        value={filters.year}
+        onChange={(e) => setFilters(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+        options={Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i).map(y => ({ value: y, label: y.toString() }))}
+      />
+    </div>
   );
 
   return (
-    <div className="flex h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden">
+    <div className="flex h-screen bg-transparent text-slate-100 font-sans overflow-hidden">
       
       {/* SIDEBAR */}
       <Sidebar 
@@ -273,7 +273,7 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         
         {/* Mobile Header (Hidden on Desktop) */}
-        <header className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 z-20">
+        <header className="md:hidden flex items-center justify-between p-4 glass-sm border-b border-white/5 z-20">
           <div className="flex items-center gap-3">
              <button onClick={() => setIsMobileSidebarOpen(true)} className="p-2 -ml-2 text-slate-400 hover:text-white">
                 <Menu size={24} />
@@ -281,19 +281,19 @@ const App: React.FC = () => {
              <h1 className="font-bold text-lg">{getPageTitle()}</h1>
           </div>
           {activeTab === 'dashboard' && (
-            <Button 
+            <GlassButton 
               onClick={() => handleOpenModal()} 
               icon={<Plus size={18} />}
               size="sm"
               className="hidden md:flex"
             >
               Novo
-            </Button>
+            </GlassButton>
           )}
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto bg-slate-950">
+        <div className="flex-1 overflow-y-auto bg-transparent">
            <div className="animate-in fade-in duration-300 min-h-full">
               
               {/* DASHBOARD TAB */}
@@ -303,9 +303,9 @@ const App: React.FC = () => {
                     title="Dashboard" 
                     subtitle="Visão geral das suas finanças neste mês."
                     actions={
-                      <Button onClick={() => handleOpenModal()} icon={<Plus size={18} />}>
+                      <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={18} />} className="hidden md:flex">
                         Nova Movimentação
-                      </Button>
+                      </GlassButton>
                     }
                     controls={
                       <>
@@ -349,26 +349,30 @@ const App: React.FC = () => {
                         <>
                           <MonthSelector />
                           <YearSelector />
-                          <div className="h-6 w-px bg-slate-700 mx-1 hidden md:block"></div>
-                          <select 
-                            value={filters.accountId}
-                            onChange={(e) => setFilters(prev => ({ ...prev, accountId: e.target.value }))}
-                            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                          >
-                            <option value="all">Todas as Contas</option>
-                            {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
-                          </select>
+                          <div className="h-6 w-px bg-white/10 mx-1 hidden md:block"></div>
+                          <div className="w-40">
+                            <GlassSelect 
+                              value={filters.accountId}
+                              onChange={(e) => setFilters(prev => ({ ...prev, accountId: e.target.value }))}
+                              options={[
+                                { value: "all", label: "Todas as Contas" },
+                                ...accounts.map(acc => ({ value: acc.id, label: acc.name }))
+                              ]}
+                            />
+                          </div>
 
-                          <select 
-                            value={filters.type}
-                            onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as any }))}
-                            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                          >
-                            <option value="all">Todos Tipos</option>
-                            <option value="income">Entradas</option>
-                            <option value="expense">Saídas</option>
-                            <option value="transfer">Transferências</option>
-                          </select>
+                          <div className="w-32">
+                            <GlassSelect 
+                              value={filters.type}
+                              onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as any }))}
+                              options={[
+                                { value: "all", label: "Todos Tipos" },
+                                { value: "income", label: "Entradas" },
+                                { value: "expense", label: "Saídas" },
+                                { value: "transfer", label: "Transferências" },
+                              ]}
+                            />
+                          </div>
 
                           <div className="relative flex-1 min-w-[200px]">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -377,7 +381,7 @@ const App: React.FC = () => {
                               placeholder="Buscar transação..." 
                               value={filters.search}
                               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                              className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none placeholder-slate-500"
+                              className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none placeholder-slate-500 hover:border-slate-600/50 transition-all"
                             />
                           </div>
                         </>
@@ -489,7 +493,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <Modal 
+      <GlassModal 
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         title={editingItem ? "Editar Movimentação" : "Nova Movimentação"}
@@ -501,7 +505,34 @@ const App: React.FC = () => {
           onSubmit={handleSubmitForm}
           onCancel={handleCloseModal}
         />
-      </Modal>
+      </GlassModal>
+
+      <MobileFab
+        visible={activeTab === 'dashboard' && !isModalOpen}
+        actions={[
+          { 
+            id: 'expense', 
+            label: 'Despesa', 
+            icon: <ArrowDownCircle size={20} />, 
+            onClick: () => handleOpenModal({ type: 'expense' }), 
+            variant: 'danger' 
+          },
+          { 
+            id: 'income', 
+            label: 'Entrada', 
+            icon: <ArrowUpCircle size={20} />, 
+            onClick: () => handleOpenModal({ type: 'income' }), 
+            variant: 'success' 
+          },
+          { 
+            id: 'transfer', 
+            label: 'Transferência', 
+            icon: <ArrowRightLeft size={20} />, 
+            onClick: () => handleOpenModal({ fromAccountId: '' }), 
+            variant: 'primary' 
+          }
+        ]}
+      />
     </div>
   );
 };

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { Account, AccountType } from '../types';
-import { Button } from './ui/Button';
-import { Modal } from './ui/Modal';
+import { GlassButton } from './ui/GlassButton';
+import { GlassModal } from './ui/GlassModal';
+import { GlassCard } from './ui/GlassCard';
+import { GlassInput } from './ui/GlassInput';
+import { GlassSelect } from './ui/GlassSelect';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
+import { MobileFab } from './ui/MobileFab';
 import { Building2, Wallet, Banknote, Edit2, Trash2, Plus, Lock, AlertTriangle } from 'lucide-react';
 
 interface AccountListProps {
@@ -81,7 +85,7 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         title="Minhas Contas" 
         subtitle="Gerencie suas contas bancárias, carteiras e dinheiro físico."
         actions={
-          <Button onClick={() => openModal()} icon={<Plus size={18}/>}>Nova Conta</Button>
+          <GlassButton onClick={() => openModal()} icon={<Plus size={18}/>} className="hidden md:flex">Nova Conta</GlassButton>
         }
       />
 
@@ -89,10 +93,10 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         {accounts.map(acc => {
           const balance = getBalance(acc.id);
           return (
-            <div key={acc.id} className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-sm flex flex-col justify-between group hover:border-slate-600 transition-colors">
+            <GlassCard key={acc.id} className="flex flex-col justify-between group hover:border-white/20 transition-colors">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-700/50 rounded-lg shadow-inner">
+                  <div className="p-3 bg-white/5 rounded-xl shadow-inner border border-white/5">
                     {getIcon(acc.type)}
                   </div>
                   <div>
@@ -107,11 +111,11 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                     <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">{acc.type === 'bank' ? 'Banco' : acc.type === 'cash' ? 'Dinheiro' : 'Carteira'}</span>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                    <button 
                      type="button"
                      onClick={(e) => { e.stopPropagation(); openModal(acc); }} 
-                     className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded-lg transition-colors"
+                     className="p-2 text-slate-400 hover:text-blue-400 hover:bg-white/5 rounded-lg transition-colors"
                      title="Editar"
                    >
                      <Edit2 size={16} />
@@ -122,7 +126,7 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                      className={`p-2 rounded-lg transition-colors ${
                        acc.isDefault 
                          ? 'text-slate-600 cursor-not-allowed' 
-                         : 'text-slate-400 hover:text-red-400 hover:bg-slate-700'
+                         : 'text-slate-400 hover:text-red-400 hover:bg-white/5'
                      }`}
                      disabled={!!acc.isDefault}
                      title={acc.isDefault ? "Conta padrão não pode ser excluída" : "Excluir conta"}
@@ -131,50 +135,57 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                    </button>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-slate-700/50">
+              <div className="mt-4 pt-4 border-t border-white/5">
                 <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-1">Saldo Atual</p>
                 <p className={`text-2xl font-bold ${balance >= 0 ? 'text-white' : 'text-red-400'}`}>
                   {formatCurrency(balance)}
                 </p>
               </div>
-            </div>
+            </GlassCard>
           )
         })}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingAcc ? 'Editar Conta' : 'Nova Conta'}>
+      <GlassModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingAcc ? 'Editar Conta' : 'Nova Conta'}>
         <form onSubmit={handleSubmit} className="space-y-4">
+           <GlassInput
+             label="Nome da Conta"
+             value={name}
+             onChange={e => setName(e.target.value)}
+             placeholder="Ex: Nubank, Carteira..."
+             required
+           />
+           <GlassSelect
+             label="Tipo"
+             value={type}
+             onChange={e => setType(e.target.value as AccountType)}
+             options={[
+               { value: 'cash', label: 'Dinheiro Físico' },
+               { value: 'bank', label: 'Conta Bancária' },
+               { value: 'wallet', label: 'Carteira Digital' },
+               { value: 'other', label: 'Outro' }
+             ]}
+           />
            <div>
-             <label className="block text-sm font-medium text-slate-300 mb-1">Nome da Conta</label>
-             <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none" 
-               value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Nubank, Carteira..." required />
+             <GlassInput
+               label="Saldo Inicial"
+               type="number"
+               step="0.01"
+               value={initialBalance}
+               onChange={e => setInitialBalance(e.target.value)}
+             />
+             <p className="text-xs text-slate-500 mt-1 pl-1">O saldo atual será calculado a partir deste valor + transações.</p>
            </div>
-           <div>
-             <label className="block text-sm font-medium text-slate-300 mb-1">Tipo</label>
-             <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none"
-               value={type} onChange={e => setType(e.target.value as AccountType)}>
-               <option value="cash">Dinheiro Físico</option>
-               <option value="bank">Conta Bancária</option>
-               <option value="wallet">Carteira Digital</option>
-               <option value="other">Outro</option>
-             </select>
-           </div>
-           <div>
-             <label className="block text-sm font-medium text-slate-300 mb-1">Saldo Inicial</label>
-             <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" 
-               value={initialBalance} onChange={e => setInitialBalance(e.target.value)} />
-             <p className="text-xs text-slate-500 mt-1">O saldo atual será calculado a partir deste valor + transações.</p>
-           </div>
-           <div className="flex justify-end gap-2 pt-2">
-             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-             <Button type="submit">{editingAcc ? 'Salvar' : 'Criar Conta'}</Button>
+           <div className="flex justify-end gap-2 pt-4">
+             <GlassButton type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</GlassButton>
+             <GlassButton type="submit" variant="primary">{editingAcc ? 'Salvar' : 'Criar Conta'}</GlassButton>
            </div>
         </form>
-      </Modal>
+      </GlassModal>
 
-      <Modal isOpen={!!deletingAcc} onClose={() => setDeletingAcc(null)} title="Excluir Conta">
+      <GlassModal isOpen={!!deletingAcc} onClose={() => setDeletingAcc(null)} title="Excluir Conta">
         <div className="text-center space-y-4">
-          <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
              <AlertTriangle size={32} className="text-red-500" />
           </div>
           <div>
@@ -186,11 +197,23 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
             Se houver transações vinculadas, a exclusão será bloqueada.
           </p>
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="ghost" onClick={() => setDeletingAcc(null)}>Cancelar</Button>
-            <Button type="button" variant="danger" onClick={confirmDelete}>Confirmar Exclusão</Button>
+            <GlassButton type="button" variant="ghost" onClick={() => setDeletingAcc(null)}>Cancelar</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={confirmDelete}>Confirmar Exclusão</GlassButton>
           </div>
         </div>
-      </Modal>
+      </GlassModal>
+
+      <MobileFab
+        visible={!isModalOpen && !deletingAcc}
+        actions={[
+          { 
+            id: 'add-account', 
+            label: 'Nova Conta', 
+            icon: <Plus size={24} />, 
+            onClick: () => openModal() 
+          }
+        ]}
+      />
     </PageShell>
   );
 };

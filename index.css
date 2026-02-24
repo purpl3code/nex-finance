@@ -1,0 +1,103 @@
+:root {
+  /* Colors */
+  --bg: #020617; /* slate-950 */
+  --bg-elev: #0f172a; /* slate-900 */
+  
+  /* Glass Tokens */
+  --glass-bg: rgba(15, 23, 42, 0.6); 
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.05);
+  
+  /* Text */
+  --text: #f8fafc; /* slate-50 */
+  --muted: #94a3b8; /* slate-400 */
+  
+  /* Effects */
+  --shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+  --ring: rgba(59, 130, 246, 0.5); /* blue-500 with opacity */
+  
+  /* Accents */
+  --accent: #3b82f6; /* blue-500 */
+  --accent-2: #8b5cf6; /* violet-500 */
+  
+  /* Gradients */
+  --gradient-bg: 
+    radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.15), transparent 50%),
+    radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.1), transparent 40%),
+    radial-gradient(circle at 0% 20%, rgba(6, 182, 212, 0.05), transparent 40%);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  background-image: var(--gradient-bg);
+  background-attachment: fixed;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Glass Utilities */
+.glass-base {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.1) 20%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 80%, 
+    transparent 100%
+  );
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.glass-sm {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-lg {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Recharts Tooltip Override */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: var(--shadow) !important;
+}

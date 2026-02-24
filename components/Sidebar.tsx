@@ -32,15 +32,19 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ item, activeTab, collapsed, o
     <button
       onClick={() => onNavigate(item.id)}
       className={`
-        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
+        w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
         ${isActive 
-          ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20' 
-          : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}
+          ? 'bg-blue-600/20 text-blue-400 shadow-lg shadow-blue-900/10 border border-blue-500/20' 
+          : 'text-slate-400 hover:bg-white/5 hover:text-slate-100 border border-transparent'}
         ${collapsed ? 'justify-center' : ''}
       `}
       title={collapsed ? item.label : undefined}
     >
-      <Icon size={20} className={`min-w-[20px] ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-100'}`} />
+      {isActive && (
+        <div className="absolute inset-0 bg-blue-500/10 blur-md rounded-xl -z-10" />
+      )}
+      
+      <Icon size={20} className={`min-w-[20px] transition-colors ${isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-100'}`} />
       
       {!collapsed && (
         <span className="text-sm font-medium whitespace-nowrap overflow-hidden animate-in fade-in duration-300">
@@ -50,10 +54,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ item, activeTab, collapsed, o
 
       {/* Collapsed Tooltip (Desktop only) */}
       {collapsed && (
-        <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 border border-slate-700 shadow-xl transition-opacity translate-x-1 group-hover:translate-x-0">
+        <div className="absolute left-full ml-3 px-3 py-2 glass-lg text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity translate-x-1 group-hover:translate-x-0">
           {item.label}
-          {/* Tiny arrow */}
-          <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 bg-slate-900 border-l border-b border-slate-700 rotate-45 transform"></div>
         </div>
       )}
     </button>
@@ -89,7 +91,7 @@ const SidebarGroup: React.FC<SidebarGroupProps> = ({ group, isOpen, collapsed, o
       
       {/* Separator for collapsed mode to group visually */}
       {collapsed && (
-        <div className="h-px w-8 mx-auto bg-slate-800/50 my-3" />
+        <div className="h-px w-8 mx-auto bg-white/5 my-3" />
       )}
 
       <div className={`space-y-1 overflow-hidden transition-all duration-300 ${!collapsed && !isOpen ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
@@ -192,13 +194,6 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
 
   // --- RENDER ---
 
-  const sidebarClasses = `
-    flex flex-col bg-slate-900 border-r border-slate-800 h-screen transition-all duration-300
-    ${collapsed ? 'w-[72px]' : 'w-[260px]'}
-    fixed md:relative z-40
-    ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-  `;
-
   return (
     <>
       {/* Mobile Overlay */}
@@ -209,7 +204,12 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
         />
       )}
 
-      <aside className={sidebarClasses}>
+      <aside className={`
+        flex flex-col glass-lg h-screen transition-all duration-300 border-r border-white/5
+        ${collapsed ? 'w-[80px]' : 'w-[280px]'}
+        fixed md:relative z-40
+        ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
         
         {/* NEW HEADER (Replaces old header & profile section) */}
         <SidebarHeader 
@@ -222,30 +222,31 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
         {/* Mobile Close Button (Absolute positioned to not mess with header layout) */}
         <button 
           onClick={() => setIsMobileOpen(false)}
-          className="md:hidden absolute top-4 right-4 p-1 text-slate-400 hover:text-white bg-slate-800/50 rounded-lg"
+          className="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-white bg-white/5 rounded-lg backdrop-blur-md"
         >
           <X size={20} />
         </button>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-4 scrollbar-hide">
           {menuGroups.map(group => (
-            <SidebarGroup 
-              key={group.id} 
-              group={group} 
-              isOpen={groupStates[group.id]}
-              collapsed={collapsed}
-              onToggle={toggleGroup}
-              activeTab={activeTab}
-              onNavigate={handleNavigation}
-            />
+            <div key={group.id}>
+              <SidebarGroup 
+                group={group} 
+                isOpen={groupStates[group.id]}
+                collapsed={collapsed}
+                onToggle={toggleGroup}
+                activeTab={activeTab}
+                onNavigate={handleNavigation}
+              />
+            </div>
           ))}
         </div>
 
         {/* Footer info only visible when expanded */}
         {!collapsed && (
-          <div className="p-4 border-t border-slate-800/50 text-center animate-in fade-in duration-500">
-             <p className="text-[10px] text-slate-600 font-medium">v1.0.0 • Offline Mode</p>
+          <div className="p-4 border-t border-white/5 text-center animate-in fade-in duration-500">
+             <p className="text-[10px] text-slate-500 font-medium">v1.0.0 • Liquid Glass UI</p>
           </div>
         )}
       </aside>

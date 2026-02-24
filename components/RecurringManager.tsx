@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { RecurringRule, Category, Account, TransactionType } from '../types';
-import { Button } from './ui/Button';
-import { Modal } from './ui/Modal';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
+import { GlassButton } from './ui/GlassButton';
+import { GlassInput } from './ui/GlassInput';
+import { GlassSelect } from './ui/GlassSelect';
+import { GlassCard } from './ui/GlassCard';
+import { GlassBadge } from './ui/GlassBadge';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
+import { MobileFab } from './ui/MobileFab';
 import { Repeat, Plus, Trash2, Edit2, Play, CheckCircle, AlertCircle, ToggleLeft, ToggleRight, Calendar } from 'lucide-react';
 
 interface RecurringManagerProps {
@@ -137,198 +142,253 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
         subtitle="Automatize lançamentos frequentes como salários e assinaturas."
         actions={
           <>
-            <Button variant="secondary" onClick={() => { setHasGeneratedPreview(false); setIsGenModalOpen(true); }} icon={<Play size={16} />}>
+            <GlassButton variant="secondary" onClick={() => { setHasGeneratedPreview(false); setIsGenModalOpen(true); }} icon={<Play size={16} />}>
               Gerar Mês
-            </Button>
-            <Button onClick={() => handleOpenForm()} icon={<Plus size={16} />}>
+            </GlassButton>
+            <GlassButton onClick={() => handleOpenForm()} icon={<Plus size={16} />} className="hidden md:flex">
               Nova Regra
-            </Button>
+            </GlassButton>
           </>
         }
       />
 
       <div className="grid grid-cols-1 gap-4">
         {rules.map(rule => (
-          <div key={rule.id} className={`bg-slate-800 border ${rule.isActive ? 'border-slate-700' : 'border-slate-800 opacity-60'} p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition-all`}>
+          <GlassCard key={rule.id} className={`p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition-all ${!rule.isActive ? 'opacity-60' : ''}`}>
              <div className="flex items-center gap-5">
-                <button onClick={() => onToggleRule(rule.id)} className={`transition-colors ${rule.isActive ? 'text-blue-500 hover:text-blue-400' : 'text-slate-600 hover:text-slate-500'}`}>
+                <button onClick={() => onToggleRule(rule.id)} className={`transition-colors ${rule.isActive ? 'text-blue-400 hover:text-blue-300' : 'text-slate-600 hover:text-slate-500'}`}>
                    {rule.isActive ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
                 </button>
                 <div>
                    <h3 className="text-lg font-semibold text-white">{rule.description || getCategoryName(rule.categoryId)}</h3>
                    <div className="flex flex-wrap gap-2 text-xs text-slate-400 mt-1.5">
-                      <span className={`px-2 py-0.5 rounded font-medium ${rule.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                      <GlassBadge variant={rule.type === 'income' ? 'success' : 'danger'}>
                         {rule.type === 'income' ? 'Entrada' : 'Saída'}
-                      </span>
-                      <span className="bg-slate-700/50 px-2 py-0.5 rounded">
+                      </GlassBadge>
+                      <GlassBadge variant="secondary">
                         {rule.frequency === 'monthly' ? `Todo dia ${rule.dayOfMonth}` : `Toda ${daysOfWeek[rule.dayOfWeek || 0]}`}
-                      </span>
-                      <span className="bg-slate-700/50 px-2 py-0.5 rounded">
+                      </GlassBadge>
+                      <GlassBadge variant="outline">
                         {getAccountName(rule.accountId)}
-                      </span>
+                      </GlassBadge>
                    </div>
                 </div>
              </div>
              
-             <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-slate-700/50 pt-4 md:pt-0">
+             <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
                 <span className={`text-xl font-bold ${rule.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
                    {formatCurrency(rule.amount)}
                 </span>
                 <div className="flex gap-2">
-                   <button onClick={() => handleOpenForm(rule)} className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded-lg transition-colors">
-                     <Edit2 size={18} />
-                   </button>
-                   <button onClick={() => { if(window.confirm('Excluir regra?')) onDeleteRule(rule.id) }} className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg transition-colors">
-                     <Trash2 size={18} />
-                   </button>
+                   <GlassButton variant="ghost" size="sm" onClick={() => handleOpenForm(rule)} icon={<Edit2 size={18} />} />
+                   <GlassButton variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => { if(window.confirm('Excluir regra?')) onDeleteRule(rule.id) }} icon={<Trash2 size={18} />} />
                 </div>
              </div>
-          </div>
+          </GlassCard>
         ))}
 
         {rules.length === 0 && (
-          <div className="text-center py-16 text-slate-500 border-2 border-dashed border-slate-700 rounded-xl">
-             <Repeat size={48} className="mx-auto mb-4 opacity-20" />
-             <p className="text-lg font-medium">Nenhuma regra cadastrada.</p>
-             <p className="text-sm opacity-70">Crie regras para lançar contas fixas automaticamente.</p>
-          </div>
+          <GlassCard className="text-center py-16 border-dashed border-2 border-slate-700/50 bg-transparent">
+             <Repeat size={48} className="mx-auto mb-4 text-slate-600" />
+             <p className="text-lg font-medium text-slate-300">Nenhuma regra cadastrada.</p>
+             <p className="text-sm text-slate-500">Crie regras para lançar contas fixas automaticamente.</p>
+          </GlassCard>
         )}
       </div>
 
       {/* CREATE/EDIT MODAL */}
-      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={editingRuleId ? 'Editar Regra' : 'Nova Regra'}>
-         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Tipo</label>
-                  <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value as any})}>
-                     <option value="expense">Saída</option>
-                     <option value="income">Entrada</option>
-                  </select>
+      <ModalShell isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={editingRuleId ? 'Editar Regra' : 'Nova Regra'}>
+         <ModalBody>
+            <form id="rule-form" onSubmit={handleSubmit} className="space-y-4">
+               <div className="grid grid-cols-2 gap-4">
+                  <GlassSelect 
+                     label="Tipo" 
+                     value={formData.type} 
+                     onChange={e => setFormData({...formData, type: e.target.value as any})}
+                     options={[
+                       { value: 'expense', label: 'Saída' },
+                       { value: 'income', label: 'Entrada' }
+                     ]}
+                  />
+                  <GlassInput 
+                     label="Valor" 
+                     type="number" 
+                     step="0.01" 
+                     value={formData.amount} 
+                     onChange={e => setFormData({...formData, amount: e.target.value})} 
+                     required 
+                  />
                </div>
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Valor</label>
-                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} required />
-               </div>
-            </div>
 
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Categoria</label>
-               <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value})} required>
-                  <option value="">Selecione...</option>
-                  {categories.filter(c => c.kind === formData.type).map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
-               </select>
-            </div>
+               <GlassSelect 
+                  label="Categoria" 
+                  value={formData.categoryId} 
+                  onChange={e => setFormData({...formData, categoryId: e.target.value})} 
+                  required
+                  options={[
+                    { value: '', label: 'Selecione...' },
+                    ...categories.filter(c => c.kind === formData.type).map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                  ]}
+               />
 
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Conta</label>
-               <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.accountId} onChange={e => setFormData({...formData, accountId: e.target.value})} required>
-                  {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-               </select>
-            </div>
+               <GlassSelect 
+                  label="Conta" 
+                  value={formData.accountId} 
+                  onChange={e => setFormData({...formData, accountId: e.target.value})} 
+                  required
+                  options={accounts.map(a => ({ value: a.id, label: a.name }))}
+               />
 
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Descrição</label>
-               <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Ex: Aluguel" />
-            </div>
+               <GlassInput 
+                  label="Descrição" 
+                  value={formData.description} 
+                  onChange={e => setFormData({...formData, description: e.target.value})} 
+                  placeholder="Ex: Aluguel" 
+               />
 
-            <div className="grid grid-cols-2 gap-4">
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Frequência</label>
-                  <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.frequency} onChange={e => setFormData({...formData, frequency: e.target.value})}>
-                     <option value="monthly">Mensal</option>
-                     <option value="weekly">Semanal</option>
-                  </select>
-               </div>
-               <div>
-                  {formData.frequency === 'monthly' ? (
-                     <>
-                        <label className="block text-sm text-slate-300 mb-1">Dia do Mês</label>
-                        <input type="number" min="1" max="31" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.dayOfMonth} onChange={e => setFormData({...formData, dayOfMonth: e.target.value})} required />
-                     </>
-                  ) : (
-                     <>
-                        <label className="block text-sm text-slate-300 mb-1">Dia da Semana</label>
-                        <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.dayOfWeek} onChange={e => setFormData({...formData, dayOfWeek: e.target.value})}>
-                           {daysOfWeek.map((d, i) => <option key={i} value={i}>{d}</option>)}
-                        </select>
-                     </>
-                  )}
-               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Início</label>
-                  <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} required />
-               </div>
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Fim (Opcional)</label>
-                  <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} />
-               </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
-               <Button type="submit">Salvar Regra</Button>
-            </div>
-         </form>
-      </Modal>
-
-      {/* GENERATE MODAL */}
-      <Modal isOpen={isGenModalOpen} onClose={() => setIsGenModalOpen(false)} title="Gerar Lançamentos">
-         <div className="space-y-4">
-            <div className="flex gap-2 items-center justify-center p-4 bg-slate-900 rounded-lg border border-slate-700">
-               <Calendar className="text-blue-500" />
-               <select className="bg-slate-800 text-white border border-slate-600 rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" value={genMonth} onChange={e => { setGenMonth(parseInt(e.target.value)); setHasGeneratedPreview(false); }}>
-                  {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
-               </select>
-               <select className="bg-slate-800 text-white border border-slate-600 rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" value={genYear} onChange={e => { setGenYear(parseInt(e.target.value)); setHasGeneratedPreview(false); }}>
-                  {Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
-               </select>
-            </div>
-
-            {!hasGeneratedPreview ? (
-               <div className="text-center py-4">
-                  <Button onClick={handlePreview} className="w-full">
-                     Pré-visualizar Lançamentos
-                  </Button>
-               </div>
-            ) : (
-               <div className="space-y-3">
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Resultado da Prévia</h3>
-                  <div className="max-h-60 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
-                     {previewData.length === 0 ? (
-                        <p className="text-center text-slate-500 text-sm py-4">Nenhuma regra ativa para este período.</p>
+               <div className="grid grid-cols-2 gap-4">
+                  <GlassSelect 
+                     label="Frequência" 
+                     value={formData.frequency} 
+                     onChange={e => setFormData({...formData, frequency: e.target.value})}
+                     options={[
+                       { value: 'monthly', label: 'Mensal' },
+                       { value: 'weekly', label: 'Semanal' }
+                     ]}
+                  />
+                  <div>
+                     {formData.frequency === 'monthly' ? (
+                        <GlassInput 
+                           label="Dia do Mês" 
+                           type="number" 
+                           min="1" 
+                           max="31" 
+                           value={formData.dayOfMonth} 
+                           onChange={e => setFormData({...formData, dayOfMonth: e.target.value})} 
+                           required 
+                        />
                      ) : (
-                        previewData.map((item, idx) => (
-                           <div key={idx} className={`p-3 rounded-lg border flex justify-between items-center ${item.isDuplicate ? 'bg-slate-900/50 border-slate-800 opacity-60' : 'bg-slate-800 border-slate-700'}`}>
-                              <div>
-                                 <p className="text-sm font-medium text-white">{item.ruleName}</p>
-                                 <p className="text-xs text-slate-400">{new Date(item.transaction.date).toLocaleDateString('pt-BR')} • {formatCurrency(item.transaction.amount)}</p>
-                              </div>
-                              <div className="text-xs">
-                                 {item.isDuplicate ? (
-                                    <span className="flex items-center gap-1 text-slate-500 bg-slate-900 px-2 py-1 rounded"><AlertCircle size={12}/> Já existe</span>
-                                 ) : (
-                                    <span className="flex items-center gap-1 text-emerald-400 bg-emerald-950/30 px-2 py-1 rounded"><CheckCircle size={12}/> Criar</span>
-                                 )}
-                              </div>
-                           </div>
-                        ))
+                        <GlassSelect 
+                           label="Dia da Semana" 
+                           value={formData.dayOfWeek} 
+                           onChange={e => setFormData({...formData, dayOfWeek: e.target.value})}
+                           options={daysOfWeek.map((d, i) => ({ value: i.toString(), label: d }))}
+                        />
                      )}
                   </div>
-                  
-                  <div className="flex justify-end gap-2 pt-4 border-t border-slate-700">
-                     <Button variant="ghost" onClick={() => setIsGenModalOpen(false)}>Cancelar</Button>
-                     <Button onClick={handleCommit} disabled={previewData.filter(p => !p.isDuplicate).length === 0}>
-                        Confirmar Geração
-                     </Button>
-                  </div>
                </div>
+
+               <div className="grid grid-cols-2 gap-4">
+                  <GlassInput 
+                     label="Início" 
+                     type="date" 
+                     value={formData.startDate} 
+                     onChange={e => setFormData({...formData, startDate: e.target.value})} 
+                     required 
+                  />
+                  <GlassInput 
+                     label="Fim (Opcional)" 
+                     type="date" 
+                     value={formData.endDate} 
+                     onChange={e => setFormData({...formData, endDate: e.target.value})} 
+                  />
+               </div>
+            </form>
+         </ModalBody>
+         <ModalFooter>
+            <GlassButton type="button" variant="ghost" onClick={() => setIsFormOpen(false)}>Cancelar</GlassButton>
+            <GlassButton type="submit" form="rule-form">Salvar Regra</GlassButton>
+         </ModalFooter>
+      </ModalShell>
+
+      {/* GENERATE MODAL */}
+      <ModalShell isOpen={isGenModalOpen} onClose={() => setIsGenModalOpen(false)} title="Gerar Lançamentos">
+         <ModalBody>
+            <div className="space-y-6">
+               <GlassCard className="flex gap-4 items-center justify-center p-6 bg-slate-900/50">
+                  <Calendar className="text-blue-400" size={24} />
+                  <div className="flex gap-2">
+                    <select 
+                       className="bg-slate-800 text-white border border-white/10 rounded-lg p-2 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all" 
+                       value={genMonth} 
+                       onChange={e => { setGenMonth(parseInt(e.target.value)); setHasGeneratedPreview(false); }}
+                    >
+                       {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
+                    </select>
+                    <select 
+                       className="bg-slate-800 text-white border border-white/10 rounded-lg p-2 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all" 
+                       value={genYear} 
+                       onChange={e => { setGenYear(parseInt(e.target.value)); setHasGeneratedPreview(false); }}
+                    >
+                       {Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </div>
+               </GlassCard>
+
+               {!hasGeneratedPreview ? (
+                  <div className="text-center py-4">
+                     <GlassButton onClick={handlePreview} className="w-full" size="lg">
+                        Pré-visualizar Lançamentos
+                     </GlassButton>
+                  </div>
+               ) : (
+                  <div className="space-y-4">
+                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Resultado da Prévia</h3>
+                     <div className="space-y-2 pr-1">
+                        {previewData.length === 0 ? (
+                           <p className="text-center text-slate-500 text-sm py-4">Nenhuma regra ativa para este período.</p>
+                        ) : (
+                           previewData.map((item, idx) => (
+                              <div key={idx} className={`p-3 rounded-lg border flex justify-between items-center transition-all ${item.isDuplicate ? 'bg-slate-900/30 border-slate-800 opacity-60' : 'bg-slate-800/50 border-white/10'}`}>
+                                 <div>
+                                    <p className="text-sm font-medium text-white">{item.ruleName}</p>
+                                    <p className="text-xs text-slate-400">{new Date(item.transaction.date).toLocaleDateString('pt-BR')} • {formatCurrency(item.transaction.amount)}</p>
+                                 </div>
+                                 <div className="text-xs">
+                                    {item.isDuplicate ? (
+                                       <GlassBadge variant="secondary" className="flex items-center gap-1">
+                                         <AlertCircle size={12}/> Já existe
+                                       </GlassBadge>
+                                    ) : (
+                                       <GlassBadge variant="success" className="flex items-center gap-1">
+                                         <CheckCircle size={12}/> Criar
+                                       </GlassBadge>
+                                    )}
+                                 </div>
+                              </div>
+                           ))
+                        )}
+                     </div>
+                  </div>
+               )}
+            </div>
+         </ModalBody>
+         <ModalFooter>
+            {hasGeneratedPreview && (
+               <>
+                  <GlassButton variant="ghost" onClick={() => setIsGenModalOpen(false)}>Cancelar</GlassButton>
+                  <GlassButton onClick={handleCommit} disabled={previewData.filter(p => !p.isDuplicate).length === 0}>
+                     Confirmar Geração
+                  </GlassButton>
+               </>
             )}
-         </div>
-      </Modal>
+            {!hasGeneratedPreview && (
+               <GlassButton variant="ghost" onClick={() => setIsGenModalOpen(false)}>Cancelar</GlassButton>
+            )}
+         </ModalFooter>
+      </ModalShell>
+
+      <MobileFab
+        visible={!isFormOpen && !isGenModalOpen}
+        actions={[
+          { 
+            id: 'new-rule', 
+            label: 'Nova Regra', 
+            icon: <Plus size={24} />, 
+            onClick: () => handleOpenForm() 
+          }
+        ]}
+      />
     </PageShell>
   );
 };

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { InvestmentAccount, Asset, InvestmentMovement, Position, Account, InvestmentMovementKind, AssetType } from '../types';
 import { Button } from './ui/Button';
-import { Modal } from './ui/Modal';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
+import { MobileFab } from './ui/MobileFab';
 import { TrendingUp, Plus, ArrowUpRight, ArrowDownLeft, Building2, Briefcase, DollarSign, Wallet } from 'lucide-react';
 
 interface InvestmentDashboardProps {
@@ -79,8 +80,8 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
         subtitle="Monitore seu patrimônio, rentabilidade e alocação de ativos."
         actions={
           <>
-            <Button onClick={() => { setMovForm(prev => ({...prev, type: 'deposit'})); setIsMovementModalOpen(true); }} icon={<ArrowUpRight size={16}/>}>Aportar</Button>
-            <Button variant="secondary" onClick={() => { setMovForm(prev => ({...prev, type: 'buy'})); setIsMovementModalOpen(true); }} icon={<Briefcase size={16}/>}>Comprar Ativo</Button>
+            <Button onClick={() => { setMovForm(prev => ({...prev, type: 'deposit'})); setIsMovementModalOpen(true); }} icon={<ArrowUpRight size={16}/>} className="hidden md:flex">Aportar</Button>
+            <Button variant="secondary" onClick={() => { setMovForm(prev => ({...prev, type: 'buy'})); setIsMovementModalOpen(true); }} icon={<Briefcase size={16}/>} className="hidden md:flex">Comprar Ativo</Button>
           </>
         }
       />
@@ -244,114 +245,139 @@ export const InvestmentDashboard: React.FC<InvestmentDashboardProps> = ({
       )}
 
       {/* MODALS */}
-      <Modal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} title="Nova Conta de Investimento">
-         <form onSubmit={(e) => { e.preventDefault(); onAddAccount(accForm); setIsAccountModalOpen(false); setAccForm({name:'', institution:''}); }} className="space-y-4">
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Nome</label>
-               <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={accForm.name} onChange={e => setAccForm({...accForm, name: e.target.value})} required placeholder="Ex: Carteira XP" />
-            </div>
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Instituição</label>
-               <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={accForm.institution} onChange={e => setAccForm({...accForm, institution: e.target.value})} placeholder="Ex: XP Investimentos" />
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsAccountModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Salvar</Button>
-            </div>
-         </form>
-      </Modal>
-
-      <Modal isOpen={isAssetModalOpen} onClose={() => setIsAssetModalOpen(false)} title="Novo Ativo">
-         <form onSubmit={(e) => { e.preventDefault(); onAddAsset(assetForm); setIsAssetModalOpen(false); setAssetForm({name:'', type:'fixed_income', currency: 'BRL'}); }} className="space-y-4">
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Ticker / Nome</label>
-               <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={assetForm.name} onChange={e => setAssetForm({...assetForm, name: e.target.value})} required placeholder="Ex: PETR4, CDB Banco X..." />
-            </div>
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Tipo</label>
-               <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={assetForm.type} onChange={e => setAssetForm({...assetForm, type: e.target.value as any})}>
-                  <option value="fixed_income">Renda Fixa</option>
-                  <option value="stock">Ação</option>
-                  <option value="fii">FII</option>
-                  <option value="etf">ETF</option>
-                  <option value="crypto">Cripto</option>
-                  <option value="fund">Fundo</option>
-               </select>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsAssetModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Salvar</Button>
-            </div>
-         </form>
-      </Modal>
-
-      <Modal isOpen={isMovementModalOpen} onClose={() => setIsMovementModalOpen(false)} title="Nova Movimentação">
-         <form onSubmit={handleMovementSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-lg mb-4">
-               {['deposit', 'withdraw', 'buy', 'sell'].map((type) => (
-                  <button type="button" key={type} 
-                     onClick={() => setMovForm({...movForm, type: type as any})}
-                     className={`py-2 text-xs font-bold uppercase rounded ${movForm.type === type ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                  >
-                     {type === 'deposit' ? 'Aporte' : type === 'withdraw' ? 'Resgate' : type === 'buy' ? 'Compra' : 'Venda'}
-                  </button>
-               ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+      <ModalShell isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} title="Nova Conta de Investimento">
+         <ModalBody>
+            <form id="account-form" onSubmit={(e) => { e.preventDefault(); onAddAccount(accForm); setIsAccountModalOpen(false); setAccForm({name:'', institution:''}); }} className="space-y-4">
                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Data</label>
-                  <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.date} onChange={e => setMovForm({...movForm, date: e.target.value})} required />
+                  <label className="block text-sm text-slate-300 mb-1">Nome</label>
+                  <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={accForm.name} onChange={e => setAccForm({...accForm, name: e.target.value})} required placeholder="Ex: Carteira XP" />
                </div>
                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Valor (Total)</label>
-                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.amount} onChange={e => setMovForm({...movForm, amount: e.target.value})} required />
+                  <label className="block text-sm text-slate-300 mb-1">Instituição</label>
+                  <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={accForm.institution} onChange={e => setAccForm({...accForm, institution: e.target.value})} placeholder="Ex: XP Investimentos" />
                </div>
-            </div>
+            </form>
+         </ModalBody>
+         <ModalFooter>
+            <Button type="button" variant="ghost" onClick={() => setIsAccountModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" form="account-form">Salvar</Button>
+         </ModalFooter>
+      </ModalShell>
 
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Conta de Investimento</label>
-               <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.investmentAccountId} onChange={e => setMovForm({...movForm, investmentAccountId: e.target.value})} required>
-                  <option value="">Selecione...</option>
-                  {investmentAccounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-               </select>
-            </div>
-
-            {(movForm.type === 'deposit' || movForm.type === 'withdraw') && (
-               <div className="bg-slate-700/30 p-3 rounded-lg border border-slate-700">
-                  <label className="block text-sm text-slate-300 mb-1">
-                     {movForm.type === 'deposit' ? 'Origem do dinheiro (Conta Comum)' : 'Destino do dinheiro (Conta Comum)'}
-                  </label>
-                  <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.linkedAccountId} onChange={e => setMovForm({...movForm, linkedAccountId: e.target.value})} required>
-                     <option value="">Selecione...</option>
-                     {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+      <ModalShell isOpen={isAssetModalOpen} onClose={() => setIsAssetModalOpen(false)} title="Novo Ativo">
+         <ModalBody>
+            <form id="asset-form" onSubmit={(e) => { e.preventDefault(); onAddAsset(assetForm); setIsAssetModalOpen(false); setAssetForm({name:'', type:'fixed_income', currency: 'BRL'}); }} className="space-y-4">
+               <div>
+                  <label className="block text-sm text-slate-300 mb-1">Ticker / Nome</label>
+                  <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={assetForm.name} onChange={e => setAssetForm({...assetForm, name: e.target.value})} required placeholder="Ex: PETR4, CDB Banco X..." />
+               </div>
+               <div>
+                  <label className="block text-sm text-slate-300 mb-1">Tipo</label>
+                  <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={assetForm.type} onChange={e => setAssetForm({...assetForm, type: e.target.value as any})}>
+                     <option value="fixed_income">Renda Fixa</option>
+                     <option value="stock">Ação</option>
+                     <option value="fii">FII</option>
+                     <option value="etf">ETF</option>
+                     <option value="crypto">Cripto</option>
+                     <option value="fund">Fundo</option>
                   </select>
-                  <p className="text-xs text-slate-500 mt-1">Isso criará uma transação automática no seu extrato.</p>
                </div>
-            )}
+            </form>
+         </ModalBody>
+         <ModalFooter>
+            <Button type="button" variant="ghost" onClick={() => setIsAssetModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" form="asset-form">Salvar</Button>
+         </ModalFooter>
+      </ModalShell>
 
-            {(movForm.type === 'buy' || movForm.type === 'sell') && (
-               <div className="space-y-4">
+      <ModalShell isOpen={isMovementModalOpen} onClose={() => setIsMovementModalOpen(false)} title="Nova Movimentação">
+         <ModalBody>
+            <form id="movement-form" onSubmit={handleMovementSubmit} className="space-y-4">
+               <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-lg mb-4">
+                  {['deposit', 'withdraw', 'buy', 'sell'].map((type) => (
+                     <button type="button" key={type} 
+                        onClick={() => setMovForm({...movForm, type: type as any})}
+                        className={`py-2 text-xs font-bold uppercase rounded ${movForm.type === type ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                     >
+                        {type === 'deposit' ? 'Aporte' : type === 'withdraw' ? 'Resgate' : type === 'buy' ? 'Compra' : 'Venda'}
+                     </button>
+                  ))}
+               </div>
+
+               <div className="grid grid-cols-2 gap-4">
                   <div>
-                     <label className="block text-sm text-slate-300 mb-1">Ativo</label>
-                     <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.assetId} onChange={e => setMovForm({...movForm, assetId: e.target.value})} required>
+                     <label className="block text-sm text-slate-300 mb-1">Data</label>
+                     <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.date} onChange={e => setMovForm({...movForm, date: e.target.value})} required />
+                  </div>
+                  <div>
+                     <label className="block text-sm text-slate-300 mb-1">Valor (Total)</label>
+                     <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.amount} onChange={e => setMovForm({...movForm, amount: e.target.value})} required />
+                  </div>
+               </div>
+
+               <div>
+                  <label className="block text-sm text-slate-300 mb-1">Conta de Investimento</label>
+                  <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.investmentAccountId} onChange={e => setMovForm({...movForm, investmentAccountId: e.target.value})} required>
+                     <option value="">Selecione...</option>
+                     {investmentAccounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                  </select>
+               </div>
+
+               {(movForm.type === 'deposit' || movForm.type === 'withdraw') && (
+                  <div className="bg-slate-700/30 p-3 rounded-lg border border-slate-700">
+                     <label className="block text-sm text-slate-300 mb-1">
+                        {movForm.type === 'deposit' ? 'Origem do dinheiro (Conta Comum)' : 'Destino do dinheiro (Conta Comum)'}
+                     </label>
+                     <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.linkedAccountId} onChange={e => setMovForm({...movForm, linkedAccountId: e.target.value})} required>
                         <option value="">Selecione...</option>
-                        {assets.map(a => <option key={a.id} value={a.id}>{a.name} ({a.type})</option>)}
+                        {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                      </select>
+                     <p className="text-xs text-slate-500 mt-1">Isso criará uma transação automática no seu extrato.</p>
                   </div>
-                  <div>
-                     <label className="block text-sm text-slate-300 mb-1">Quantidade</label>
-                     <input type="number" step="0.00000001" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.quantity} onChange={e => setMovForm({...movForm, quantity: e.target.value})} required />
-                  </div>
-               </div>
-            )}
+               )}
 
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsMovementModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Confirmar</Button>
-            </div>
-         </form>
-      </Modal>
+               {(movForm.type === 'buy' || movForm.type === 'sell') && (
+                  <div className="space-y-4">
+                     <div>
+                        <label className="block text-sm text-slate-300 mb-1">Ativo</label>
+                        <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.assetId} onChange={e => setMovForm({...movForm, assetId: e.target.value})} required>
+                           <option value="">Selecione...</option>
+                           {assets.map(a => <option key={a.id} value={a.id}>{a.name} ({a.type})</option>)}
+                        </select>
+                     </div>
+                     <div>
+                        <label className="block text-sm text-slate-300 mb-1">Quantidade</label>
+                        <input type="number" step="0.00000001" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={movForm.quantity} onChange={e => setMovForm({...movForm, quantity: e.target.value})} required />
+                     </div>
+                  </div>
+               )}
+            </form>
+         </ModalBody>
+         <ModalFooter>
+            <Button type="button" variant="ghost" onClick={() => setIsMovementModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" form="movement-form">Confirmar</Button>
+         </ModalFooter>
+      </ModalShell>
+
+      <MobileFab
+        visible={!isMovementModalOpen && !isAccountModalOpen && !isAssetModalOpen}
+        actions={[
+          { 
+            id: 'deposit', 
+            label: 'Aportar', 
+            icon: <ArrowUpRight size={24} />, 
+            onClick: () => { setMovForm(prev => ({...prev, type: 'deposit'})); setIsMovementModalOpen(true); },
+            variant: 'success' 
+          },
+          { 
+            id: 'buy-asset', 
+            label: 'Comprar Ativo', 
+            icon: <Briefcase size={24} />, 
+            onClick: () => { setMovForm(prev => ({...prev, type: 'buy'})); setIsMovementModalOpen(true); },
+            variant: 'primary' 
+          }
+        ]}
+      />
     </PageShell>
   );
 };

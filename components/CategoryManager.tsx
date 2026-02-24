@@ -1,8 +1,12 @@
 
 import React, { useState } from 'react';
 import { Category, CategoryGroup, TransactionType } from '../types';
-import { Button } from './ui/Button';
-import { Modal } from './ui/Modal';
+import { GlassButton } from './ui/GlassButton';
+import { GlassModal } from './ui/GlassModal';
+import { GlassInput } from './ui/GlassInput';
+import { GlassSelect } from './ui/GlassSelect';
+import { GlassCard } from './ui/GlassCard';
+import { GlassBadge } from './ui/GlassBadge';
 import { Plus, Edit2, Archive, AlertTriangle, Lock, RotateCcw } from 'lucide-react';
 
 interface CategoryManagerProps {
@@ -140,42 +144,42 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
   return (
     <div className="min-h-full flex flex-col">
       {/* Sticky Toolbar */}
-      <div className="sticky -top-4 -mx-4 px-4 py-3 bg-slate-800/95 backdrop-blur z-10 border-b border-slate-700/50 mb-4 flex flex-wrap gap-3 items-center justify-between shadow-sm">
-         <div className="flex bg-slate-900 p-1 rounded-lg shrink-0">
-            <button onClick={() => setActiveTab('expense')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${activeTab === 'expense' ? 'bg-red-500/20 text-red-400' : 'text-slate-400 hover:text-slate-200'}`}>Despesas</button>
-            <button onClick={() => setActiveTab('income')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${activeTab === 'income' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>Entradas</button>
+      <div className="sticky -top-4 -mx-4 px-4 py-3 bg-slate-900/80 backdrop-blur-md z-10 border-b border-white/5 mb-4 flex flex-wrap gap-3 items-center justify-between shadow-sm">
+         <div className="flex bg-slate-800/50 p-1 rounded-lg shrink-0 border border-white/5">
+            <button onClick={() => setActiveTab('expense')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${activeTab === 'expense' ? 'bg-red-500/20 text-red-400 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}>Despesas</button>
+            <button onClick={() => setActiveTab('income')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${activeTab === 'income' ? 'bg-emerald-500/20 text-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}>Entradas</button>
          </div>
          
          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 cursor-pointer select-none">
-               <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-blue-500/20" />
+            <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 cursor-pointer select-none hover:text-slate-300 transition-colors">
+               <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="rounded bg-slate-800 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
                Arquivadas
             </label>
-            <Button onClick={() => handleOpenModal()} icon={<Plus size={16}/>} className="flex-1 sm:flex-none">Nova</Button>
+            <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={16}/>} className="flex-1 sm:flex-none">Nova</GlassButton>
          </div>
       </div>
 
       {/* Grid Content - Desktop Optimized (md:grid-cols-2 lg:grid-cols-3) */}
       {displayedCategories.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-500 border-2 border-dashed border-slate-700/50 rounded-xl">
-           <div className="bg-slate-800 p-3 rounded-full mb-3">
+        <GlassCard className="flex flex-col items-center justify-center py-16 text-slate-500 border-dashed border-2 border-slate-700/50 bg-transparent">
+           <div className="bg-slate-800/50 p-4 rounded-full mb-3 border border-white/5">
               <Archive size={24} className="opacity-50" />
            </div>
            <p className="text-sm">Nenhuma categoria encontrada.</p>
-        </div>
+        </GlassCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-3 lg:gap-4 pb-2">
            {displayedCategories.map(cat => (
-              <div key={cat.id} className={`bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between group h-20 md:h-22 transition-all hover:border-slate-600 ${cat.isArchived ? 'opacity-50 grayscale' : ''}`}>
+              <GlassCard key={cat.id} className={`p-3 flex items-center justify-between group h-20 md:h-22 transition-all hover:border-slate-500/50 hover:bg-slate-800/80 ${cat.isArchived ? 'opacity-50 grayscale' : ''}`}>
                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-slate-700/30 shrink-0 border border-slate-700/50" style={{ color: cat.color }}>
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-slate-800/50 shrink-0 border border-white/10 shadow-sm" style={{ color: cat.color }}>
                        {cat.emoji}
                     </div>
                     <div className="min-w-0">
                        <div className="flex items-center gap-1.5">
                           <span className={`font-semibold text-slate-200 text-sm truncate max-w-[140px] md:max-w-[120px] lg:max-w-[160px] ${cat.isArchived ? 'line-through' : ''}`} title={cat.name}>{cat.name}</span>
-                          {cat.isSystem && <span title="Protegido pelo Sistema" className="bg-blue-900/30 text-blue-400 text-[10px] px-1 py-0.5 rounded border border-blue-500/20 shrink-0"><Lock size={10}/></span>}
-                          {cat.isArchived && <span className="bg-slate-700 text-slate-400 text-[10px] px-1 py-0.5 rounded shrink-0">Arq.</span>}
+                          {cat.isSystem && <GlassBadge variant="secondary" size="sm" className="px-1 py-0.5"><Lock size={10}/></GlassBadge>}
+                          {cat.isArchived && <GlassBadge variant="outline" size="sm" className="px-1 py-0.5">Arq.</GlassBadge>}
                        </div>
                        <span className="text-xs text-slate-500 truncate block opacity-80" title={cat.group}>{cat.group}</span>
                     </div>
@@ -183,68 +187,78 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                  
                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
                     {!cat.isArchived && (
-                       <button onClick={() => handleOpenModal(cat)} className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded-lg" disabled={cat.isSystem && false} title="Editar">
-                          <Edit2 size={16} />
-                       </button>
+                       <GlassButton variant="ghost" size="sm" onClick={() => handleOpenModal(cat)} disabled={cat.isSystem && false} title="Editar" icon={<Edit2 size={16} />} />
                     )}
                     {!cat.isSystem && !cat.isArchived && (
-                       <button onClick={() => handleInitiateArchive(cat)} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg" title="Arquivar">
-                          <Archive size={16} />
-                       </button>
+                       <GlassButton variant="ghost" size="sm" className="text-slate-400 hover:text-red-400 hover:bg-red-500/10" onClick={() => handleInitiateArchive(cat)} title="Arquivar" icon={<Archive size={16} />} />
                     )}
                     {cat.isArchived && !cat.isSystem && (
-                       <button onClick={() => onEdit(cat.id, { isArchived: false })} className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-700 rounded-lg" title="Restaurar">
-                          <RotateCcw size={16} />
-                       </button>
+                       <GlassButton variant="ghost" size="sm" className="text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10" onClick={() => onEdit(cat.id, { isArchived: false })} title="Restaurar" icon={<RotateCcw size={16} />} />
                     )}
                  </div>
-              </div>
+              </GlassCard>
            ))}
         </div>
       )}
 
       {/* CREATE/EDIT MODAL */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCategory ? 'Editar Categoria' : 'Nova Categoria'}>
+      <GlassModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCategory ? 'Editar Categoria' : 'Nova Categoria'}>
          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-               <label className="block text-sm text-slate-300 mb-1">Nome</label>
-               <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required maxLength={20} disabled={editingCategory?.isSystem} />
-               {editingCategory?.isSystem && <p className="text-xs text-amber-500 mt-1">Nome protegido pelo sistema.</p>}
+               <GlassInput 
+                  label="Nome" 
+                  value={form.name} 
+                  onChange={e => setForm({...form, name: e.target.value})} 
+                  required 
+                  maxLength={20} 
+                  disabled={editingCategory?.isSystem} 
+               />
+               {editingCategory?.isSystem && <p className="text-xs text-amber-500 mt-1 flex items-center gap-1"><Lock size={10}/> Nome protegido pelo sistema.</p>}
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Ícone (Emoji)</label>
-                  <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-center text-xl" value={form.emoji} onChange={e => setForm({...form, emoji: e.target.value})} required maxLength={2} />
-               </div>
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Grupo</label>
-                  <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={form.group} onChange={e => setForm({...form, group: e.target.value as any})}>
-                     {groups.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
-               </div>
+               <GlassInput 
+                  label="Ícone (Emoji)" 
+                  value={form.emoji} 
+                  onChange={e => setForm({...form, emoji: e.target.value})} 
+                  required 
+                  maxLength={2} 
+                  className="text-center text-xl"
+               />
+               <GlassSelect 
+                  label="Grupo" 
+                  value={form.group} 
+                  onChange={e => setForm({...form, group: e.target.value as any})}
+                  options={groups.map(g => ({ value: g, label: g }))}
+               />
             </div>
 
             <div>
                <label className="block text-sm text-slate-300 mb-2">Cor</label>
-               <div className="flex flex-wrap gap-3">
+               <div className="flex flex-wrap gap-3 p-3 bg-slate-900/30 rounded-lg border border-white/5">
                   {colors.map(c => (
-                     <button type="button" key={c} onClick={() => setForm({...form, color: c})} className={`w-8 h-8 rounded-full border-2 ${form.color === c ? 'border-white' : 'border-transparent'}`} style={{ backgroundColor: c }} />
+                     <button 
+                        type="button" 
+                        key={c} 
+                        onClick={() => setForm({...form, color: c})} 
+                        className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${form.color === c ? 'border-white ring-2 ring-white/20' : 'border-transparent hover:border-white/50'}`} 
+                        style={{ backgroundColor: c }} 
+                     />
                   ))}
                </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Salvar</Button>
+            <div className="flex justify-end gap-2 pt-4">
+               <GlassButton type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</GlassButton>
+               <GlassButton type="submit">Salvar</GlassButton>
             </div>
          </form>
-      </Modal>
+      </GlassModal>
 
       {/* ARCHIVE/REASSIGN MODAL */}
-      <Modal isOpen={isArchiveModalOpen} onClose={() => setIsArchiveModalOpen(false)} title="Arquivar Categoria">
+      <GlassModal isOpen={isArchiveModalOpen} onClose={() => setIsArchiveModalOpen(false)} title="Arquivar Categoria">
          <div className="space-y-4">
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-lg flex gap-3">
+            <GlassCard className="bg-amber-500/10 border-amber-500/30 p-4 flex gap-3">
                <AlertTriangle className="text-amber-500 shrink-0" size={24} />
                <div>
                   <h4 className="text-amber-500 font-bold mb-1">Atenção</h4>
@@ -253,35 +267,34 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                      {usageCount > 0 ? ` Esta categoria é usada em ${usageCount} transações.` : ' Ela não está em uso.'}
                   </p>
                </div>
-            </div>
+            </GlassCard>
 
             {usageCount > 0 && (
                <div>
                   <label className="block text-sm text-slate-300 mb-2">O que deseja fazer com os itens existentes?</label>
                   <div className="space-y-3">
-                     <label className="flex items-start gap-3 p-3 rounded-lg border border-slate-700 bg-slate-800/50 cursor-pointer hover:bg-slate-800">
-                        <input type="radio" name="archiveAction" checked={!reassignId} onChange={() => setReassignId('')} className="mt-1" />
+                     <label className="flex items-start gap-3 p-3 rounded-lg border border-white/10 bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                        <input type="radio" name="archiveAction" checked={!reassignId} onChange={() => setReassignId('')} className="mt-1 bg-slate-900 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
                         <div>
                            <span className="block text-sm font-medium text-white">Manter histórico (Recomendado)</span>
                            <span className="block text-xs text-slate-400">Itens antigos continuam nesta categoria, mas ela não aparecerá para novos lançamentos.</span>
                         </div>
                      </label>
-                     <label className="flex items-start gap-3 p-3 rounded-lg border border-slate-700 bg-slate-800/50 cursor-pointer hover:bg-slate-800">
-                        <input type="radio" name="archiveAction" checked={!!reassignId} onChange={() => setReassignId(categories.find(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)?.id || '')} className="mt-1" />
+                     <label className="flex items-start gap-3 p-3 rounded-lg border border-white/10 bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                        <input type="radio" name="archiveAction" checked={!!reassignId} onChange={() => setReassignId(categories.find(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)?.id || '')} className="mt-1 bg-slate-900 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
                         <div className="w-full">
                            <span className="block text-sm font-medium text-white">Mover para outra categoria</span>
                            {!!reassignId && (
-                              <select 
-                                 className="mt-2 w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white"
-                                 value={reassignId}
-                                 onChange={(e) => setReassignId(e.target.value)}
-                                 onClick={(e) => e.stopPropagation()}
-                              >
-                                 {categories
-                                    .filter(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)
-                                    .map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)
-                                 }
-                              </select>
+                              <div className="mt-2" onClick={e => e.preventDefault()}>
+                                <GlassSelect 
+                                   value={reassignId}
+                                   onChange={(e) => setReassignId(e.target.value)}
+                                   options={categories
+                                      .filter(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)
+                                      .map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                                   }
+                                />
+                              </div>
                            )}
                         </div>
                      </label>
@@ -289,14 +302,14 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsArchiveModalOpen(false)}>Cancelar</Button>
-               <Button type="button" variant="danger" onClick={handleConfirmArchive}>
+            <div className="flex justify-end gap-2 pt-4">
+               <GlassButton type="button" variant="ghost" onClick={() => setIsArchiveModalOpen(false)}>Cancelar</GlassButton>
+               <GlassButton type="button" variant="danger" onClick={handleConfirmArchive}>
                   {reassignId ? 'Mover e Arquivar' : 'Arquivar'}
-               </Button>
+               </GlassButton>
             </div>
          </div>
-      </Modal>
+      </GlassModal>
     </div>
   );
 };

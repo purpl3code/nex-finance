@@ -10,9 +10,11 @@ import { useAuth } from '../hooks/useAuth';
 import { BackupFile, DataHealthReport, FixLogEntry } from '../types';
 import { useFinance } from '../hooks/useFinance';
 import { useUserProfile } from '../hooks/useUserProfile';
-import { Button } from './ui/Button';
-import { Modal } from './ui/Modal';
-import { Avatar } from './ui/Avatar';
+import { GlassButton } from './ui/GlassButton';
+import { GlassModal } from './ui/GlassModal';
+import { GlassAvatar } from './ui/GlassAvatar';
+import { GlassCard } from './ui/GlassCard';
+import { GlassInput } from './ui/GlassInput';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { ThemeSelector } from './ThemeSelector';
@@ -212,14 +214,17 @@ export const SettingsView: React.FC = () => {
   };
 
   const SectionCard = ({ title, description, icon, children, danger = false }: any) => (
-    <div className={`bg-slate-800 rounded-xl border ${danger ? 'border-red-900/30' : 'border-slate-700'} overflow-hidden shadow-sm`}>
-      <div className={`p-6 border-b ${danger ? 'border-red-900/30 bg-red-900/5' : 'border-slate-700/50 bg-slate-800'}`}>
+    <GlassCard 
+      className={`overflow-hidden ${danger ? 'border-red-500/30 shadow-red-900/10' : ''}`}
+      variant={danger ? 'base' : 'base'}
+    >
+      <div className={`p-6 border-b ${danger ? 'border-red-500/20 bg-red-500/5' : 'border-white/5 bg-white/5'}`}>
         <div className="flex items-start gap-4">
-          <div className={`p-3 rounded-lg ${danger ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
+          <div className={`p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
             {icon}
           </div>
           <div>
-            <h3 className={`text-lg font-semibold ${danger ? 'text-red-400' : 'text-slate-200'}`}>{title}</h3>
+            <h3 className={`text-lg font-semibold ${danger ? 'text-red-400' : 'text-white'}`}>{title}</h3>
             {description && <p className="text-sm text-slate-400 mt-1">{description}</p>}
           </div>
         </div>
@@ -227,7 +232,7 @@ export const SettingsView: React.FC = () => {
       <div className="p-6">
         {children}
       </div>
-    </div>
+    </GlassCard>
   );
 
   return (
@@ -236,7 +241,7 @@ export const SettingsView: React.FC = () => {
         title="Configurações" 
         subtitle="Gerencie seus dados, backups e preferências do sistema."
         actions={
-          <Button variant="secondary" onClick={handleLogout} icon={<LogOut size={16} />}>Sair</Button>
+          <GlassButton variant="secondary" onClick={handleLogout} icon={<LogOut size={16} />}>Sair</GlassButton>
         }
       />
 
@@ -249,10 +254,10 @@ export const SettingsView: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-8 items-start">
            <div className="flex flex-col items-center gap-3">
               <div className="relative group">
-                 <Avatar src={profile.avatarDataUrl} name={profile.displayName} size="xl" />
+                 <GlassAvatar src={profile.avatarDataUrl} name={profile.displayName} size="xl" />
                  <button 
                    onClick={() => avatarInputRef.current?.click()}
-                   className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                   className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm"
                  >
                    <Camera size={24} className="text-white" />
                  </button>
@@ -273,10 +278,8 @@ export const SettingsView: React.FC = () => {
            
            <form onSubmit={handleSaveProfile} className="flex-1 w-full space-y-4">
               <div>
-                 <label className="block text-sm text-slate-300 mb-1">Nome de Exibição</label>
-                 <input 
-                    type="text" 
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none" 
+                 <GlassInput 
+                    label="Nome de Exibição" 
                     value={profileName} 
                     onChange={e => setProfileName(e.target.value)} 
                     maxLength={30}
@@ -284,7 +287,7 @@ export const SettingsView: React.FC = () => {
                  />
               </div>
               <div className="pt-2">
-                 <Button type="submit">Salvar Alterações</Button>
+                 <GlassButton type="submit">Salvar Alterações</GlassButton>
               </div>
            </form>
         </div>
@@ -297,18 +300,18 @@ export const SettingsView: React.FC = () => {
         icon={<Cloud size={24} />}
       >
         <div className="space-y-4">
-          <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-slate-700/50">
-             <div className={`w-2 h-2 rounded-full ${navigator.onLine ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+          <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-white/10">
+             <div className={`w-2 h-2 rounded-full shadow-lg ${navigator.onLine ? 'bg-emerald-500 shadow-emerald-500/50' : 'bg-red-500 shadow-red-500/50'}`}></div>
              <span>Status da conexão: <span className="text-slate-200 font-medium">{navigator.onLine ? 'Online' : 'Offline'}</span></span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <Button onClick={handlePushToCloud} disabled={isSyncing || isDemo} className="w-full flex justify-center">
+             <GlassButton onClick={handlePushToCloud} disabled={isSyncing || isDemo} className="w-full flex justify-center">
                 {isSyncing ? 'Enviando...' : 'Enviar Dados para Nuvem'}
-             </Button>
-             <Button onClick={handlePullFromCloud} variant="secondary" disabled={isSyncing || isDemo} className="w-full flex justify-center">
+             </GlassButton>
+             <GlassButton onClick={handlePullFromCloud} variant="secondary" disabled={isSyncing || isDemo} className="w-full flex justify-center">
                 {isSyncing ? 'Baixando...' : 'Baixar Dados da Nuvem'}
-             </Button>
+             </GlassButton>
           </div>
           <p className="text-xs text-slate-500 text-center">
             {isDemo ? 'Recurso desativado no modo demo.' : 'Seus dados são salvos automaticamente na nuvem ao fazer alterações.'}
@@ -336,7 +339,7 @@ export const SettingsView: React.FC = () => {
               <p className="text-slate-300 font-medium">{categories.length} categorias cadastradas</p>
               <p className="text-xs text-slate-500 mt-1">Gerencie ícones, cores e grupos.</p>
            </div>
-           <Button onClick={() => setIsCatManagerOpen(true)}>Gerenciar Categorias</Button>
+           <GlassButton onClick={() => setIsCatManagerOpen(true)}>Gerenciar Categorias</GlassButton>
         </div>
       </SectionCard>
 
@@ -349,16 +352,16 @@ export const SettingsView: React.FC = () => {
         <div className="space-y-6">
            {/* Status Bar */}
            {!healthReport ? (
-              <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-700 border-dashed">
+              <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-700/50 border-dashed">
                  <Activity size={40} className="mx-auto text-slate-600 mb-4" />
                  <p className="text-slate-400 mb-6">Execute uma verificação para detectar itens órfãos ou quebrados.</p>
-                 <Button onClick={runHealthScan} disabled={isScanning} icon={isScanning ? <RefreshCw className="animate-spin" size={16}/> : <Activity size={16}/>}>
+                 <GlassButton onClick={runHealthScan} disabled={isScanning} icon={isScanning ? <RefreshCw className="animate-spin" size={16}/> : <Activity size={16}/>}>
                     {isScanning ? 'Verificando...' : 'Executar Verificação'}
-                 </Button>
+                 </GlassButton>
               </div>
            ) : (
               <div className="space-y-4">
-                 <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                 <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-lg border border-white/10">
                     <div className={`p-3 rounded-full ${healthReport.summary.errorCount > 0 ? 'bg-red-500/20 text-red-400' : healthReport.summary.warningCount > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
                        {healthReport.summary.errorCount > 0 || healthReport.summary.warningCount > 0 ? <AlertTriangle size={24}/> : <CheckCircle size={24}/>}
                     </div>
@@ -373,12 +376,12 @@ export const SettingsView: React.FC = () => {
                        </p>
                     </div>
                     <div className="flex gap-2">
-                       <Button size="sm" variant="secondary" onClick={runHealthScan} disabled={isScanning}>Re-escanear</Button>
+                       <GlassButton size="sm" variant="secondary" onClick={runHealthScan} disabled={isScanning}>Re-escanear</GlassButton>
                        {healthReport.issues.some(i => i.canAutoFix) && (
-                          <Button size="sm" onClick={runAutoFix} className="bg-emerald-600 hover:bg-emerald-700 text-white">Corrigir Automático</Button>
+                          <GlassButton size="sm" onClick={runAutoFix} className="bg-emerald-600 hover:bg-emerald-700 text-white">Corrigir Automático</GlassButton>
                        )}
                        {healthReport.issues.some(i => !i.canAutoFix) && (
-                          <Button size="sm" variant="ghost" onClick={exportOrphans} icon={<Download size={14}/>}>Exportar Órfãos</Button>
+                          <GlassButton size="sm" variant="ghost" onClick={exportOrphans} icon={<Download size={14}/>}>Exportar Órfãos</GlassButton>
                        )}
                     </div>
                  </div>
@@ -457,7 +460,7 @@ export const SettingsView: React.FC = () => {
         icon={<Download size={24} />}
       >
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
-           <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-slate-700/50 w-full md:w-auto">
+           <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-white/10 w-full md:w-auto">
               <History size={16} />
               {lastBackup ? (
                 <span>Último export: <span className="text-slate-200 font-medium">{new Date(lastBackup).toLocaleDateString()} às {new Date(lastBackup).toLocaleTimeString().slice(0,5)}</span></span>
@@ -468,9 +471,9 @@ export const SettingsView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <Button onClick={handleExport} className="w-full flex items-center justify-center gap-2 h-12 text-base">
+           <GlassButton onClick={handleExport} className="w-full flex items-center justify-center gap-2 h-12 text-base">
               <Download size={18} /> Exportar Dados (.json)
-           </Button>
+           </GlassButton>
            
            <div className="relative">
              <input 
@@ -480,13 +483,13 @@ export const SettingsView: React.FC = () => {
                 accept=".json"
                 onChange={handleFileSelect}
              />
-             <Button 
+             <GlassButton 
                 onClick={() => fileInputRef.current?.click()} 
                 variant="secondary" 
                 className="w-full flex items-center justify-center gap-2 h-12 text-base"
              >
                 <Upload size={18} /> Importar Backup
-             </Button>
+             </GlassButton>
            </div>
         </div>
       </SectionCard>
@@ -507,14 +510,14 @@ export const SettingsView: React.FC = () => {
                { val: assets.length, label: 'Inv. Ativos' },
                { val: investmentMovements.length, label: 'Inv. Movs' },
             ].map((stat, i) => (
-               <div key={i} className="bg-slate-900/50 p-3 rounded-lg text-center border border-slate-700/50">
+               <div key={i} className="bg-slate-900/50 p-3 rounded-lg text-center border border-white/10">
                   <p className="text-xl font-bold text-white">{stat.val}</p>
                   <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{stat.label}</p>
                </div>
             ))}
          </div>
          <div className="mt-6 flex justify-end">
-            <Button size="sm" variant="ghost" onClick={() => window.location.reload()} icon={<RefreshCw size={14}/>}>Recalcular Dados</Button>
+            <GlassButton size="sm" variant="ghost" onClick={() => window.location.reload()} icon={<RefreshCw size={14}/>}>Recalcular Dados</GlassButton>
          </div>
       </SectionCard>
 
@@ -524,11 +527,11 @@ export const SettingsView: React.FC = () => {
         icon={<Server size={24} />}
       >
          <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+            <div className="flex justify-between items-center py-2 border-b border-white/5">
                <span className="text-slate-400 text-sm">Versão do Schema (Banco de Dados)</span>
-               <span className="text-slate-200 font-mono text-sm bg-slate-900 px-2 py-1 rounded">v{StorageService.load().version}</span>
+               <span className="text-slate-200 font-mono text-sm bg-slate-900 px-2 py-1 rounded border border-white/5">v{StorageService.load().version}</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+            <div className="flex justify-between items-center py-2 border-b border-white/5">
                <span className="text-slate-400 text-sm">Armazenamento</span>
                <span className="text-emerald-400 text-sm font-medium flex items-center gap-1"><HardDrive size={14}/> LocalStorage (Browser)</span>
             </div>
@@ -551,14 +554,14 @@ export const SettingsView: React.FC = () => {
                <p className="text-slate-300 font-medium">Limpar todos os dados</p>
                <p className="text-xs text-slate-500 mt-1">Remove todas as transações, contas e configurações.</p>
             </div>
-            <Button variant="danger" onClick={() => setIsClearModalOpen(true)}>
+            <GlassButton variant="danger" onClick={() => setIsClearModalOpen(true)}>
                Apagar Tudo
-            </Button>
+            </GlassButton>
          </div>
       </SectionCard>
 
       {/* CATEGORY MANAGER MODAL */}
-      <Modal 
+      <GlassModal 
         isOpen={isCatManagerOpen} 
         onClose={() => setIsCatManagerOpen(false)} 
         title="Gerenciar Categorias"
@@ -573,12 +576,12 @@ export const SettingsView: React.FC = () => {
             onArchive={archiveCategory}
             onReassign={reassignCategory}
          />
-      </Modal>
+      </GlassModal>
 
       {/* ... [Rest of modals] ... */}
       
       {/* IMPORT PREVIEW MODAL */}
-      <Modal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Restaurar Backup">
+      <GlassModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Restaurar Backup">
         <div className="space-y-4">
            {importError ? (
               <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-lg flex items-center gap-3 text-red-400">
@@ -587,7 +590,7 @@ export const SettingsView: React.FC = () => {
               </div>
            ) : previewBackup && (
               <div className="space-y-4">
-                 <div className="bg-slate-900/50 p-4 border rounded-lg border-slate-700">
+                 <div className="bg-slate-900/50 p-4 border rounded-lg border-white/10">
                     <div className="flex justify-between items-center mb-2">
                        <span className="text-slate-400 text-xs">Arquivo</span>
                        <span className="text-slate-200 text-xs font-mono">{previewBackup.appName} v{previewBackup.schemaVersion}</span>
@@ -605,15 +608,15 @@ export const SettingsView: React.FC = () => {
                  )}
 
                  <div className="grid grid-cols-3 gap-2 text-center">
-                     <div className="bg-slate-700/30 p-2 rounded">
+                     <div className="bg-slate-700/30 p-2 rounded border border-white/5">
                         <span className="block text-lg font-bold text-white">{previewBackup.data.transactions?.length || 0}</span>
                         <span className="text-[10px] text-slate-400 uppercase">Transações</span>
                      </div>
-                     <div className="bg-slate-700/30 p-2 rounded">
+                     <div className="bg-slate-700/30 p-2 rounded border border-white/5">
                         <span className="block text-lg font-bold text-white">{previewBackup.data.accounts?.length || 0}</span>
                         <span className="text-[10px] text-slate-400 uppercase">Contas</span>
                      </div>
-                     <div className="bg-slate-700/30 p-2 rounded">
+                     <div className="bg-slate-700/30 p-2 rounded border border-white/5">
                         <span className="block text-lg font-bold text-white">{previewBackup.data.creditCards?.length || 0}</span>
                         <span className="text-[10px] text-slate-400 uppercase">Cartões</span>
                      </div>
@@ -621,23 +624,23 @@ export const SettingsView: React.FC = () => {
 
                  <div className="pt-4 flex gap-3">
                      <div className="flex-1">
-                        <Button onClick={handleMerge} className="w-full bg-blue-600 hover:bg-blue-700">Mesclar</Button>
+                        <GlassButton onClick={handleMerge} className="w-full bg-blue-600 hover:bg-blue-700">Mesclar</GlassButton>
                         <p className="text-[10px] text-slate-500 text-center mt-1">Mantém atuais, adiciona novos.</p>
                      </div>
                      <div className="flex-1">
-                        <Button onClick={handleReplace} className="w-full bg-red-600 hover:bg-red-700">Substituir</Button>
+                        <GlassButton onClick={handleReplace} className="w-full bg-red-600 hover:bg-red-700">Substituir</GlassButton>
                         <p className="text-[10px] text-slate-500 text-center mt-1">Apaga tudo e restaura.</p>
                      </div>
                  </div>
               </div>
            )}
         </div>
-      </Modal>
+      </GlassModal>
 
       {/* CLEAR CONFIRM MODAL */}
-      <Modal isOpen={isClearModalOpen} onClose={() => setIsClearModalOpen(false)} title="Apagar Tudo?">
+      <GlassModal isOpen={isClearModalOpen} onClose={() => setIsClearModalOpen(false)} title="Apagar Tudo?">
          <div className="text-center space-y-4">
-            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
                <Trash2 size={32} className="text-red-500" />
             </div>
             <div>
@@ -647,11 +650,11 @@ export const SettingsView: React.FC = () => {
                </p>
             </div>
             <div className="flex justify-end gap-3 pt-4">
-               <Button type="button" variant="ghost" onClick={() => setIsClearModalOpen(false)}>Cancelar</Button>
-               <Button type="button" variant="danger" onClick={handleClearAllData}>Sim, Apagar Tudo</Button>
+               <GlassButton type="button" variant="ghost" onClick={() => setIsClearModalOpen(false)}>Cancelar</GlassButton>
+               <GlassButton type="button" variant="danger" onClick={handleClearAllData}>Sim, Apagar Tudo</GlassButton>
             </div>
          </div>
-      </Modal>
+      </GlassModal>
 
     </PageShell>
   );

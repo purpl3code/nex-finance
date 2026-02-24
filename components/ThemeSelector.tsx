@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeService, AppTheme } from '../services/themeService';
 import { Check } from 'lucide-react';
+import { GlassCard } from './ui/GlassCard';
 
 interface ThemeOption {
   id: AppTheme;
@@ -52,33 +53,37 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
         <button
           key={theme.id}
           onClick={() => handleSelect(theme.id)}
-          className={`
-            relative flex flex-col items-center gap-3 p-4 rounded-xl border transition-all
-            ${currentTheme === theme.id 
-              ? 'border-blue-500 bg-slate-800 ring-1 ring-blue-500' 
-              : 'border-slate-700 bg-slate-800/50 hover:bg-slate-800 hover:border-slate-600'}
-          `}
+          className="relative group outline-none text-left"
         >
-          {/* Color Preview */}
-          <div 
-            className="w-full h-16 rounded-lg shadow-inner flex items-center justify-center relative overflow-hidden"
-            style={{ backgroundColor: theme.colors.bg }}
+          <GlassCard 
+            className={`
+              flex flex-col items-center gap-3 p-4 transition-all h-full
+              ${currentTheme === theme.id 
+                ? 'ring-2 ring-blue-500/50 bg-slate-800/80' 
+                : 'hover:bg-white/5'}
+            `}
           >
-             <div 
-               className="w-8 h-8 rounded-full shadow-lg absolute" 
-               style={{ backgroundColor: theme.colors.primary }}
-             ></div>
-          </div>
-
-          <span className={`text-sm font-medium ${currentTheme === theme.id ? 'text-white' : 'text-slate-400'}`}>
-            {theme.name}
-          </span>
-
-          {currentTheme === theme.id && (
-            <div className="absolute top-2 right-2 bg-blue-500 text-white p-1 rounded-full shadow-lg">
-              <Check size={10} strokeWidth={3} />
+            {/* Color Preview */}
+            <div 
+              className="w-full h-16 rounded-lg shadow-inner flex items-center justify-center relative overflow-hidden border border-white/10"
+              style={{ backgroundColor: theme.colors.bg }}
+            >
+               <div 
+                 className="w-8 h-8 rounded-full shadow-lg absolute ring-2 ring-white/10" 
+                 style={{ backgroundColor: theme.colors.primary }}
+               ></div>
             </div>
-          )}
+
+            <span className={`text-sm font-medium ${currentTheme === theme.id ? 'text-white' : 'text-slate-400'}`}>
+              {theme.name}
+            </span>
+
+            {currentTheme === theme.id && (
+              <div className="absolute top-2 right-2 bg-blue-500 text-white p-1 rounded-full shadow-lg shadow-blue-500/20">
+                <Check size={10} strokeWidth={3} />
+              </div>
+            )}
+          </GlassCard>
         </button>
       ))}
     </div>

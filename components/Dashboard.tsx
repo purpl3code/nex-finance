@@ -19,6 +19,7 @@ import {
   CreditCardSummaryItem
 } from './DashboardWidgets';
 import { Wallet, Sparkles } from 'lucide-react';
+import { GlassCard } from './ui/GlassCard';
 
 interface DashboardProps {
   stats: DashboardStats;
@@ -140,7 +141,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
           </div>
           <InsightsList insights={insights} />
           {insights.length === 0 && (
-            <div className="p-4 border border-slate-700 border-dashed rounded-xl text-center text-slate-500 text-sm">
+            <div className="p-4 border border-white/10 border-dashed rounded-xl text-center text-slate-500 text-sm">
               Nenhum insight disponível no momento.
             </div>
           )}
@@ -153,7 +154,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
         {/* Left: Expenses & Cards */}
         <div className="space-y-6">
           {/* Chart */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-sm">
+          <GlassCard className="h-auto">
             <div className="flex justify-between items-start mb-6">
                 <div>
                   <h3 className="text-lg font-semibold text-white">Despesas por Categoria</h3>
@@ -173,14 +174,15 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                       outerRadius={80}
                       paddingAngle={5}
                       dataKey="value"
+                      stroke="none"
                     >
                       {comprehensiveChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} stroke="#1e293b" strokeWidth={2} />
+                        <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip 
                       formatter={(value: number) => formatCurrency(value)}
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px' }}
+                      contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', borderColor: 'rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '12px', backdropFilter: 'blur(8px)' }}
                       itemStyle={{ color: '#f8fafc' }}
                     />
                     <Legend 
@@ -194,12 +196,12 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-64 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-700 rounded-lg">
+              <div className="h-64 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-lg">
                 <Wallet size={48} className="mb-2 opacity-20" />
                 <p>Nenhuma despesa registrada.</p>
               </div>
             )}
-          </div>
+          </GlassCard>
 
           {/* Mini Card List */}
           <div className="space-y-3">

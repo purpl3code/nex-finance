@@ -1,11 +1,16 @@
 
+
 import React, { useState } from 'react';
 import { CreditCard, CreditCardInvoice, Category, Account, CreditCardTransaction } from '../types';
-import { Button } from './ui/Button';
-import { Modal } from './ui/Modal';
+import { GlassButton } from './ui/GlassButton';
+import { GlassModal } from './ui/GlassModal';
+import { GlassInput } from './ui/GlassInput';
+import { GlassSelect } from './ui/GlassSelect';
+import { GlassCard } from './ui/GlassCard';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
-import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle } from 'lucide-react';
+import { MobileFab } from './ui/MobileFab';
+import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote } from 'lucide-react';
 
 interface CreditCardManagerProps {
   cards: CreditCard[];
@@ -187,12 +192,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   if (view === 'details' && selectedCard) {
     return (
       <PageShell>
-        <button onClick={() => setView('list')} className="flex items-center text-slate-400 hover:text-white mb-2 transition-colors">
-          <ChevronLeft size={16} /> Voltar para Cartões
+        <button onClick={() => setView('list')} className="flex items-center text-slate-400 hover:text-white mb-4 transition-colors">
+          <ChevronLeft size={16} className="mr-1" /> Voltar para Cartões
         </button>
 
         {/* Card Header */}
-        <div className="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-6 rounded-xl shadow-sm">
+        <GlassCard className="mb-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h2 className="text-3xl font-bold text-white mb-2">{selectedCard.name}</h2>
@@ -206,52 +211,54 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               </div>
             </div>
             <div className="flex gap-3">
-              <Button onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</Button>
-              <Button onClick={() => openTxModal()} icon={<Plus size={16}/>}>Nova Compra</Button>
+              <GlassButton onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</GlassButton>
+              <GlassButton onClick={() => openTxModal()} icon={<Plus size={16}/>} className="hidden md:flex">Nova Compra</GlassButton>
             </div>
           </div>
-        </div>
+        </GlassCard>
 
         {/* Invoice Controls */}
-        <div className="flex items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700">
-          <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors"><ChevronLeft size={24} /></button>
+        <div className="flex items-center justify-between glass-sm p-4 rounded-xl border border-white/5 mb-6">
+          <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-white/5 rounded-lg text-slate-300 transition-colors"><ChevronLeft size={24} /></button>
           <div className="text-center">
             <span className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Fatura de</span>
             <span className="block text-xl font-bold text-white capitalize">{monthName}</span>
           </div>
-          <button onClick={() => changeMonth(1)} className="p-2 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors"><ChevronRight size={24} /></button>
+          <button onClick={() => changeMonth(1)} className="p-2 hover:bg-white/5 rounded-lg text-slate-300 transition-colors"><ChevronRight size={24} /></button>
         </div>
 
         {/* Invoice Summary */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-           <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-8 pb-6 border-b border-slate-700/50">
-             <div>
-               <p className="text-slate-400 text-sm font-medium mb-2">Vencimento em {new Date(invoiceInfo?.dueDate).toLocaleDateString('pt-BR')}</p>
-               <div className="text-4xl font-bold text-white">
-                 {formatCurrency(invoiceInfo?.amount || 0)}
+        <GlassCard className="p-0 overflow-hidden">
+           <div className="p-6 border-b border-white/5 bg-white/5">
+             <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+               <div>
+                 <p className="text-slate-400 text-sm font-medium mb-2">Vencimento em {new Date(invoiceInfo?.dueDate).toLocaleDateString('pt-BR')}</p>
+                 <div className="text-4xl font-bold text-white">
+                   {formatCurrency(invoiceInfo?.amount || 0)}
+                 </div>
+                 <p className={`text-sm mt-2 font-bold uppercase tracking-wider ${invoiceInfo?.isPaid ? 'text-emerald-400' : 'text-blue-400'}`}>
+                   {invoiceInfo?.isPaid ? 'Fatura Paga' : 'Fatura Aberta'}
+                 </p>
                </div>
-               <p className={`text-sm mt-2 font-bold uppercase tracking-wider ${invoiceInfo?.isPaid ? 'text-emerald-400' : 'text-blue-400'}`}>
-                 {invoiceInfo?.isPaid ? 'Fatura Paga' : 'Fatura Aberta'}
-               </p>
+               {!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 && (
+                 <GlassButton onClick={() => {
+                   setPayAccount(selectedCard.defaultPaymentAccountId || '');
+                   setIsPayModalOpen(true);
+                 }} variant="primary" size="lg" className="hidden md:flex">Pagar Fatura</GlassButton>
+               )}
              </div>
-             {!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 && (
-               <Button onClick={() => {
-                 setPayAccount(selectedCard.defaultPaymentAccountId || '');
-                 setIsPayModalOpen(true);
-               }} variant="primary" size="lg">Pagar Fatura</Button>
-             )}
            </div>
 
            {/* Transaction List */}
-           <div className="space-y-4">
+           <div className="p-6 space-y-4">
              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Transações da Fatura</h3>
              {invoiceInfo?.transactions && (invoiceInfo.transactions as any[]).length > 0 ? (
                (invoiceInfo.transactions as any[]).map((tx: CreditCardTransaction) => {
                  const isRefund = tx.type === 'refund';
                  return (
-                  <div key={tx.id} className={`flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0 hover:bg-slate-700/20 px-2 -mx-2 rounded transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
+                  <div key={tx.id} className={`flex justify-between items-center py-3 border-b border-white/5 last:border-0 hover:bg-white/5 px-3 -mx-3 rounded-lg transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
                     <div className="flex items-center gap-4">
-                      <div className={`p-2.5 rounded-lg text-xl shadow-inner ${isRefund ? 'bg-red-900/20 text-red-400' : 'bg-slate-700/50'}`}>
+                      <div className={`p-2.5 rounded-xl text-xl shadow-inner border border-white/5 ${isRefund ? 'bg-red-500/10 text-red-400' : 'bg-white/5'}`}>
                         {isRefund ? <RotateCcw size={20}/> : (categories.find(c => c.id === tx.categoryId)?.emoji || '🛒')}
                       </div>
                       <div>
@@ -272,13 +279,13 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                         {/* Actions (Only for unpaid invoices and not already refunds) */}
                         {!invoiceInfo.isPaid && !isRefund && (
                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => openRefundModal(tx)} className="p-1.5 text-amber-400 hover:bg-slate-600 rounded" title="Estornar">
+                              <button onClick={() => openRefundModal(tx)} className="p-1.5 text-amber-400 hover:bg-white/10 rounded-lg transition-colors" title="Estornar">
                                  <RotateCcw size={14} />
                               </button>
-                              <button onClick={() => openTxModal(tx)} className="p-1.5 text-blue-400 hover:bg-slate-600 rounded" title="Editar">
+                              <button onClick={() => openTxModal(tx)} className="p-1.5 text-blue-400 hover:bg-white/10 rounded-lg transition-colors" title="Editar">
                                  <Edit2 size={14} />
                               </button>
-                              <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-slate-600 rounded" title="Excluir">
+                              <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-white/10 rounded-lg transition-colors" title="Excluir">
                                  <Trash2 size={14} />
                               </button>
                            </div>
@@ -286,7 +293,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                         {/* Delete action for manual refunds if mistake made */}
                         {!invoiceInfo.isPaid && isRefund && (
                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-slate-600 rounded" title="Excluir Estorno">
+                              <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-white/10 rounded-lg transition-colors" title="Excluir Estorno">
                                  <Trash2 size={14} />
                               </button>
                            </div>
@@ -296,137 +303,204 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  );
                })
              ) : (
-               <div className="text-center py-10 bg-slate-800/50 rounded-lg border border-slate-700 border-dashed">
+               <div className="text-center py-10 bg-white/5 rounded-xl border border-white/5 border-dashed">
                  <p className="text-slate-500">Nenhuma compra nesta fatura.</p>
                </div>
              )}
            </div>
-        </div>
+        </GlassCard>
         
         {/* Modals reused */}
-        <Modal isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} title={editingTx ? "Editar Compra" : "Nova Compra"}>
+        <GlassModal isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} title={editingTx ? "Editar Compra" : "Nova Compra"}>
           <form onSubmit={handleTxSubmit} className="space-y-4">
              {editingTx && (
-                <div className="bg-amber-500/10 p-3 rounded text-amber-400 text-xs flex items-center gap-2 mb-4">
+                <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 mb-4">
                    <AlertTriangle size={14} />
                    <span>Editando apenas esta parcela. O limite total não será recalculado automaticamente para outras parcelas.</span>
                 </div>
              )}
-             <div>
-               <label className="block text-sm text-slate-300 mb-1">Valor</label>
-               <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.amount} onChange={e => setTxForm({...txForm, amount: e.target.value})} required />
-             </div>
-             <div>
-               <label className="block text-sm text-slate-300 mb-1">Data</label>
-               <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.date} onChange={e => setTxForm({...txForm, date: e.target.value})} required />
-             </div>
-             <div>
-               <label className="block text-sm text-slate-300 mb-1">Categoria</label>
-               <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.categoryId} onChange={e => setTxForm({...txForm, categoryId: e.target.value})} required>
-                 <option value="">Selecione...</option>
-                 {categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
-               </select>
-             </div>
-             <div>
-               <label className="block text-sm text-slate-300 mb-1">Descrição</label>
-               <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.description} onChange={e => setTxForm({...txForm, description: e.target.value})} />
-             </div>
+             <GlassInput 
+                label="Valor"
+                type="number" 
+                step="0.01" 
+                value={txForm.amount} 
+                onChange={e => setTxForm({...txForm, amount: e.target.value})} 
+                required 
+             />
+             <GlassInput 
+                label="Data"
+                type="date" 
+                value={txForm.date} 
+                onChange={e => setTxForm({...txForm, date: e.target.value})} 
+                required 
+             />
+             <GlassSelect
+                label="Categoria"
+                value={txForm.categoryId}
+                onChange={e => setTxForm({...txForm, categoryId: e.target.value})}
+                options={[
+                  { value: "", label: "Selecione..." },
+                  ...categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                ]}
+                required
+             />
+             <GlassInput 
+                label="Descrição"
+                value={txForm.description} 
+                onChange={e => setTxForm({...txForm, description: e.target.value})} 
+             />
              {!editingTx && (
-                 <div>
-                   <label className="block text-sm text-slate-300 mb-1">Parcelas</label>
-                   <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={txForm.installments} onChange={e => setTxForm({...txForm, installments: e.target.value})}>
-                     {Array.from({length: 12}, (_, i) => i + 1).map(i => <option key={i} value={i}>{i}x {i === 1 ? '(À vista)' : ''}</option>)}
-                   </select>
-                 </div>
+                 <GlassSelect
+                    label="Parcelas"
+                    value={txForm.installments}
+                    onChange={e => setTxForm({...txForm, installments: e.target.value})}
+                    options={Array.from({length: 12}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(À vista)' : ''}` }))}
+                 />
              )}
-             <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsTxModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Salvar</Button>
+             <div className="flex justify-end gap-2 pt-4">
+               <GlassButton type="button" variant="ghost" onClick={() => setIsTxModalOpen(false)}>Cancelar</GlassButton>
+               <GlassButton type="submit">Salvar</GlassButton>
              </div>
           </form>
-        </Modal>
+        </GlassModal>
 
         {/* Refund Modal */}
-        <Modal isOpen={isRefundModalOpen} onClose={() => setIsRefundModalOpen(false)} title="Estornar Compra">
+        <GlassModal isOpen={isRefundModalOpen} onClose={() => setIsRefundModalOpen(false)} title="Estornar Compra">
            <form onSubmit={handleRefundSubmit} className="space-y-4">
-              <div className="bg-slate-900 p-3 rounded text-sm text-slate-400 mb-2">
+              <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-sm text-slate-400 mb-2">
                  Compra original: <span className="text-white font-bold">{refundingTx?.description}</span> <br/>
                  Valor original: <span className="text-white font-bold">{formatCurrency(refundingTx?.amount || 0)}</span>
               </div>
               <div>
-                 <label className="block text-sm text-slate-300 mb-1">Valor do Estorno (R$)</label>
-                 <input type="number" step="0.01" max={refundingTx?.amount} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={refundForm.amount} onChange={e => setRefundForm({...refundForm, amount: e.target.value})} required />
-                 <p className="text-xs text-slate-500 mt-1">O valor será subtraído da fatura.</p>
+                 <GlassInput 
+                    label="Valor do Estorno (R$)"
+                    type="number" 
+                    step="0.01" 
+                    max={refundingTx?.amount} 
+                    value={refundForm.amount} 
+                    onChange={e => setRefundForm({...refundForm, amount: e.target.value})} 
+                    required 
+                 />
+                 <p className="text-xs text-slate-500 mt-1 ml-1">O valor será subtraído da fatura.</p>
               </div>
-              <div>
-                 <label className="block text-sm text-slate-300 mb-1">Data do Estorno</label>
-                 <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={refundForm.date} onChange={e => setRefundForm({...refundForm, date: e.target.value})} required />
-              </div>
-              <div>
-                 <label className="block text-sm text-slate-300 mb-1">Descrição</label>
-                 <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={refundForm.description} onChange={e => setRefundForm({...refundForm, description: e.target.value})} />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                 <Button type="button" variant="ghost" onClick={() => setIsRefundModalOpen(false)}>Cancelar</Button>
-                 <Button type="submit">Confirmar Estorno</Button>
+              <GlassInput 
+                 label="Data do Estorno"
+                 type="date" 
+                 value={refundForm.date} 
+                 onChange={e => setRefundForm({...refundForm, date: e.target.value})} 
+                 required 
+              />
+              <GlassInput 
+                 label="Descrição"
+                 value={refundForm.description} 
+                 onChange={e => setRefundForm({...refundForm, description: e.target.value})} 
+              />
+              <div className="flex justify-end gap-2 pt-4">
+                 <GlassButton type="button" variant="ghost" onClick={() => setIsRefundModalOpen(false)}>Cancelar</GlassButton>
+                 <GlassButton type="submit">Confirmar Estorno</GlassButton>
               </div>
            </form>
-        </Modal>
+        </GlassModal>
 
-        <Modal isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title="Pagar Fatura">
+        <GlassModal isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title="Pagar Fatura">
           <form onSubmit={handlePaySubmit} className="space-y-4">
-            <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 text-center">
-              <p className="text-slate-400 text-sm">Valor Total</p>
-              <p className="text-2xl font-bold text-white">{formatCurrency(invoiceInfo?.amount || 0)}</p>
+            <div className="bg-white/5 p-6 rounded-xl border border-white/5 text-center">
+              <p className="text-slate-400 text-sm mb-1">Valor Total</p>
+              <p className="text-3xl font-bold text-white">{formatCurrency(invoiceInfo?.amount || 0)}</p>
             </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Pagar com a conta:</label>
-              <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={payAccount} onChange={e => setPayAccount(e.target.value)} required>
-                <option value="">Selecione...</option>
-                {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsPayModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Confirmar Pagamento</Button>
+            <GlassSelect
+               label="Pagar com a conta:"
+               value={payAccount}
+               onChange={e => setPayAccount(e.target.value)}
+               options={[
+                 { value: "", label: "Selecione..." },
+                 ...accounts.map(a => ({ value: a.id, label: a.name }))
+               ]}
+               required
+            />
+            <div className="flex justify-end gap-2 pt-4">
+               <GlassButton type="button" variant="ghost" onClick={() => setIsPayModalOpen(false)}>Cancelar</GlassButton>
+               <GlassButton type="submit">Confirmar Pagamento</GlassButton>
              </div>
           </form>
-        </Modal>
+        </GlassModal>
 
-        <Modal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
+        <GlassModal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
             <form onSubmit={handleCardSubmit} className="space-y-4">
-               <div>
-                 <label className="block text-sm text-slate-300 mb-1">Nome do Cartão</label>
-                 <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.name} onChange={e => setCardForm({...cardForm, name: e.target.value})} placeholder="Ex: Nubank, Inter..." required />
-               </div>
-               <div>
-                 <label className="block text-sm text-slate-300 mb-1">Limite Total</label>
-                 <input type="number" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.limit} onChange={e => setCardForm({...cardForm, limit: e.target.value})} required />
-               </div>
+               <GlassInput 
+                  label="Nome do Cartão"
+                  value={cardForm.name} 
+                  onChange={e => setCardForm({...cardForm, name: e.target.value})} 
+                  placeholder="Ex: Nubank, Inter..." 
+                  required 
+               />
+               <GlassInput 
+                  label="Limite Total"
+                  type="number" 
+                  value={cardForm.limit} 
+                  onChange={e => setCardForm({...cardForm, limit: e.target.value})} 
+                  required 
+               />
                <div className="grid grid-cols-2 gap-4">
-                 <div>
-                   <label className="block text-sm text-slate-300 mb-1">Dia Fechamento</label>
-                   <input type="number" min="1" max="31" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.closingDay} onChange={e => setCardForm({...cardForm, closingDay: e.target.value})} required />
-                 </div>
-                 <div>
-                   <label className="block text-sm text-slate-300 mb-1">Dia Vencimento</label>
-                   <input type="number" min="1" max="31" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.dueDay} onChange={e => setCardForm({...cardForm, dueDay: e.target.value})} required />
-                 </div>
+                 <GlassInput 
+                    label="Dia Fechamento"
+                    type="number" 
+                    min="1" 
+                    max="31" 
+                    value={cardForm.closingDay} 
+                    onChange={e => setCardForm({...cardForm, closingDay: e.target.value})} 
+                    required 
+                 />
+                 <GlassInput 
+                    label="Dia Vencimento"
+                    type="number" 
+                    min="1" 
+                    max="31" 
+                    value={cardForm.dueDay} 
+                    onChange={e => setCardForm({...cardForm, dueDay: e.target.value})} 
+                    required 
+                 />
                </div>
                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Conta Padrão de Pagamento (Opcional)</label>
-                  <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.defaultPaymentAccountId} onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}>
-                     <option value="">Selecionar...</option>
-                     {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                  </select>
-                  <p className="text-xs text-slate-500 mt-1">Usado para estimar o saldo futuro.</p>
+                  <GlassSelect
+                     label="Conta Padrão de Pagamento (Opcional)"
+                     value={cardForm.defaultPaymentAccountId}
+                     onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
+                     options={[
+                       { value: "", label: "Selecionar..." },
+                       ...accounts.map(a => ({ value: a.id, label: a.name }))
+                     ]}
+                  />
+                  <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
                </div>
-               <div className="flex justify-end gap-2 pt-2">
-                 <Button type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</Button>
-                 <Button type="submit">Salvar Cartão</Button>
+               <div className="flex justify-end gap-2 pt-4">
+                 <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
+                 <GlassButton type="submit">Salvar Cartão</GlassButton>
                </div>
             </form>
-        </Modal>
+        </GlassModal>
+
+        <MobileFab
+          visible={!isTxModalOpen && !isPayModalOpen && !isRefundModalOpen && !isCardModalOpen}
+          actions={[
+            { 
+              id: 'new-purchase', 
+              label: 'Nova Compra', 
+              icon: <Plus size={24} />, 
+              onClick: () => openTxModal() 
+            },
+            ...(!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 ? [{
+              id: 'pay-invoice',
+              label: 'Pagar Fatura',
+              icon: <Banknote size={24} />,
+              onClick: () => {
+                setPayAccount(selectedCard.defaultPaymentAccountId || '');
+                setIsPayModalOpen(true);
+              },
+              variant: 'success' as const
+            }] : [])
+          ]}
+        />
       </PageShell>
     );
   }
@@ -438,28 +512,28 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         title="Meus Cartões" 
         subtitle="Gerencie faturas e limites dos seus cartões de crédito."
         actions={
-          <Button onClick={() => openCardModal()} icon={<Plus size={18}/>}>Novo Cartão</Button>
+          <GlassButton onClick={() => openCardModal()} icon={<Plus size={18}/>} className="hidden md:flex">Novo Cartão</GlassButton>
         }
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map(card => (
-          <div key={card.id} onClick={() => { setSelectedCardId(card.id); setView('details'); }} className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-sm hover:border-slate-500 transition-all cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56">
+          <GlassCard key={card.id} onClick={() => { setSelectedCardId(card.id); setView('details'); }} className="cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56 hover:border-blue-500/30">
              {/* Decorative Background */}
-             <div className="absolute top-0 right-0 p-6 opacity-[0.03] transform translate-x-4 -translate-y-4">
+             <div className="absolute top-0 right-0 p-6 opacity-[0.03] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
                 <CardIcon size={160} />
              </div>
              
              <div className="relative z-10">
                <div className="flex justify-between items-start mb-6">
                  <div>
-                   <h3 className="text-xl font-bold text-white tracking-tight">{card.name}</h3>
+                   <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors">{card.name}</h3>
                    <div className="flex gap-2 text-xs text-slate-400 mt-1">
-                      <span className="bg-slate-700/50 px-2 py-0.5 rounded">Fecha dia {card.closingDay}</span>
-                      <span className="bg-slate-700/50 px-2 py-0.5 rounded">Vence dia {card.dueDay}</span>
+                      <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded">Fecha dia {card.closingDay}</span>
+                      <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded">Vence dia {card.dueDay}</span>
                    </div>
                  </div>
-                 <div className="bg-slate-700 p-2.5 rounded-lg shadow-inner">
+                 <div className="bg-white/5 border border-white/10 p-2.5 rounded-xl shadow-inner">
                    <CardIcon className="text-blue-400" size={24} />
                  </div>
                </div>
@@ -470,16 +544,16 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                </div>
              </div>
                
-             <div className="relative z-10 mt-auto pt-4 border-t border-slate-700/50">
+             <div className="relative z-10 mt-auto pt-4 border-t border-white/5">
                 <span className="text-sm font-semibold text-blue-400 group-hover:text-blue-300 flex items-center gap-1 transition-colors">
                   Ver Fatura e Lançamentos <ChevronRight size={16}/>
                 </span>
              </div>
-          </div>
+          </GlassCard>
         ))}
         
         {cards.length === 0 && (
-           <div className="col-span-full text-center py-16 text-slate-500 border-2 border-dashed border-slate-700 rounded-xl">
+           <div className="col-span-full text-center py-16 text-slate-500 border-2 border-dashed border-white/10 rounded-2xl bg-white/5">
              <CardIcon size={48} className="mx-auto mb-4 opacity-20" />
              <p className="text-lg font-medium">Nenhum cartão cadastrado.</p>
              <p className="text-sm opacity-70">Adicione um cartão para controlar seus gastos a crédito.</p>
@@ -488,40 +562,72 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       </div>
 
       {/* Add/Edit Card Modal */}
-      <Modal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
+      <GlassModal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
         <form onSubmit={handleCardSubmit} className="space-y-4">
-           <div>
-             <label className="block text-sm text-slate-300 mb-1">Nome do Cartão</label>
-             <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.name} onChange={e => setCardForm({...cardForm, name: e.target.value})} placeholder="Ex: Nubank, Inter..." required />
-           </div>
-           <div>
-             <label className="block text-sm text-slate-300 mb-1">Limite Total</label>
-             <input type="number" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.limit} onChange={e => setCardForm({...cardForm, limit: e.target.value})} required />
-           </div>
+           <GlassInput 
+              label="Nome do Cartão"
+              value={cardForm.name} 
+              onChange={e => setCardForm({...cardForm, name: e.target.value})} 
+              placeholder="Ex: Nubank, Inter..." 
+              required 
+           />
+           <GlassInput 
+              label="Limite Total"
+              type="number" 
+              value={cardForm.limit} 
+              onChange={e => setCardForm({...cardForm, limit: e.target.value})} 
+              required 
+           />
            <div className="grid grid-cols-2 gap-4">
-             <div>
-               <label className="block text-sm text-slate-300 mb-1">Dia Fechamento</label>
-               <input type="number" min="1" max="31" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.closingDay} onChange={e => setCardForm({...cardForm, closingDay: e.target.value})} required />
-             </div>
-             <div>
-               <label className="block text-sm text-slate-300 mb-1">Dia Vencimento</label>
-               <input type="number" min="1" max="31" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.dueDay} onChange={e => setCardForm({...cardForm, dueDay: e.target.value})} required />
-             </div>
+             <GlassInput 
+                label="Dia Fechamento"
+                type="number" 
+                min="1" 
+                max="31" 
+                value={cardForm.closingDay} 
+                onChange={e => setCardForm({...cardForm, closingDay: e.target.value})} 
+                required 
+             />
+             <GlassInput 
+                label="Dia Vencimento"
+                type="number" 
+                min="1" 
+                max="31" 
+                value={cardForm.dueDay} 
+                onChange={e => setCardForm({...cardForm, dueDay: e.target.value})} 
+                required 
+             />
            </div>
            <div>
-              <label className="block text-sm text-slate-300 mb-1">Conta Padrão de Pagamento (Opcional)</label>
-              <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={cardForm.defaultPaymentAccountId} onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}>
-                 <option value="">Selecionar...</option>
-                 {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
-              <p className="text-xs text-slate-500 mt-1">Usado para estimar o saldo futuro.</p>
+              <GlassSelect
+                 label="Conta Padrão de Pagamento (Opcional)"
+                 value={cardForm.defaultPaymentAccountId}
+                 onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
+                 options={[
+                   { value: "", label: "Selecionar..." },
+                   ...accounts.map(a => ({ value: a.id, label: a.name }))
+                 ]}
+              />
+              <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
            </div>
-           <div className="flex justify-end gap-2 pt-2">
-             <Button type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</Button>
-             <Button type="submit">Salvar Cartão</Button>
+           <div className="flex justify-end gap-2 pt-4">
+             <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
+             <GlassButton type="submit">Salvar Cartão</GlassButton>
            </div>
         </form>
-      </Modal>
+      </GlassModal>
+
+      <MobileFab
+        visible={!isCardModalOpen}
+        actions={[
+          { 
+            id: 'new-card', 
+            label: 'Novo Cartão', 
+            icon: <Plus size={24} />, 
+            onClick: () => openCardModal() 
+          }
+        ]}
+      />
     </PageShell>
   );
 };

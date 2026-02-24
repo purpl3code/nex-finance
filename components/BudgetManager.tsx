@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Budget, Category } from '../types';
 import { Button } from './ui/Button';
-import { Modal } from './ui/Modal';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
+import { MobileFab } from './ui/MobileFab';
 import { PieChart, Trash2, Edit2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface BudgetManagerProps {
@@ -99,7 +100,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
         title="Orçamentos" 
         subtitle="Defina limites de gastos por categoria para controlar suas finanças."
         actions={
-          <Button onClick={() => openModal()} icon={<Plus size={18} />}>Novo Orçamento</Button>
+          <Button onClick={() => openModal()} icon={<Plus size={18} />} className="hidden md:flex">Novo Orçamento</Button>
         }
         controls={
           <>
@@ -185,36 +186,50 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
       )}
 
       {/* Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingBudget ? 'Editar Orçamento' : 'Novo Orçamento'}>
-         <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Categoria</label>
-               <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" 
-                  value={form.categoryId} 
-                  onChange={e => setForm({...form, categoryId: e.target.value})}
-                  disabled={!!editingBudget}
-                  required
-               >
-                  <option value="">Selecione...</option>
-                  {categories.filter(c => c.kind === 'expense').map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
-               </select>
-            </div>
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Limite (R$)</label>
-               <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={form.amountLimit} onChange={e => setForm({...form, amountLimit: e.target.value})} required />
-            </div>
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Alertar em (%)</label>
-               <input type="number" min="1" max="100" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={form.alertAtPercent} onChange={e => setForm({...form, alertAtPercent: e.target.value})} required />
-               <p className="text-xs text-slate-500 mt-1">Quando o gasto atingir essa %, a barra ficará amarela.</p>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Salvar</Button>
-            </div>
-         </form>
-      </Modal>
+      <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingBudget ? 'Editar Orçamento' : 'Novo Orçamento'}>
+         <ModalBody>
+            <form id="budget-form" onSubmit={handleSubmit} className="space-y-4">
+               <div>
+                  <label className="block text-sm text-slate-300 mb-1">Categoria</label>
+                  <select 
+                     className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" 
+                     value={form.categoryId} 
+                     onChange={e => setForm({...form, categoryId: e.target.value})}
+                     disabled={!!editingBudget}
+                     required
+                  >
+                     <option value="">Selecione...</option>
+                     {categories.filter(c => c.kind === 'expense').map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
+                  </select>
+               </div>
+               <div>
+                  <label className="block text-sm text-slate-300 mb-1">Limite (R$)</label>
+                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={form.amountLimit} onChange={e => setForm({...form, amountLimit: e.target.value})} required />
+               </div>
+               <div>
+                  <label className="block text-sm text-slate-300 mb-1">Alertar em (%)</label>
+                  <input type="number" min="1" max="100" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={form.alertAtPercent} onChange={e => setForm({...form, alertAtPercent: e.target.value})} required />
+                  <p className="text-xs text-slate-500 mt-1">Quando o gasto atingir essa %, a barra ficará amarela.</p>
+               </div>
+            </form>
+         </ModalBody>
+         <ModalFooter>
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" form="budget-form">Salvar</Button>
+         </ModalFooter>
+      </ModalShell>
+
+      <MobileFab
+        visible={!isModalOpen}
+        actions={[
+          { 
+            id: 'new-budget', 
+            label: 'Novo Orçamento', 
+            icon: <Plus size={24} />, 
+            onClick: () => openModal() 
+          }
+        ]}
+      />
     </PageShell>
   );
 };

@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Goal } from '../types';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
+import { MobileFab } from './ui/MobileFab';
 import { Button } from './ui/Button';
-import { Modal } from './ui/Modal';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GoalCard } from './GoalCard';
 import { Plus, Target } from 'lucide-react';
 
@@ -112,7 +113,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
         title="Metas Financeiras" 
         subtitle="Defina objetivos, acompanhe o progresso e planeje suas conquistas."
         actions={
-          <Button onClick={() => handleOpenForm()} icon={<Plus size={18}/>}>Nova Meta</Button>
+          <Button onClick={() => handleOpenForm()} icon={<Plus size={18}/>} className="hidden md:flex">Nova Meta</Button>
         }
       />
 
@@ -144,69 +145,84 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
       )}
 
       {/* FORM MODAL */}
-      <Modal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title={editingGoal ? 'Editar Meta' : 'Nova Meta'}>
-         <form onSubmit={handleSubmitForm} className="space-y-4">
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Nome da Meta</label>
-               <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required placeholder="Ex: Viagem para Europa, PS5..." />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+      <ModalShell isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title={editingGoal ? 'Editar Meta' : 'Nova Meta'}>
+         <ModalBody>
+            <form id="goal-form" onSubmit={handleSubmitForm} className="space-y-4">
                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Valor Alvo (R$)</label>
-                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.targetAmount} onChange={e => setFormData({...formData, targetAmount: e.target.value})} required />
+                  <label className="block text-sm text-slate-300 mb-1">Nome da Meta</label>
+                  <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required placeholder="Ex: Viagem para Europa, PS5..." />
                </div>
+               
+               <div className="grid grid-cols-2 gap-4">
+                  <div>
+                     <label className="block text-sm text-slate-300 mb-1">Valor Alvo (R$)</label>
+                     <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.targetAmount} onChange={e => setFormData({...formData, targetAmount: e.target.value})} required />
+                  </div>
+                  <div>
+                     <label className="block text-sm text-slate-300 mb-1">Já Tenho (R$)</label>
+                     <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.currentAmount} onChange={e => setFormData({...formData, currentAmount: e.target.value})} />
+                  </div>
+               </div>
+
                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Já Tenho (R$)</label>
-                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.currentAmount} onChange={e => setFormData({...formData, currentAmount: e.target.value})} />
+                  <label className="block text-sm text-slate-300 mb-1">Aporte Mensal Estimado (R$)</label>
+                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.monthlyContribution} onChange={e => setFormData({...formData, monthlyContribution: e.target.value})} />
+                  <p className="text-xs text-slate-500 mt-1">Usado para calcular quando você atingirá a meta.</p>
                </div>
-            </div>
 
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Aporte Mensal Estimado (R$)</label>
-               <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.monthlyContribution} onChange={e => setFormData({...formData, monthlyContribution: e.target.value})} />
-               <p className="text-xs text-slate-500 mt-1">Usado para calcular quando você atingirá a meta.</p>
-            </div>
+               <div className="grid grid-cols-2 gap-4">
+                  <div>
+                     <label className="block text-sm text-slate-300 mb-1">Data Início</label>
+                     <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} required />
+                  </div>
+                  <div>
+                     <label className="block text-sm text-slate-300 mb-1">Prazo Final (Opcional)</label>
+                     <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.deadline} onChange={e => setFormData({...formData, deadline: e.target.value})} />
+                  </div>
+               </div>
 
-            <div className="grid grid-cols-2 gap-4">
                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Data Início</label>
-                  <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} required />
+                  <label className="block text-sm text-slate-300 mb-1">Descrição (Opcional)</label>
+                  <textarea className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white h-20 resize-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                </div>
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Prazo Final (Opcional)</label>
-                  <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.deadline} onChange={e => setFormData({...formData, deadline: e.target.value})} />
-               </div>
-            </div>
-
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Descrição (Opcional)</label>
-               <textarea className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white h-20 resize-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsFormModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Salvar Meta</Button>
-            </div>
-         </form>
-      </Modal>
+            </form>
+         </ModalBody>
+         <ModalFooter>
+            <Button type="button" variant="ghost" onClick={() => setIsFormModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" form="goal-form">Salvar Meta</Button>
+         </ModalFooter>
+      </ModalShell>
 
       {/* ADD VALUE MODAL */}
-      <Modal isOpen={isAddValueModalOpen} onClose={() => setIsAddValueModalOpen(false)} title="Adicionar Valor">
-         <form onSubmit={handleSubmitAddValue} className="space-y-4">
-            <div className="p-4 bg-slate-900/50 border border-blue-500/20 rounded-lg text-sm text-slate-300">
-               Isso apenas atualiza o saldo da meta. Não cria uma transação no extrato.
-            </div>
-            <div>
-               <label className="block text-sm text-slate-300 mb-1">Valor a adicionar (R$)</label>
-               <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-lg font-bold" value={addAmount} onChange={e => setAddAmount(e.target.value)} autoFocus required />
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-               <Button type="button" variant="ghost" onClick={() => setIsAddValueModalOpen(false)}>Cancelar</Button>
-               <Button type="submit">Confirmar</Button>
-            </div>
-         </form>
-      </Modal>
+      <ModalShell isOpen={isAddValueModalOpen} onClose={() => setIsAddValueModalOpen(false)} title="Adicionar Valor">
+         <ModalBody>
+            <form id="add-value-form" onSubmit={handleSubmitAddValue} className="space-y-4">
+               <div className="p-4 bg-slate-900/50 border border-blue-500/20 rounded-lg text-sm text-slate-300">
+                  Isso apenas atualiza o saldo da meta. Não cria uma transação no extrato.
+               </div>
+               <div>
+                  <label className="block text-sm text-slate-300 mb-1">Valor a adicionar (R$)</label>
+                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-lg font-bold" value={addAmount} onChange={e => setAddAmount(e.target.value)} autoFocus required />
+               </div>
+            </form>
+         </ModalBody>
+         <ModalFooter>
+            <Button type="button" variant="ghost" onClick={() => setIsAddValueModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" form="add-value-form">Confirmar</Button>
+         </ModalFooter>
+      </ModalShell>
+
+      <MobileFab
+        visible={!isFormModalOpen && !isAddValueModalOpen}
+        actions={[
+          { 
+            id: 'new-goal', 
+            label: 'Nova Meta', 
+            icon: <Plus size={24} />, 
+            onClick: () => handleOpenForm() 
+          }
+        ]}
+      />
     </PageShell>
   );
 };
