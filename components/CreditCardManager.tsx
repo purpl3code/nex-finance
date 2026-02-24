@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { CreditCard, CreditCardInvoice, Category, Account, CreditCardTransaction } from '../types';
 import { GlassButton } from './ui/GlassButton';
-import { GlassModal } from './ui/GlassModal';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassInput } from './ui/GlassInput';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
@@ -311,174 +311,182 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         </GlassCard>
         
         {/* Modals reused */}
-        <GlassModal isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} title={editingTx ? "Editar Compra" : "Nova Compra"}>
-          <form onSubmit={handleTxSubmit} className="space-y-4">
-             {editingTx && (
-                <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 mb-4">
-                   <AlertTriangle size={14} />
-                   <span>Editando apenas esta parcela. O limite total não será recalculado automaticamente para outras parcelas.</span>
-                </div>
-             )}
-             <GlassInput 
-                label="Valor"
-                type="number" 
-                step="0.01" 
-                value={txForm.amount} 
-                onChange={e => setTxForm({...txForm, amount: e.target.value})} 
-                required 
-             />
-             <GlassInput 
-                label="Data"
-                type="date" 
-                value={txForm.date} 
-                onChange={e => setTxForm({...txForm, date: e.target.value})} 
-                required 
-             />
-             <GlassSelect
-                label="Categoria"
-                value={txForm.categoryId}
-                onChange={e => setTxForm({...txForm, categoryId: e.target.value})}
-                options={[
-                  { value: "", label: "Selecione..." },
-                  ...categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
-                ]}
-                required
-             />
-             <GlassInput 
-                label="Descrição"
-                value={txForm.description} 
-                onChange={e => setTxForm({...txForm, description: e.target.value})} 
-             />
-             {!editingTx && (
-                 <GlassSelect
-                    label="Parcelas"
-                    value={txForm.installments}
-                    onChange={e => setTxForm({...txForm, installments: e.target.value})}
-                    options={Array.from({length: 12}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(À vista)' : ''}` }))}
-                 />
-             )}
-             <div className="flex justify-end gap-2 pt-4">
-               <GlassButton type="button" variant="ghost" onClick={() => setIsTxModalOpen(false)}>Cancelar</GlassButton>
-               <GlassButton type="submit">Salvar</GlassButton>
-             </div>
-          </form>
-        </GlassModal>
+        <ModalShell isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} title={editingTx ? "Editar Compra" : "Nova Compra"}>
+          <ModalBody>
+            <form id="tx-form" onSubmit={handleTxSubmit} className="space-y-4">
+               {editingTx && (
+                  <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 mb-4">
+                     <AlertTriangle size={14} />
+                     <span>Editando apenas esta parcela. O limite total não será recalculado automaticamente para outras parcelas.</span>
+                  </div>
+               )}
+               <GlassInput 
+                  label="Valor"
+                  type="number" 
+                  step="0.01" 
+                  value={txForm.amount} 
+                  onChange={e => setTxForm({...txForm, amount: e.target.value})} 
+                  required 
+               />
+               <GlassInput 
+                  label="Data"
+                  type="date" 
+                  value={txForm.date} 
+                  onChange={e => setTxForm({...txForm, date: e.target.value})} 
+                  required 
+               />
+               <GlassSelect
+                  label="Categoria"
+                  value={txForm.categoryId}
+                  onChange={e => setTxForm({...txForm, categoryId: e.target.value})}
+                  options={[
+                    { value: "", label: "Selecione..." },
+                    ...categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                  ]}
+                  required
+               />
+               <GlassInput 
+                  label="Descrição"
+                  value={txForm.description} 
+                  onChange={e => setTxForm({...txForm, description: e.target.value})} 
+               />
+               {!editingTx && (
+                   <GlassSelect
+                      label="Parcelas"
+                      value={txForm.installments}
+                      onChange={e => setTxForm({...txForm, installments: e.target.value})}
+                      options={Array.from({length: 12}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(À vista)' : ''}` }))}
+                   />
+               )}
+            </form>
+          </ModalBody>
+          <ModalFooter>
+             <GlassButton type="button" variant="ghost" onClick={() => setIsTxModalOpen(false)}>Cancelar</GlassButton>
+             <GlassButton type="submit" form="tx-form">Salvar</GlassButton>
+          </ModalFooter>
+        </ModalShell>
 
         {/* Refund Modal */}
-        <GlassModal isOpen={isRefundModalOpen} onClose={() => setIsRefundModalOpen(false)} title="Estornar Compra">
-           <form onSubmit={handleRefundSubmit} className="space-y-4">
-              <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-sm text-slate-400 mb-2">
-                 Compra original: <span className="text-white font-bold">{refundingTx?.description}</span> <br/>
-                 Valor original: <span className="text-white font-bold">{formatCurrency(refundingTx?.amount || 0)}</span>
-              </div>
-              <div>
+        <ModalShell isOpen={isRefundModalOpen} onClose={() => setIsRefundModalOpen(false)} title="Estornar Compra">
+           <ModalBody>
+              <form id="refund-form" onSubmit={handleRefundSubmit} className="space-y-4">
+                 <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-sm text-slate-400 mb-2">
+                    Compra original: <span className="text-white font-bold">{refundingTx?.description}</span> <br/>
+                    Valor original: <span className="text-white font-bold">{formatCurrency(refundingTx?.amount || 0)}</span>
+                 </div>
+                 <div>
+                    <GlassInput 
+                       label="Valor do Estorno (R$)"
+                       type="number" 
+                       step="0.01" 
+                       max={refundingTx?.amount} 
+                       value={refundForm.amount} 
+                       onChange={e => setRefundForm({...refundForm, amount: e.target.value})} 
+                       required 
+                    />
+                    <p className="text-xs text-slate-500 mt-1 ml-1">O valor será subtraído da fatura.</p>
+                 </div>
                  <GlassInput 
-                    label="Valor do Estorno (R$)"
-                    type="number" 
-                    step="0.01" 
-                    max={refundingTx?.amount} 
-                    value={refundForm.amount} 
-                    onChange={e => setRefundForm({...refundForm, amount: e.target.value})} 
+                    label="Data do Estorno"
+                    type="date" 
+                    value={refundForm.date} 
+                    onChange={e => setRefundForm({...refundForm, date: e.target.value})} 
                     required 
                  />
-                 <p className="text-xs text-slate-500 mt-1 ml-1">O valor será subtraído da fatura.</p>
-              </div>
-              <GlassInput 
-                 label="Data do Estorno"
-                 type="date" 
-                 value={refundForm.date} 
-                 onChange={e => setRefundForm({...refundForm, date: e.target.value})} 
-                 required 
-              />
-              <GlassInput 
-                 label="Descrição"
-                 value={refundForm.description} 
-                 onChange={e => setRefundForm({...refundForm, description: e.target.value})} 
-              />
-              <div className="flex justify-end gap-2 pt-4">
-                 <GlassButton type="button" variant="ghost" onClick={() => setIsRefundModalOpen(false)}>Cancelar</GlassButton>
-                 <GlassButton type="submit">Confirmar Estorno</GlassButton>
-              </div>
-           </form>
-        </GlassModal>
+                 <GlassInput 
+                    label="Descrição"
+                    value={refundForm.description} 
+                    onChange={e => setRefundForm({...refundForm, description: e.target.value})} 
+                 />
+              </form>
+           </ModalBody>
+           <ModalFooter>
+              <GlassButton type="button" variant="ghost" onClick={() => setIsRefundModalOpen(false)}>Cancelar</GlassButton>
+              <GlassButton type="submit" form="refund-form">Confirmar Estorno</GlassButton>
+           </ModalFooter>
+        </ModalShell>
 
-        <GlassModal isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title="Pagar Fatura">
-          <form onSubmit={handlePaySubmit} className="space-y-4">
-            <div className="bg-white/5 p-6 rounded-xl border border-white/5 text-center">
-              <p className="text-slate-400 text-sm mb-1">Valor Total</p>
-              <p className="text-3xl font-bold text-white">{formatCurrency(invoiceInfo?.amount || 0)}</p>
-            </div>
-            <GlassSelect
-               label="Pagar com a conta:"
-               value={payAccount}
-               onChange={e => setPayAccount(e.target.value)}
-               options={[
-                 { value: "", label: "Selecione..." },
-                 ...accounts.map(a => ({ value: a.id, label: a.name }))
-               ]}
-               required
-            />
-            <div className="flex justify-end gap-2 pt-4">
-               <GlassButton type="button" variant="ghost" onClick={() => setIsPayModalOpen(false)}>Cancelar</GlassButton>
-               <GlassButton type="submit">Confirmar Pagamento</GlassButton>
-             </div>
-          </form>
-        </GlassModal>
-
-        <GlassModal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
-            <form onSubmit={handleCardSubmit} className="space-y-4">
-               <GlassInput 
-                  label="Nome do Cartão"
-                  value={cardForm.name} 
-                  onChange={e => setCardForm({...cardForm, name: e.target.value})} 
-                  placeholder="Ex: Nubank, Inter..." 
-                  required 
-               />
-               <GlassInput 
-                  label="Limite Total"
-                  type="number" 
-                  value={cardForm.limit} 
-                  onChange={e => setCardForm({...cardForm, limit: e.target.value})} 
-                  required 
-               />
-               <div className="grid grid-cols-2 gap-4">
-                 <GlassInput 
-                    label="Dia Fechamento"
-                    type="number" 
-                    min="1" 
-                    max="31" 
-                    value={cardForm.closingDay} 
-                    onChange={e => setCardForm({...cardForm, closingDay: e.target.value})} 
-                    required 
-                 />
-                 <GlassInput 
-                    label="Dia Vencimento"
-                    type="number" 
-                    min="1" 
-                    max="31" 
-                    value={cardForm.dueDay} 
-                    onChange={e => setCardForm({...cardForm, dueDay: e.target.value})} 
-                    required 
-                 />
-               </div>
-               <div>
-                  <GlassSelect
-                     label="Conta Padrão de Pagamento (Opcional)"
-                     value={cardForm.defaultPaymentAccountId}
-                     onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
-                     options={[
-                       { value: "", label: "Selecionar..." },
-                       ...accounts.map(a => ({ value: a.id, label: a.name }))
-                     ]}
-                  />
-                  <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
-               </div>
-               <div className="flex justify-end gap-2 pt-4">
-                 <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
-                 <GlassButton type="submit">Salvar Cartão</GlassButton>
-               </div>
+        <ModalShell isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title="Pagar Fatura">
+          <ModalBody>
+            <form id="pay-form" onSubmit={handlePaySubmit} className="space-y-4">
+              <div className="bg-white/5 p-6 rounded-xl border border-white/5 text-center">
+                <p className="text-slate-400 text-sm mb-1">Valor Total</p>
+                <p className="text-3xl font-bold text-white">{formatCurrency(invoiceInfo?.amount || 0)}</p>
+              </div>
+              <GlassSelect
+                 label="Pagar com a conta:"
+                 value={payAccount}
+                 onChange={e => setPayAccount(e.target.value)}
+                 options={[
+                   { value: "", label: "Selecione..." },
+                   ...accounts.map(a => ({ value: a.id, label: a.name }))
+                 ]}
+                 required
+              />
             </form>
-        </GlassModal>
+          </ModalBody>
+          <ModalFooter>
+             <GlassButton type="button" variant="ghost" onClick={() => setIsPayModalOpen(false)}>Cancelar</GlassButton>
+             <GlassButton type="submit" form="pay-form">Confirmar Pagamento</GlassButton>
+          </ModalFooter>
+        </ModalShell>
+
+        <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
+            <ModalBody>
+               <form id="card-form-details" onSubmit={handleCardSubmit} className="space-y-4">
+                  <GlassInput 
+                     label="Nome do Cartão"
+                     value={cardForm.name} 
+                     onChange={e => setCardForm({...cardForm, name: e.target.value})} 
+                     placeholder="Ex: Nubank, Inter..." 
+                     required 
+                  />
+                  <GlassInput 
+                     label="Limite Total"
+                     type="number" 
+                     value={cardForm.limit} 
+                     onChange={e => setCardForm({...cardForm, limit: e.target.value})} 
+                     required 
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <GlassInput 
+                       label="Dia Fechamento"
+                       type="number" 
+                       min="1" 
+                       max="31" 
+                       value={cardForm.closingDay} 
+                       onChange={e => setCardForm({...cardForm, closingDay: e.target.value})} 
+                       required 
+                    />
+                    <GlassInput 
+                       label="Dia Vencimento"
+                       type="number" 
+                       min="1" 
+                       max="31" 
+                       value={cardForm.dueDay} 
+                       onChange={e => setCardForm({...cardForm, dueDay: e.target.value})} 
+                       required 
+                    />
+                  </div>
+                  <div>
+                     <GlassSelect
+                        label="Conta Padrão de Pagamento (Opcional)"
+                        value={cardForm.defaultPaymentAccountId}
+                        onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
+                        options={[
+                          { value: "", label: "Selecionar..." },
+                          ...accounts.map(a => ({ value: a.id, label: a.name }))
+                        ]}
+                     />
+                     <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
+                  </div>
+               </form>
+            </ModalBody>
+            <ModalFooter>
+              <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
+              <GlassButton type="submit" form="card-form-details">Salvar Cartão</GlassButton>
+            </ModalFooter>
+        </ModalShell>
 
         <MobileFab
           visible={!isTxModalOpen && !isPayModalOpen && !isRefundModalOpen && !isCardModalOpen}
@@ -562,60 +570,62 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       </div>
 
       {/* Add/Edit Card Modal */}
-      <GlassModal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
-        <form onSubmit={handleCardSubmit} className="space-y-4">
-           <GlassInput 
-              label="Nome do Cartão"
-              value={cardForm.name} 
-              onChange={e => setCardForm({...cardForm, name: e.target.value})} 
-              placeholder="Ex: Nubank, Inter..." 
-              required 
-           />
-           <GlassInput 
-              label="Limite Total"
-              type="number" 
-              value={cardForm.limit} 
-              onChange={e => setCardForm({...cardForm, limit: e.target.value})} 
-              required 
-           />
-           <div className="grid grid-cols-2 gap-4">
-             <GlassInput 
-                label="Dia Fechamento"
-                type="number" 
-                min="1" 
-                max="31" 
-                value={cardForm.closingDay} 
-                onChange={e => setCardForm({...cardForm, closingDay: e.target.value})} 
-                required 
-             />
-             <GlassInput 
-                label="Dia Vencimento"
-                type="number" 
-                min="1" 
-                max="31" 
-                value={cardForm.dueDay} 
-                onChange={e => setCardForm({...cardForm, dueDay: e.target.value})} 
-                required 
-             />
-           </div>
-           <div>
-              <GlassSelect
-                 label="Conta Padrão de Pagamento (Opcional)"
-                 value={cardForm.defaultPaymentAccountId}
-                 onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
-                 options={[
-                   { value: "", label: "Selecionar..." },
-                   ...accounts.map(a => ({ value: a.id, label: a.name }))
-                 ]}
+      <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
+        <ModalBody>
+           <form id="card-form-list" onSubmit={handleCardSubmit} className="space-y-4">
+              <GlassInput 
+                 label="Nome do Cartão"
+                 value={cardForm.name} 
+                 onChange={e => setCardForm({...cardForm, name: e.target.value})} 
+                 placeholder="Ex: Nubank, Inter..." 
+                 required 
               />
-              <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
-           </div>
-           <div className="flex justify-end gap-2 pt-4">
-             <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
-             <GlassButton type="submit">Salvar Cartão</GlassButton>
-           </div>
-        </form>
-      </GlassModal>
+              <GlassInput 
+                 label="Limite Total"
+                 type="number" 
+                 value={cardForm.limit} 
+                 onChange={e => setCardForm({...cardForm, limit: e.target.value})} 
+                 required 
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <GlassInput 
+                   label="Dia Fechamento"
+                   type="number" 
+                   min="1" 
+                   max="31" 
+                   value={cardForm.closingDay} 
+                   onChange={e => setCardForm({...cardForm, closingDay: e.target.value})} 
+                   required 
+                />
+                <GlassInput 
+                   label="Dia Vencimento"
+                   type="number" 
+                   min="1" 
+                   max="31" 
+                   value={cardForm.dueDay} 
+                   onChange={e => setCardForm({...cardForm, dueDay: e.target.value})} 
+                   required 
+                />
+              </div>
+              <div>
+                 <GlassSelect
+                    label="Conta Padrão de Pagamento (Opcional)"
+                    value={cardForm.defaultPaymentAccountId}
+                    onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
+                    options={[
+                      { value: "", label: "Selecionar..." },
+                      ...accounts.map(a => ({ value: a.id, label: a.name }))
+                    ]}
+                 />
+                 <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
+              </div>
+           </form>
+        </ModalBody>
+        <ModalFooter>
+           <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
+           <GlassButton type="submit" form="card-form-list">Salvar Cartão</GlassButton>
+        </ModalFooter>
+      </ModalShell>
 
       <MobileFab
         visible={!isCardModalOpen}

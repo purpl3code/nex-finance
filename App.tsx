@@ -14,7 +14,7 @@ import { SettingsView } from './components/SettingsView';
 import { InvestmentDashboard } from './components/InvestmentDashboard';
 import { GoalManager } from './components/GoalManager';
 import { Sidebar } from './components/Sidebar';
-import { GlassModal } from './components/ui/GlassModal';
+import { ModalShell, ModalBody, ModalFooter } from './components/ui/ModalShell';
 import { GlassButton } from './components/ui/GlassButton';
 import { GlassSelect } from './components/ui/GlassSelect';
 import { PageShell } from './components/ui/PageShell';
@@ -493,19 +493,21 @@ const App: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <GlassModal 
+      <ModalShell 
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         title={editingItem ? "Editar Movimentação" : "Nova Movimentação"}
       >
-        <TransactionForm 
-          initialData={editingItem} 
-          categories={categories} 
-          accounts={accounts}
-          onSubmit={handleSubmitForm}
-          onCancel={handleCloseModal}
-        />
-      </GlassModal>
+        <ModalBody>
+          <TransactionForm 
+            initialData={editingItem} 
+            categories={categories} 
+            accounts={accounts}
+            onSubmit={handleSubmitForm}
+            onCancel={handleCloseModal}
+          />
+        </ModalBody>
+      </ModalShell>
 
       <MobileFab
         visible={activeTab === 'dashboard' && !isModalOpen}

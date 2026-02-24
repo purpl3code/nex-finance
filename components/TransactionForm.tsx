@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer } from '../types';
 import { Button } from './ui/Button';
+import { ModalFooter } from './ui/ModalShell';
 import { ArrowDownCircle, ArrowUpCircle, ArrowRightLeft } from 'lucide-react';
 
 interface TransactionFormProps {
@@ -142,8 +143,9 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Type Toggle */}
+    <>
+      <form id="transaction-form" onSubmit={handleSubmit} className="space-y-4">
+        {/* Type Toggle */}
       <div className="grid grid-cols-3 gap-2 p-1 bg-slate-900 rounded-lg">
         <button
           type="button"
@@ -294,13 +296,14 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       </div>
 
       {error && <p className="text-red-400 text-sm animate-pulse">{error}</p>}
+      </form>
 
-      <div className="flex justify-end gap-3 pt-4">
+      <ModalFooter>
         <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" variant="primary">
+        <Button type="submit" form="transaction-form" variant="primary">
           {initialData ? 'Salvar Alterações' : (mode === 'transfer' ? 'Confirmar Transferência' : 'Adicionar Transação')}
         </Button>
-      </div>
-    </form>
+      </ModalFooter>
+    </>
   );
 };

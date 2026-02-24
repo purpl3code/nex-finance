@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Category, CategoryGroup, TransactionType } from '../types';
 import { GlassButton } from './ui/GlassButton';
-import { GlassModal } from './ui/GlassModal';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassInput } from './ui/GlassInput';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
@@ -202,114 +202,116 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
       )}
 
       {/* CREATE/EDIT MODAL */}
-      <GlassModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCategory ? 'Editar Categoria' : 'Nova Categoria'}>
-         <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-               <GlassInput 
-                  label="Nome" 
-                  value={form.name} 
-                  onChange={e => setForm({...form, name: e.target.value})} 
-                  required 
-                  maxLength={20} 
-                  disabled={editingCategory?.isSystem} 
-               />
-               {editingCategory?.isSystem && <p className="text-xs text-amber-500 mt-1 flex items-center gap-1"><Lock size={10}/> Nome protegido pelo sistema.</p>}
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-               <GlassInput 
-                  label="Ícone (Emoji)" 
-                  value={form.emoji} 
-                  onChange={e => setForm({...form, emoji: e.target.value})} 
-                  required 
-                  maxLength={2} 
-                  className="text-center text-xl"
-               />
-               <GlassSelect 
-                  label="Grupo" 
-                  value={form.group} 
-                  onChange={e => setForm({...form, group: e.target.value as any})}
-                  options={groups.map(g => ({ value: g, label: g }))}
-               />
-            </div>
-
-            <div>
-               <label className="block text-sm text-slate-300 mb-2">Cor</label>
-               <div className="flex flex-wrap gap-3 p-3 bg-slate-900/30 rounded-lg border border-white/5">
-                  {colors.map(c => (
-                     <button 
-                        type="button" 
-                        key={c} 
-                        onClick={() => setForm({...form, color: c})} 
-                        className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${form.color === c ? 'border-white ring-2 ring-white/20' : 'border-transparent hover:border-white/50'}`} 
-                        style={{ backgroundColor: c }} 
-                     />
-                  ))}
-               </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-               <GlassButton type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</GlassButton>
-               <GlassButton type="submit">Salvar</GlassButton>
-            </div>
-         </form>
-      </GlassModal>
-
-      {/* ARCHIVE/REASSIGN MODAL */}
-      <GlassModal isOpen={isArchiveModalOpen} onClose={() => setIsArchiveModalOpen(false)} title="Arquivar Categoria">
-         <div className="space-y-4">
-            <GlassCard className="bg-amber-500/10 border-amber-500/30 p-4 flex gap-3">
-               <AlertTriangle className="text-amber-500 shrink-0" size={24} />
+      <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCategory ? 'Editar Categoria' : 'Nova Categoria'}>
+         <ModalBody>
+            <form id="category-form" onSubmit={handleSubmit} className="space-y-4">
                <div>
-                  <h4 className="text-amber-500 font-bold mb-1">Atenção</h4>
-                  <p className="text-sm text-slate-300">
-                     Você está prestes a arquivar <strong>{targetCategory?.name}</strong>.
-                     {usageCount > 0 ? ` Esta categoria é usada em ${usageCount} transações.` : ' Ela não está em uso.'}
-                  </p>
+                  <GlassInput 
+                     label="Nome" 
+                     value={form.name} 
+                     onChange={e => setForm({...form, name: e.target.value})} 
+                     required 
+                     maxLength={20} 
+                     disabled={editingCategory?.isSystem} 
+                  />
+                  {editingCategory?.isSystem && <p className="text-xs text-amber-500 mt-1 flex items-center gap-1"><Lock size={10}/> Nome protegido pelo sistema.</p>}
                </div>
-            </GlassCard>
+               
+               <div className="grid grid-cols-2 gap-4">
+                  <GlassInput 
+                     label="Ícone (Emoji)" 
+                     value={form.emoji} 
+                     onChange={e => setForm({...form, emoji: e.target.value})} 
+                     required 
+                     maxLength={2} 
+                     className="text-center text-xl"
+                  />
+                  <GlassSelect 
+                     label="Grupo" 
+                     value={form.group} 
+                     onChange={e => setForm({...form, group: e.target.value as any})}
+                     options={groups.map(g => ({ value: g, label: g }))}
+                  />
+               </div>
 
-            {usageCount > 0 && (
                <div>
-                  <label className="block text-sm text-slate-300 mb-2">O que deseja fazer com os itens existentes?</label>
-                  <div className="space-y-3">
-                     <label className="flex items-start gap-3 p-3 rounded-lg border border-white/10 bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition-colors">
-                        <input type="radio" name="archiveAction" checked={!reassignId} onChange={() => setReassignId('')} className="mt-1 bg-slate-900 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
-                        <div>
-                           <span className="block text-sm font-medium text-white">Manter histórico (Recomendado)</span>
-                           <span className="block text-xs text-slate-400">Itens antigos continuam nesta categoria, mas ela não aparecerá para novos lançamentos.</span>
-                        </div>
-                     </label>
-                     <label className="flex items-start gap-3 p-3 rounded-lg border border-white/10 bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition-colors">
-                        <input type="radio" name="archiveAction" checked={!!reassignId} onChange={() => setReassignId(categories.find(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)?.id || '')} className="mt-1 bg-slate-900 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
-                        <div className="w-full">
-                           <span className="block text-sm font-medium text-white">Mover para outra categoria</span>
-                           {!!reassignId && (
-                              <div className="mt-2" onClick={e => e.preventDefault()}>
-                                <GlassSelect 
-                                   value={reassignId}
-                                   onChange={(e) => setReassignId(e.target.value)}
-                                   options={categories
-                                      .filter(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)
-                                      .map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
-                                   }
-                                />
-                              </div>
-                           )}
-                        </div>
-                     </label>
+                  <label className="block text-sm text-slate-300 mb-2">Cor</label>
+                  <div className="flex flex-wrap gap-3 p-3 bg-slate-900/30 rounded-lg border border-white/5">
+                     {colors.map(c => (
+                        <button 
+                           type="button" 
+                           key={c} 
+                           onClick={() => setForm({...form, color: c})} 
+                           className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${form.color === c ? 'border-white ring-2 ring-white/20' : 'border-transparent hover:border-white/50'}`} 
+                           style={{ backgroundColor: c }} 
+                        />
+                     ))}
                   </div>
                </div>
-            )}
+            </form>
+         </ModalBody>
+         <ModalFooter>
+            <GlassButton type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</GlassButton>
+            <GlassButton type="submit" form="category-form">Salvar</GlassButton>
+         </ModalFooter>
+      </ModalShell>
 
-            <div className="flex justify-end gap-2 pt-4">
-               <GlassButton type="button" variant="ghost" onClick={() => setIsArchiveModalOpen(false)}>Cancelar</GlassButton>
-               <GlassButton type="button" variant="danger" onClick={handleConfirmArchive}>
-                  {reassignId ? 'Mover e Arquivar' : 'Arquivar'}
-               </GlassButton>
+      {/* ARCHIVE/REASSIGN MODAL */}
+      <ModalShell isOpen={isArchiveModalOpen} onClose={() => setIsArchiveModalOpen(false)} title="Arquivar Categoria">
+         <ModalBody>
+            <div className="space-y-4">
+               <GlassCard className="bg-amber-500/10 border-amber-500/30 p-4 flex gap-3">
+                  <AlertTriangle className="text-amber-500 shrink-0" size={24} />
+                  <div>
+                     <h4 className="text-amber-500 font-bold mb-1">Atenção</h4>
+                     <p className="text-sm text-slate-300">
+                        Você está prestes a arquivar <strong>{targetCategory?.name}</strong>.
+                        {usageCount > 0 ? ` Esta categoria é usada em ${usageCount} transações.` : ' Ela não está em uso.'}
+                     </p>
+                  </div>
+               </GlassCard>
+
+               {usageCount > 0 && (
+                  <div>
+                     <label className="block text-sm text-slate-300 mb-2">O que deseja fazer com os itens existentes?</label>
+                     <div className="space-y-3">
+                        <label className="flex items-start gap-3 p-3 rounded-lg border border-white/10 bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                           <input type="radio" name="archiveAction" checked={!reassignId} onChange={() => setReassignId('')} className="mt-1 bg-slate-900 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
+                           <div>
+                              <span className="block text-sm font-medium text-white">Manter histórico (Recomendado)</span>
+                              <span className="block text-xs text-slate-400">Itens antigos continuam nesta categoria, mas ela não aparecerá para novos lançamentos.</span>
+                           </div>
+                        </label>
+                        <label className="flex items-start gap-3 p-3 rounded-lg border border-white/10 bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                           <input type="radio" name="archiveAction" checked={!!reassignId} onChange={() => setReassignId(categories.find(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)?.id || '')} className="mt-1 bg-slate-900 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
+                           <div className="w-full">
+                              <span className="block text-sm font-medium text-white">Mover para outra categoria</span>
+                              {!!reassignId && (
+                                 <div className="mt-2" onClick={e => e.preventDefault()}>
+                                   <GlassSelect 
+                                      value={reassignId}
+                                      onChange={(e) => setReassignId(e.target.value)}
+                                      options={categories
+                                         .filter(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)
+                                         .map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                                      }
+                                   />
+                                 </div>
+                              )}
+                           </div>
+                        </label>
+                     </div>
+                  </div>
+               )}
             </div>
-         </div>
-      </GlassModal>
+         </ModalBody>
+         <ModalFooter>
+            <GlassButton type="button" variant="ghost" onClick={() => setIsArchiveModalOpen(false)}>Cancelar</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={handleConfirmArchive}>
+               {reassignId ? 'Mover e Arquivar' : 'Arquivar'}
+            </GlassButton>
+         </ModalFooter>
+      </ModalShell>
     </div>
   );
 };

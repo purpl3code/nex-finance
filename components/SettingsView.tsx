@@ -11,7 +11,7 @@ import { BackupFile, DataHealthReport, FixLogEntry } from '../types';
 import { useFinance } from '../hooks/useFinance';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { GlassButton } from './ui/GlassButton';
-import { GlassModal } from './ui/GlassModal';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassAvatar } from './ui/GlassAvatar';
 import { GlassCard } from './ui/GlassCard';
 import { GlassInput } from './ui/GlassInput';
@@ -561,100 +561,106 @@ export const SettingsView: React.FC = () => {
       </SectionCard>
 
       {/* CATEGORY MANAGER MODAL */}
-      <GlassModal 
+      <ModalShell 
         isOpen={isCatManagerOpen} 
         onClose={() => setIsCatManagerOpen(false)} 
         title="Gerenciar Categorias"
         className="w-full max-w-lg md:max-w-none md:w-[min(980px,92vw)]" // Added responsive width override
       >
-         <CategoryManager 
-            categories={categories}
-            transactions={transactions}
-            creditCardTransactions={creditCardTransactions}
-            onAdd={addCategory}
-            onEdit={editCategory}
-            onArchive={archiveCategory}
-            onReassign={reassignCategory}
-         />
-      </GlassModal>
+         <ModalBody>
+            <CategoryManager 
+               categories={categories}
+               transactions={transactions}
+               creditCardTransactions={creditCardTransactions}
+               onAdd={addCategory}
+               onEdit={editCategory}
+               onArchive={archiveCategory}
+               onReassign={reassignCategory}
+            />
+         </ModalBody>
+      </ModalShell>
 
       {/* ... [Rest of modals] ... */}
       
       {/* IMPORT PREVIEW MODAL */}
-      <GlassModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Restaurar Backup">
-        <div className="space-y-4">
-           {importError ? (
-              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-lg flex items-center gap-3 text-red-400">
-                 <AlertTriangle size={20} />
-                 <p>{importError}</p>
-              </div>
-           ) : previewBackup && (
-              <div className="space-y-4">
-                 <div className="bg-slate-900/50 p-4 border rounded-lg border-white/10">
-                    <div className="flex justify-between items-center mb-2">
-                       <span className="text-slate-400 text-xs">Arquivo</span>
-                       <span className="text-slate-200 text-xs font-mono">{previewBackup.appName} v{previewBackup.schemaVersion}</span>
+      <ModalShell isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Restaurar Backup">
+        <ModalBody>
+           <div className="space-y-4">
+              {importError ? (
+                 <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-lg flex items-center gap-3 text-red-400">
+                    <AlertTriangle size={20} />
+                    <p>{importError}</p>
+                 </div>
+              ) : previewBackup && (
+                 <div className="space-y-4">
+                    <div className="bg-slate-900/50 p-4 border rounded-lg border-white/10">
+                       <div className="flex justify-between items-center mb-2">
+                          <span className="text-slate-400 text-xs">Arquivo</span>
+                          <span className="text-slate-200 text-xs font-mono">{previewBackup.appName} v{previewBackup.schemaVersion}</span>
+                       </div>
+                       <div className="flex justify-between items-center">
+                          <span className="text-slate-400 text-xs">Data Exportação</span>
+                          <span className="text-slate-200 text-xs">{new Date(previewBackup.exportedAt).toLocaleString()}</span>
+                       </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                       <span className="text-slate-400 text-xs">Data Exportação</span>
-                       <span className="text-slate-200 text-xs">{new Date(previewBackup.exportedAt).toLocaleString()}</span>
+
+                    {importWarning && (
+                       <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-amber-400 text-sm">
+                          ⚠️ {importWarning}
+                       </div>
+                    )}
+
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="bg-slate-700/30 p-2 rounded border border-white/5">
+                           <span className="block text-lg font-bold text-white">{previewBackup.data.transactions?.length || 0}</span>
+                           <span className="text-[10px] text-slate-400 uppercase">Transações</span>
+                        </div>
+                        <div className="bg-slate-700/30 p-2 rounded border border-white/5">
+                           <span className="block text-lg font-bold text-white">{previewBackup.data.accounts?.length || 0}</span>
+                           <span className="text-[10px] text-slate-400 uppercase">Contas</span>
+                        </div>
+                        <div className="bg-slate-700/30 p-2 rounded border border-white/5">
+                           <span className="block text-lg font-bold text-white">{previewBackup.data.creditCards?.length || 0}</span>
+                           <span className="text-[10px] text-slate-400 uppercase">Cartões</span>
+                        </div>
+                    </div>
+
+                    <div className="pt-4 flex gap-3">
+                        <div className="flex-1">
+                           <GlassButton onClick={handleMerge} className="w-full bg-blue-600 hover:bg-blue-700">Mesclar</GlassButton>
+                           <p className="text-[10px] text-slate-500 text-center mt-1">Mantém atuais, adiciona novos.</p>
+                        </div>
+                        <div className="flex-1">
+                           <GlassButton onClick={handleReplace} className="w-full bg-red-600 hover:bg-red-700">Substituir</GlassButton>
+                           <p className="text-[10px] text-slate-500 text-center mt-1">Apaga tudo e restaura.</p>
+                        </div>
                     </div>
                  </div>
-
-                 {importWarning && (
-                    <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-amber-400 text-sm">
-                       ⚠️ {importWarning}
-                    </div>
-                 )}
-
-                 <div className="grid grid-cols-3 gap-2 text-center">
-                     <div className="bg-slate-700/30 p-2 rounded border border-white/5">
-                        <span className="block text-lg font-bold text-white">{previewBackup.data.transactions?.length || 0}</span>
-                        <span className="text-[10px] text-slate-400 uppercase">Transações</span>
-                     </div>
-                     <div className="bg-slate-700/30 p-2 rounded border border-white/5">
-                        <span className="block text-lg font-bold text-white">{previewBackup.data.accounts?.length || 0}</span>
-                        <span className="text-[10px] text-slate-400 uppercase">Contas</span>
-                     </div>
-                     <div className="bg-slate-700/30 p-2 rounded border border-white/5">
-                        <span className="block text-lg font-bold text-white">{previewBackup.data.creditCards?.length || 0}</span>
-                        <span className="text-[10px] text-slate-400 uppercase">Cartões</span>
-                     </div>
-                 </div>
-
-                 <div className="pt-4 flex gap-3">
-                     <div className="flex-1">
-                        <GlassButton onClick={handleMerge} className="w-full bg-blue-600 hover:bg-blue-700">Mesclar</GlassButton>
-                        <p className="text-[10px] text-slate-500 text-center mt-1">Mantém atuais, adiciona novos.</p>
-                     </div>
-                     <div className="flex-1">
-                        <GlassButton onClick={handleReplace} className="w-full bg-red-600 hover:bg-red-700">Substituir</GlassButton>
-                        <p className="text-[10px] text-slate-500 text-center mt-1">Apaga tudo e restaura.</p>
-                     </div>
-                 </div>
-              </div>
-           )}
-        </div>
-      </GlassModal>
+              )}
+           </div>
+        </ModalBody>
+      </ModalShell>
 
       {/* CLEAR CONFIRM MODAL */}
-      <GlassModal isOpen={isClearModalOpen} onClose={() => setIsClearModalOpen(false)} title="Apagar Tudo?">
-         <div className="text-center space-y-4">
-            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
-               <Trash2 size={32} className="text-red-500" />
+      <ModalShell isOpen={isClearModalOpen} onClose={() => setIsClearModalOpen(false)} title="Apagar Tudo?">
+         <ModalBody>
+            <div className="text-center space-y-4">
+               <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                  <Trash2 size={32} className="text-red-500" />
+               </div>
+               <div>
+                  <p className="text-lg text-slate-200 font-medium">Esta ação é irreversível.</p>
+                  <p className="text-sm text-slate-400 mt-2">
+                     Todos as transações, contas, orçamentos e investimentos serão apagados deste navegador permanentemente.
+                  </p>
+               </div>
             </div>
-            <div>
-               <p className="text-lg text-slate-200 font-medium">Esta ação é irreversível.</p>
-               <p className="text-sm text-slate-400 mt-2">
-                  Todos as transações, contas, orçamentos e investimentos serão apagados deste navegador permanentemente.
-               </p>
-            </div>
-            <div className="flex justify-end gap-3 pt-4">
-               <GlassButton type="button" variant="ghost" onClick={() => setIsClearModalOpen(false)}>Cancelar</GlassButton>
-               <GlassButton type="button" variant="danger" onClick={handleClearAllData}>Sim, Apagar Tudo</GlassButton>
-            </div>
-         </div>
-      </GlassModal>
+         </ModalBody>
+         <ModalFooter>
+            <GlassButton type="button" variant="ghost" onClick={() => setIsClearModalOpen(false)}>Cancelar</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={handleClearAllData}>Sim, Apagar Tudo</GlassButton>
+         </ModalFooter>
+      </ModalShell>
 
     </PageShell>
   );

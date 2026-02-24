@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Account, AccountType } from '../types';
 import { GlassButton } from './ui/GlassButton';
-import { GlassModal } from './ui/GlassModal';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassCard } from './ui/GlassCard';
 import { GlassInput } from './ui/GlassInput';
 import { GlassSelect } from './ui/GlassSelect';
@@ -146,62 +146,66 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         })}
       </div>
 
-      <GlassModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingAcc ? 'Editar Conta' : 'Nova Conta'}>
-        <form onSubmit={handleSubmit} className="space-y-4">
-           <GlassInput
-             label="Nome da Conta"
-             value={name}
-             onChange={e => setName(e.target.value)}
-             placeholder="Ex: Nubank, Carteira..."
-             required
-           />
-           <GlassSelect
-             label="Tipo"
-             value={type}
-             onChange={e => setType(e.target.value as AccountType)}
-             options={[
-               { value: 'cash', label: 'Dinheiro Físico' },
-               { value: 'bank', label: 'Conta Bancária' },
-               { value: 'wallet', label: 'Carteira Digital' },
-               { value: 'other', label: 'Outro' }
-             ]}
-           />
-           <div>
+      <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingAcc ? 'Editar Conta' : 'Nova Conta'}>
+        <ModalBody>
+          <form id="account-form" onSubmit={handleSubmit} className="space-y-4">
              <GlassInput
-               label="Saldo Inicial"
-               type="number"
-               step="0.01"
-               value={initialBalance}
-               onChange={e => setInitialBalance(e.target.value)}
+               label="Nome da Conta"
+               value={name}
+               onChange={e => setName(e.target.value)}
+               placeholder="Ex: Nubank, Carteira..."
+               required
              />
-             <p className="text-xs text-slate-500 mt-1 pl-1">O saldo atual será calculado a partir deste valor + transações.</p>
-           </div>
-           <div className="flex justify-end gap-2 pt-4">
-             <GlassButton type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</GlassButton>
-             <GlassButton type="submit" variant="primary">{editingAcc ? 'Salvar' : 'Criar Conta'}</GlassButton>
-           </div>
-        </form>
-      </GlassModal>
+             <GlassSelect
+               label="Tipo"
+               value={type}
+               onChange={e => setType(e.target.value as AccountType)}
+               options={[
+                 { value: 'cash', label: 'Dinheiro Físico' },
+                 { value: 'bank', label: 'Conta Bancária' },
+                 { value: 'wallet', label: 'Carteira Digital' },
+                 { value: 'other', label: 'Outro' }
+               ]}
+             />
+             <div>
+               <GlassInput
+                 label="Saldo Inicial"
+                 type="number"
+                 step="0.01"
+                 value={initialBalance}
+                 onChange={e => setInitialBalance(e.target.value)}
+               />
+               <p className="text-xs text-slate-500 mt-1 pl-1">O saldo atual será calculado a partir deste valor + transações.</p>
+             </div>
+          </form>
+        </ModalBody>
+        <ModalFooter>
+           <GlassButton type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</GlassButton>
+           <GlassButton type="submit" form="account-form" variant="primary">{editingAcc ? 'Salvar' : 'Criar Conta'}</GlassButton>
+        </ModalFooter>
+      </ModalShell>
 
-      <GlassModal isOpen={!!deletingAcc} onClose={() => setDeletingAcc(null)} title="Excluir Conta">
-        <div className="text-center space-y-4">
-          <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
-             <AlertTriangle size={32} className="text-red-500" />
+      <ModalShell isOpen={!!deletingAcc} onClose={() => setDeletingAcc(null)} title="Excluir Conta">
+        <ModalBody>
+          <div className="text-center space-y-4">
+            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+               <AlertTriangle size={32} className="text-red-500" />
+            </div>
+            <div>
+              <p className="text-lg text-slate-200">Tem certeza que deseja excluir?</p>
+              <p className="text-xl font-bold text-white mt-1">{deletingAcc?.name}</p>
+            </div>
+            <p className="text-sm text-slate-400">
+              Esta ação removerá a conta permanentemente. <br/>
+              Se houver transações vinculadas, a exclusão será bloqueada.
+            </p>
           </div>
-          <div>
-            <p className="text-lg text-slate-200">Tem certeza que deseja excluir?</p>
-            <p className="text-xl font-bold text-white mt-1">{deletingAcc?.name}</p>
-          </div>
-          <p className="text-sm text-slate-400">
-            Esta ação removerá a conta permanentemente. <br/>
-            Se houver transações vinculadas, a exclusão será bloqueada.
-          </p>
-          <div className="flex justify-end gap-3 pt-4">
-            <GlassButton type="button" variant="ghost" onClick={() => setDeletingAcc(null)}>Cancelar</GlassButton>
-            <GlassButton type="button" variant="danger" onClick={confirmDelete}>Confirmar Exclusão</GlassButton>
-          </div>
-        </div>
-      </GlassModal>
+        </ModalBody>
+        <ModalFooter>
+          <GlassButton type="button" variant="ghost" onClick={() => setDeletingAcc(null)}>Cancelar</GlassButton>
+          <GlassButton type="button" variant="danger" onClick={confirmDelete}>Confirmar Exclusão</GlassButton>
+        </ModalFooter>
+      </ModalShell>
 
       <MobileFab
         visible={!isModalOpen && !deletingAcc}
