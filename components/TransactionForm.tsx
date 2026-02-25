@@ -11,6 +11,8 @@ interface TransactionFormProps {
   accounts: Account[];
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  currentMonth?: number;
+  currentYear?: number;
 }
 
 export const TransactionForm: React.FC<TransactionFormProps> = ({ 
@@ -18,7 +20,9 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   categories, 
   accounts,
   onSubmit, 
-  onCancel 
+  onCancel,
+  currentMonth,
+  currentYear
 }) => {
   // Check if initial data is a transfer
   const initialIsTransfer = initialData && 'fromAccountId' in initialData;
@@ -28,7 +32,19 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   );
 
   const [amount, setAmount] = useState<string>(initialData?.amount?.toString() || '');
-  const [date, setDate] = useState<string>(initialData?.date || new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState<string>(() => {
+    if (initialData?.date) return initialData.date;
+    
+    // If we have a currentMonth/Year, and it's not the actual current month,
+    // default to the 1st of that selected month. Otherwise, use today.
+    const today = new Date();
+    if (currentMonth !== undefined && currentYear !== undefined) {
+      if (currentMonth !== today.getMonth() || currentYear !== today.getFullYear()) {
+        return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+      }
+    }
+    return today.toISOString().split('T')[0];
+  });
   const [description, setDescription] = useState<string>(initialData?.description || '');
   
   // Transaction State
@@ -72,7 +88,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
   // Auto-select salary category for income
   useEffect(() => {
-    if (mode === 'income' && !initialData) {
+    if (mode === 'income' && !initialData?.id) {
       const salaryCat = categories.find(c => c.kind === 'income' && c.name.toLowerCase().includes('salário'));
       if(salaryCat) setCategoryId(salaryCat.id);
     } else if (mode === 'transfer') {
@@ -210,6 +226,13 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           onChange={(e) => setDate(e.target.value)}
           className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]"
         />
+        {date && currentMonth !== undefined && currentYear !== undefined && (
+          (new Date(date + 'T12:00:00').getMonth() !== currentMonth || new Date(date + 'T12:00:00').getFullYear() !== currentYear)
+        ) && (
+          <p className="text-xs text-amber-400 mt-1">
+            Aviso: Esta data está fora do mês selecionado no filtro ({currentMonth + 1}/{currentYear}).
+          </p>
+        )}
       </div>
 
       {/* Account Selection Logic */}
@@ -301,7 +324,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       <ModalFooter>
         <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
         <Button type="submit" form="transaction-form" variant="primary">
-          {initialData ? 'Salvar Alterações' : (mode === 'transfer' ? 'Confirmar Transferência' : 'Adicionar Transação')}
+          {initialData?.id ? 'Salvar Alterações' : (mode === 'transfer' ? 'Confirmar Transferência' : 'Adicionar Transação')}
         </Button>
       </ModalFooter>
     </>

@@ -169,7 +169,7 @@ const App: React.FC = () => {
   };
 
   const handleSubmitForm = (data: any) => {
-    if (editingItem) {
+    if (editingItem && editingItem.id) {
       if (data.isTransfer) {
         editTransfer(editingItem.id, data);
       } else {
@@ -496,7 +496,7 @@ const App: React.FC = () => {
       <ModalShell 
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
-        title={editingItem ? "Editar Movimentação" : "Nova Movimentação"}
+        title={editingItem?.id ? "Editar Movimentação" : "Nova Movimentação"}
       >
         <ModalBody>
           <TransactionForm 
@@ -505,6 +505,8 @@ const App: React.FC = () => {
             accounts={accounts}
             onSubmit={handleSubmitForm}
             onCancel={handleCloseModal}
+            currentMonth={filters.month}
+            currentYear={filters.year}
           />
         </ModalBody>
       </ModalShell>
