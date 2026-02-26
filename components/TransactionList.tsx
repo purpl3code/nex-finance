@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Transaction, Category, Account, Transfer } from '../types';
-import { Trash2, Edit2, Search, ArrowRightLeft, Repeat } from 'lucide-react';
+import { Trash2, Edit2, Search, ArrowRightLeft, Repeat, AlertTriangle } from 'lucide-react';
 import { GlassCard } from './ui/GlassCard';
 import { GlassButton } from './ui/GlassButton';
+import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 
 interface TransactionListProps {
   transactions: (Transaction | Transfer | any)[]; // Unified list
@@ -19,6 +20,8 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
   onEdit, 
   onDelete 
 }) => {
+  const [deletingItem, setDeletingItem] = useState<any>(null);
+
   const getCategory = (id: string) => categories.find(c => c.id === id);
   const getAccountName = (id: string) => accounts.find(a => a.id === id)?.name || 'Conta desconhecida';
 
@@ -110,10 +113,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                         <Edit2 size={16} />
                       </button>
                       <button 
-                        onClick={() => {
-                          const label = isTransfer ? 'transferência' : 'transação';
-                          if(window.confirm(`Tem certeza que deseja excluir esta ${label}?`)) onDelete(item.id, isTransfer);
-                        }}
+                        onClick={() => setDeletingItem(item)}
                         className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
                         title="Excluir"
                       >
@@ -182,10 +182,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                   <GlassButton 
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                       const label = isTransfer ? 'transferência' : 'transação';
-                       if(window.confirm(`Excluir ${label}?`)) onDelete(item.id, isTransfer);
-                    }}
+                    onClick={() => setDeletingItem(item)}
                     className="text-red-400 hover:text-red-300 h-8 px-3"
                   >
                     <Trash2 size={14} className="mr-1.5" /> Excluir
@@ -195,6 +192,34 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
           );
         })}
       </div>
+
+      <ModalShell isOpen={!!deletingItem} onClose={() => setDeletingItem(null)} title="Excluir Movimentação">
+        <ModalBody>
+          <div className="text-center space-y-4 py-4">
+            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+               <AlertTriangle size={32} className="text-red-500" />
+            </div>
+            <div>
+              <p className="text-lg text-slate-200">Tem certeza que deseja excluir?</p>
+              <p className="text-sm text-slate-400 mt-2">
+                {deletingItem?.description || (deletingItem?.isTransfer ? 'Transferência' : 'Transação sem descrição')}
+              </p>
+            </div>
+            <p className="text-sm text-slate-400">
+              Esta ação não pode ser desfeita e o saldo será recalculado.
+            </p>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <GlassButton type="button" variant="ghost" onClick={() => setDeletingItem(null)}>Cancelar</GlassButton>
+          <GlassButton type="button" variant="danger" onClick={() => {
+            if (deletingItem) {
+              onDelete(deletingItem.id, deletingItem.isTransfer);
+              setDeletingItem(null);
+            }
+          }}>Confirmar Exclusão</GlassButton>
+        </ModalFooter>
+      </ModalShell>
     </div>
   );
 });

@@ -36,6 +36,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
 }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isGenModalOpen, setIsGenModalOpen] = useState(false);
+  const [deletingRuleId, setDeletingRuleId] = useState<string | null>(null);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
 
   // Form State
@@ -181,7 +182,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                 </span>
                 <div className="flex gap-2">
                    <GlassButton variant="ghost" size="sm" onClick={() => handleOpenForm(rule)} icon={<Edit2 size={18} />} />
-                   <GlassButton variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => { if(window.confirm('Excluir regra?')) onDeleteRule(rule.id) }} icon={<Trash2 size={18} />} />
+                   <GlassButton variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => setDeletingRuleId(rule.id)} icon={<Trash2 size={18} />} />
                 </div>
              </div>
           </GlassCard>
@@ -376,6 +377,31 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                <GlassButton variant="ghost" onClick={() => setIsGenModalOpen(false)}>Cancelar</GlassButton>
             )}
          </ModalFooter>
+      </ModalShell>
+
+      <ModalShell isOpen={!!deletingRuleId} onClose={() => setDeletingRuleId(null)} title="Excluir Regra">
+        <ModalBody>
+          <div className="text-center space-y-4 py-4">
+            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+               <AlertTriangle size={32} className="text-red-500" />
+            </div>
+            <div>
+              <p className="text-lg text-slate-200">Tem certeza que deseja excluir esta regra?</p>
+              <p className="text-sm text-slate-400 mt-2">
+                As movimentações já geradas por esta regra não serão apagadas.
+              </p>
+            </div>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <GlassButton type="button" variant="ghost" onClick={() => setDeletingRuleId(null)}>Cancelar</GlassButton>
+          <GlassButton type="button" variant="danger" onClick={() => {
+            if (deletingRuleId) {
+              onDeleteRule(deletingRuleId);
+              setDeletingRuleId(null);
+            }
+          }}>Confirmar Exclusão</GlassButton>
+        </ModalFooter>
       </ModalShell>
 
       <MobileFab

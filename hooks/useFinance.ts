@@ -190,7 +190,25 @@ export const useFinance = () => {
   }, [touchData]);
 
   const deleteTransaction = useCallback((id: string) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
+    setTransactions(prev => {
+      const txToDelete = prev.find(t => t.id === id);
+      
+      if (txToDelete) {
+        if (txToDelete.linkedInvoiceId) {
+          setCreditCardInvoices(invoices => invoices.filter(inv => inv.id !== txToDelete.linkedInvoiceId));
+        } else if (txToDelete.categoryId === 'cat_invoice_payment') {
+          setCreditCardInvoices(invoices => {
+            const matchingInvoice = invoices.find(inv => inv.isPaid && inv.amount === txToDelete.amount);
+            if (matchingInvoice) {
+              return invoices.filter(inv => inv.id !== matchingInvoice.id);
+            }
+            return invoices;
+          });
+        }
+      }
+      
+      return prev.filter(t => t.id !== id);
+    });
     touchData();
   }, [touchData]);
 
@@ -374,11 +392,15 @@ export const useFinance = () => {
       accountId: accountId,
       description: `Fatura Cartão - Venc ${new Date(invoice.dueDate).toLocaleDateString('pt-BR')}`,
       createdAt: Date.now(),
+      linkedInvoiceId: invoice.id
     };
     const paidInvoice: CreditCardInvoice = { ...invoice, isPaid: true, paidAt: Date.now() };
     
     setTransactions(prev => [newTx, ...prev]);
-    setCreditCardInvoices(prev => [...prev, paidInvoice]);
+    setCreditCardInvoices(prev => {
+      const filtered = prev.filter(i => i.id !== invoice.id);
+      return [...filtered, paidInvoice];
+    });
     touchData();
   }, [touchData]);
 
@@ -585,8 +607,6 @@ export const useFinance = () => {
     // Updated: Now includes refunds and purchases
     const invoiceTxs = creditCardTransactions.filter(t => {
       if (t.cardId !== cardId) return false;
-      const isPaid = creditCardInvoices.some(inv => inv.cardId === cardId && inv.isPaid);
-      if (isPaid) return false;
       const tDate = new Date(t.date + 'T12:00:00');
       return isAfter(tDate, prevMonthClosing) && (tDate <= closingDate);
     });

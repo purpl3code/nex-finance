@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Budget, Category } from '../types';
 import { Button } from './ui/Button';
+import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
@@ -31,6 +32,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
   const [selectedMonth, setSelectedMonth] = useState(initialMonth);
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletingBudgetId, setDeletingBudgetId] = useState<string | null>(null);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
   const [form, setForm] = useState({ categoryId: '', amountLimit: '', alertAtPercent: '80' });
@@ -155,7 +157,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                    </div>
                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => openModal(budget)} className="p-2 text-blue-400 hover:bg-slate-700 rounded-lg transition-colors"><Edit2 size={16}/></button>
-                      <button onClick={() => { if(window.confirm('Excluir orçamento?')) onDeleteBudget(budget.id) }} className="p-2 text-red-400 hover:bg-slate-700 rounded-lg transition-colors"><Trash2 size={16}/></button>
+                      <button onClick={() => setDeletingBudgetId(budget.id)} className="p-2 text-red-400 hover:bg-slate-700 rounded-lg transition-colors"><Trash2 size={16}/></button>
                    </div>
                 </div>
 
@@ -217,6 +219,31 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
             <Button type="submit" form="budget-form">Salvar</Button>
          </ModalFooter>
+      </ModalShell>
+
+      <ModalShell isOpen={!!deletingBudgetId} onClose={() => setDeletingBudgetId(null)} title="Excluir Orçamento">
+        <ModalBody>
+          <div className="text-center space-y-4 py-4">
+            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+               <AlertTriangle size={32} className="text-red-500" />
+            </div>
+            <div>
+              <p className="text-lg text-slate-200">Tem certeza que deseja excluir este orçamento?</p>
+              <p className="text-sm text-slate-400 mt-2">
+                O histórico de gastos desta categoria não será afetado.
+              </p>
+            </div>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <GlassButton type="button" variant="ghost" onClick={() => setDeletingBudgetId(null)}>Cancelar</GlassButton>
+          <GlassButton type="button" variant="danger" onClick={() => {
+            if (deletingBudgetId) {
+              onDeleteBudget(deletingBudgetId);
+              setDeletingBudgetId(null);
+            }
+          }}>Confirmar Exclusão</GlassButton>
+        </ModalFooter>
       </ModalShell>
 
       <MobileFab

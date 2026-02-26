@@ -50,6 +50,8 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+  const [deletingTxId, setDeletingTxId] = useState<string | null>(null);
+  const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
 
   // Edit/Add Logic
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
@@ -142,8 +144,24 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   };
 
   const handleDeleteTx = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta compra? Se houver estornos vinculados, eles também serão removidos.')) {
-      if (onDeleteTransaction) onDeleteTransaction(id);
+    setDeletingTxId(id);
+  };
+
+  const confirmDeleteTx = () => {
+    if (deletingTxId && onDeleteTransaction) {
+      onDeleteTransaction(deletingTxId);
+    }
+    setDeletingTxId(null);
+  };
+
+  const confirmDeleteCard = () => {
+    if (deletingCardId) {
+      onDeleteCard(deletingCardId);
+      if (selectedCardId === deletingCardId) {
+        setView('list');
+        setSelectedCardId(null);
+      }
+      setDeletingCardId(null);
     }
   };
 
@@ -212,6 +230,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             </div>
             <div className="flex gap-3">
               <GlassButton onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</GlassButton>
+              <GlassButton onClick={() => setDeletingCardId(selectedCard.id)} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" icon={<Trash2 size={16}/>}>Excluir</GlassButton>
               <GlassButton onClick={() => openTxModal()} icon={<Plus size={16}/>} className="hidden md:flex">Nova Compra</GlassButton>
             </div>
           </div>
@@ -428,6 +447,46 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
           <ModalFooter>
              <GlassButton type="button" variant="ghost" onClick={() => setIsPayModalOpen(false)}>Cancelar</GlassButton>
              <GlassButton type="submit" form="pay-form">Confirmar Pagamento</GlassButton>
+          </ModalFooter>
+        </ModalShell>
+
+        <ModalShell isOpen={!!deletingTxId} onClose={() => setDeletingTxId(null)} title="Excluir Compra">
+          <ModalBody>
+            <div className="text-center space-y-4 py-4">
+              <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+                 <AlertTriangle size={32} className="text-red-500" />
+              </div>
+              <div>
+                <p className="text-lg text-slate-200">Tem certeza que deseja excluir esta compra?</p>
+                <p className="text-sm text-slate-400 mt-2">
+                  Se houver estornos vinculados, eles também serão removidos.
+                </p>
+              </div>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <GlassButton type="button" variant="ghost" onClick={() => setDeletingTxId(null)}>Cancelar</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={confirmDeleteTx}>Confirmar Exclusão</GlassButton>
+          </ModalFooter>
+        </ModalShell>
+
+        <ModalShell isOpen={!!deletingCardId} onClose={() => setDeletingCardId(null)} title="Excluir Cartão">
+          <ModalBody>
+            <div className="text-center space-y-4 py-4">
+              <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+                 <AlertTriangle size={32} className="text-red-500" />
+              </div>
+              <div>
+                <p className="text-lg text-slate-200">Tem certeza que deseja excluir este cartão?</p>
+                <p className="text-sm text-slate-400 mt-2">
+                  Todas as compras, estornos e faturas vinculadas a este cartão também serão removidas permanentemente.
+                </p>
+              </div>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <GlassButton type="button" variant="ghost" onClick={() => setDeletingCardId(null)}>Cancelar</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={confirmDeleteCard}>Confirmar Exclusão</GlassButton>
           </ModalFooter>
         </ModalShell>
 

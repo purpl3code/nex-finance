@@ -41,6 +41,9 @@ export interface Transaction {
   // Recurring Tracking
   generatedByRuleId?: string; // Links back to the rule
   generatedKey?: string; // Idempotency key (e.g., ruleId_2023-10-05)
+  
+  // Credit Card Invoice Tracking
+  linkedInvoiceId?: string;
 }
 
 export interface RecurringRule {
