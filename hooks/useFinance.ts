@@ -509,6 +509,11 @@ export const useFinance = () => {
     touchData();
   }, [touchData]);
 
+  const deleteGoal = useCallback((id: string) => {
+    setGoals(prev => prev.filter(g => g.id !== id));
+    touchData();
+  }, [touchData]);
+
   // --- HEAVY CALCULATORS (Memoized) ---
 
   const getInvestmentAccountBalance = useCallback((accountId: string) => {
@@ -811,7 +816,7 @@ export const useFinance = () => {
     addCategory, editCategory, archiveCategory, reassignCategory,
     
     // Goal Actions
-    addGoal, editGoal, toggleArchiveGoal, addValueToGoal,
+    addGoal, editGoal, toggleArchiveGoal, addValueToGoal, deleteGoal,
 
     // Selectors / Calculators
     getAccountBalance,

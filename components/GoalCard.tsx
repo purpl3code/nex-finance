@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Goal } from '../types';
 import { computeGoalStats, formatCurrency } from '../utils/goalHelpers';
-import { Edit2, Plus, Archive, Calendar, Target, Clock, AlertTriangle } from 'lucide-react';
+import { Edit2, Plus, Archive, Calendar, Target, Clock, AlertTriangle, Trash2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -11,9 +11,10 @@ interface GoalCardProps {
   onEdit: (goal: Goal) => void;
   onArchive: (id: string) => void;
   onAddValue: (id: string, amount: number) => void;
+  onDelete: () => void;
 }
 
-export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onAddValue }) => {
+export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onAddValue, onDelete }) => {
   const stats = computeGoalStats(goal);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -37,27 +38,22 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
           <h3 className="text-xl font-bold text-white tracking-tight">{goal.title}</h3>
           {goal.description && <p className="text-slate-400 text-xs mt-1 line-clamp-1">{goal.description}</p>}
         </div>
-        <div className={`flex gap-2 transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-           <button onClick={() => onEdit(goal)} className="p-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 transition-colors" title="Editar">
-             <Edit2 size={16} />
+        <div className={`flex gap-1 transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+           <button onClick={() => onEdit(goal)} className="p-1.5 bg-slate-700/50 hover:bg-slate-600 rounded text-slate-300 transition-colors" title="Editar">
+             <Edit2 size={14} />
            </button>
-           <button onClick={() => onArchive(goal.id)} className="p-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 transition-colors" title="Arquivar">
-             <Archive size={16} />
+           <button onClick={() => onArchive(goal.id)} className="p-1.5 bg-slate-700/50 hover:bg-slate-600 rounded text-slate-300 transition-colors" title={goal.isArchived ? "Desarquivar" : "Arquivar"}>
+             <Archive size={14} />
+           </button>
+           <button onClick={onDelete} className="p-1.5 bg-red-500/10 hover:bg-red-500/20 rounded text-red-400 transition-colors" title="Excluir">
+             <Trash2 size={14} />
            </button>
         </div>
       </div>
 
-      <div className="flex items-end gap-2 mb-2">
+      <div className="flex items-end gap-2 mb-4">
         <span className="text-3xl font-bold text-white">{formatCurrency(goal.currentAmount)}</span>
         <span className="text-sm text-slate-500 mb-1.5 font-medium">de {formatCurrency(goal.targetAmount)}</span>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="w-full bg-slate-700/50 rounded-full h-2.5 mb-4 overflow-hidden">
-        <div 
-          className="bg-blue-600 h-2.5 rounded-full transition-all duration-1000 ease-out" 
-          style={{ width: `${stats.progressPercent}%` }} 
-        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">

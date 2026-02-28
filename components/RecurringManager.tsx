@@ -9,7 +9,7 @@ import { GlassBadge } from './ui/GlassBadge';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
-import { Repeat, Plus, Trash2, Edit2, Play, CheckCircle, AlertCircle, ToggleLeft, ToggleRight, Calendar } from 'lucide-react';
+import { Repeat, Plus, Trash2, Edit2, Play, CheckCircle, AlertCircle, ToggleLeft, ToggleRight, Calendar, AlertTriangle } from 'lucide-react';
 
 interface RecurringManagerProps {
   rules: RecurringRule[];

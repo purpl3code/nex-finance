@@ -93,6 +93,7 @@ const App: React.FC = () => {
     editGoal,
     toggleArchiveGoal,
     addValueToGoal,
+    deleteGoal,
     loading: dataLoading
   } = useFinance();
 
@@ -481,6 +482,7 @@ const App: React.FC = () => {
                   onEditGoal={editGoal}
                   onArchiveGoal={toggleArchiveGoal}
                   onAddValueToGoal={addValueToGoal}
+                  onDeleteGoal={deleteGoal}
                 />
               )}
 

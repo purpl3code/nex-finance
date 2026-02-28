@@ -6,7 +6,8 @@ import { MobileFab } from './ui/MobileFab';
 import { Button } from './ui/Button';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GoalCard } from './GoalCard';
-import { Plus, Target } from 'lucide-react';
+import { Plus, Target, AlertTriangle } from 'lucide-react';
+import { GlassButton } from './ui/GlassButton';
 
 interface GoalManagerProps {
   goals: Goal[];
@@ -14,6 +15,7 @@ interface GoalManagerProps {
   onEditGoal: (id: string, updates: any) => void;
   onArchiveGoal: (id: string) => void;
   onAddValueToGoal: (id: string, amount: number) => void;
+  onDeleteGoal: (id: string) => void;
 }
 
 export const GoalManager: React.FC<GoalManagerProps> = ({
@@ -21,11 +23,13 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
   onAddGoal,
   onEditGoal,
   onArchiveGoal,
-  onAddValueToGoal
+  onAddValueToGoal,
+  onDeleteGoal
 }) => {
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isAddValueModalOpen, setIsAddValueModalOpen] = useState(false);
+  const [deletingGoalId, setDeletingGoalId] = useState<string | null>(null);
   
   // Edit/Form State
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
@@ -139,6 +143,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
               onEdit={handleOpenForm}
               onArchive={onArchiveGoal}
               onAddValue={handleOpenAddValue}
+              onDelete={() => setDeletingGoalId(goal.id)}
             />
           ))}
         </div>
@@ -210,6 +215,32 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
             <Button type="button" variant="ghost" onClick={() => setIsAddValueModalOpen(false)}>Cancelar</Button>
             <Button type="submit" form="add-value-form">Confirmar</Button>
          </ModalFooter>
+      </ModalShell>
+
+      {/* DELETE MODAL */}
+      <ModalShell isOpen={!!deletingGoalId} onClose={() => setDeletingGoalId(null)} title="Excluir Meta">
+        <ModalBody>
+          <div className="text-center space-y-4 py-4">
+            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+               <AlertTriangle size={32} className="text-red-500" />
+            </div>
+            <div>
+              <p className="text-lg text-slate-200">Tem certeza que deseja excluir esta meta?</p>
+              <p className="text-sm text-slate-400 mt-2">
+                O histórico de valores guardados não será apagado do seu saldo, apenas a meta deixará de existir.
+              </p>
+            </div>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <GlassButton type="button" variant="ghost" onClick={() => setDeletingGoalId(null)}>Cancelar</GlassButton>
+          <GlassButton type="button" variant="danger" onClick={() => {
+            if (deletingGoalId) {
+              onDeleteGoal(deletingGoalId);
+              setDeletingGoalId(null);
+            }
+          }}>Confirmar Exclusão</GlassButton>
+        </ModalFooter>
       </ModalShell>
 
       <MobileFab
