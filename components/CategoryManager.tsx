@@ -171,15 +171,15 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-3 lg:gap-4 pb-2">
            {displayedCategories.map(cat => (
               <GlassCard key={cat.id} className={`p-3 flex items-center justify-between group h-20 md:h-22 transition-all hover:border-slate-500/50 hover:bg-slate-800/80 ${cat.isArchived ? 'opacity-50 grayscale' : ''}`}>
-                 <div className="flex items-center gap-3 min-w-0">
+                 <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-slate-800/50 shrink-0 border border-white/10 shadow-sm" style={{ color: cat.color }}>
                        {cat.emoji}
                     </div>
-                    <div className="min-w-0">
-                       <div className="flex items-center gap-1.5">
-                          <span className={`font-semibold text-slate-200 text-sm truncate max-w-[140px] md:max-w-[120px] lg:max-w-[160px] ${cat.isArchived ? 'line-through' : ''}`} title={cat.name}>{cat.name}</span>
-                          {cat.isSystem && <GlassBadge variant="secondary" size="sm" className="px-1 py-0.5"><Lock size={10}/></GlassBadge>}
-                          {cat.isArchived && <GlassBadge variant="outline" size="sm" className="px-1 py-0.5">Arq.</GlassBadge>}
+                    <div className="min-w-0 flex-1">
+                       <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`font-semibold text-slate-200 text-sm truncate flex-1 min-w-0 ${cat.isArchived ? 'line-through' : ''}`} title={cat.name}>{cat.name}</span>
+                          {cat.isSystem && <GlassBadge variant="secondary" size="sm" className="px-1 py-0.5 shrink-0"><Lock size={10}/></GlassBadge>}
+                          {cat.isArchived && <GlassBadge variant="outline" size="sm" className="px-1 py-0.5 shrink-0">Arq.</GlassBadge>}
                        </div>
                        <span className="text-xs text-slate-500 truncate block opacity-80" title={cat.group}>{cat.group}</span>
                     </div>

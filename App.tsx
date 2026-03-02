@@ -11,7 +11,6 @@ import { RecurringManager } from './components/RecurringManager';
 import { ForecastView } from './components/ForecastView';
 import { BudgetManager } from './components/BudgetManager';
 import { SettingsView } from './components/SettingsView';
-import { InvestmentDashboard } from './components/InvestmentDashboard';
 import { GoalManager } from './components/GoalManager';
 import { Sidebar } from './components/Sidebar';
 import { ModalShell, ModalBody, ModalFooter } from './components/ui/ModalShell';
@@ -26,10 +25,10 @@ import { LoginScreen } from './components/auth/LoginScreen';
 import { MobileFab } from './components/ui/MobileFab';
 
 // Define valid tabs for type safety
-type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'investments' | 'goals';
+type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals';
 
 const VALID_TABS: AppTab[] = [
-  'dashboard', 'list', 'accounts', 'cards', 'recurring', 'forecast', 'budgets', 'settings', 'investments', 'goals'
+  'dashboard', 'list', 'accounts', 'cards', 'recurring', 'forecast', 'budgets', 'settings', 'goals'
 ];
 
 const App: React.FC = () => {
@@ -72,10 +71,6 @@ const App: React.FC = () => {
     addBudget,
     editBudget,
     deleteBudget,
-    addInvestmentAccount,
-    deleteInvestmentAccount,
-    addAsset,
-    addInvestmentMovement,
     getCategorySpending,
     getRecurringPreview,
     commitRecurringTransactions,
@@ -87,8 +82,6 @@ const App: React.FC = () => {
     getStats,
     getChartData,
     getForecast,
-    getInvestmentAccountBalance,
-    getPortfolioSummary,
     addGoal,
     editGoal,
     toggleArchiveGoal,
@@ -232,7 +225,6 @@ const App: React.FC = () => {
         case 'forecast': return 'Previsão Financeira';
         case 'budgets': return 'Orçamentos';
         case 'settings': return 'Configurações';
-        case 'investments': return 'Investimentos';
         case 'goals': return 'Metas';
         default: return 'Nex Finance';
      }
@@ -457,21 +449,6 @@ const App: React.FC = () => {
                   onEditBudget={editBudget}
                   onDeleteBudget={deleteBudget}
                   getCategorySpending={getCategorySpending}
-                />
-              )}
-
-              {activeTab === 'investments' && (
-                <InvestmentDashboard 
-                    investmentAccounts={investmentAccounts}
-                    assets={assets}
-                    positions={positions}
-                    movements={investmentMovements}
-                    accounts={accounts}
-                    onAddAccount={addInvestmentAccount}
-                    onAddAsset={addAsset}
-                    onAddMovement={addInvestmentMovement}
-                    getInvestmentAccountBalance={getInvestmentAccountBalance}
-                    getPortfolioSummary={getPortfolioSummary}
                 />
               )}
 

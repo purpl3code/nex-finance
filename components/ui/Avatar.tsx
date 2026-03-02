@@ -29,7 +29,7 @@ export const Avatar: React.FC<AvatarProps> = ({ src, name, size = 'md', classNam
       className={`
         relative rounded-full overflow-hidden flex items-center justify-center font-bold text-white shrink-0
         ${sizeClasses[size]} 
-        ${!src ? 'bg-gradient-to-tr from-blue-500 to-purple-500' : 'bg-slate-800'}
+        ${!src ? 'bg-gradient-to-tr from-blue-500 to-blue-600' : 'bg-slate-800'}
         ${className}
       `}
     >

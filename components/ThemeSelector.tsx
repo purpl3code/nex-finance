@@ -32,6 +32,16 @@ const THEMES: ThemeOption[] = [
     id: 'royal', 
     name: 'Royal', 
     colors: { bg: '#18181b', primary: '#8b5cf6' } // Zinc-900 / Violet-500
+  },
+  { 
+    id: 'sunset', 
+    name: 'Sunset', 
+    colors: { bg: '#1c1917', primary: '#f97316' } // Stone-900 / Orange-500
+  },
+  { 
+    id: 'forest', 
+    name: 'Forest', 
+    colors: { bg: '#064e3b', primary: '#14b8a6' } // Emerald-900 / Teal-500
   }
 ];
 
@@ -48,7 +58,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
       {THEMES.map(theme => (
         <button
           key={theme.id}

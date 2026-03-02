@@ -276,28 +276,28 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  const isRefund = tx.type === 'refund';
                  return (
                   <div key={tx.id} className={`flex justify-between items-center py-3 border-b border-white/5 last:border-0 hover:bg-white/5 px-3 -mx-3 rounded-lg transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2.5 rounded-xl text-xl shadow-inner border border-white/5 ${isRefund ? 'bg-red-500/10 text-red-400' : 'bg-white/5'}`}>
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`p-2.5 rounded-xl text-xl shadow-inner border border-white/5 shrink-0 ${isRefund ? 'bg-red-500/10 text-red-400' : 'bg-white/5'}`}>
                         {isRefund ? <RotateCcw size={20}/> : (categories.find(c => c.id === tx.categoryId)?.emoji || '🛒')}
                       </div>
-                      <div>
-                        <p className={`text-sm font-semibold ${isRefund ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-sm font-semibold truncate ${isRefund ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
                            {tx.description || (isRefund ? 'Estorno' : 'Compra')}
                         </p>
-                        <p className="text-slate-500 text-xs mt-0.5">
+                        <p className="text-slate-500 text-xs mt-0.5 truncate">
                           {new Date(tx.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
                           {!isRefund && tx.installment.total > 1 && ` • Parcela ${tx.installment.current}/${tx.installment.total}`}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <span className={`font-medium ${isRefund ? 'text-emerald-400' : 'text-white'}`}>
+                    <div className="flex flex-col md:flex-row items-end md:items-center gap-2 shrink-0 ml-2">
+                        <span className={`font-medium whitespace-nowrap ${isRefund ? 'text-emerald-400' : 'text-white'}`}>
                            {formatCurrency(tx.amount)}
                         </span>
                         
                         {/* Actions (Only for unpaid invoices and not already refunds) */}
                         {!invoiceInfo.isPaid && !isRefund && (
-                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                               <button onClick={() => openRefundModal(tx)} className="p-1.5 text-amber-400 hover:bg-white/10 rounded-lg transition-colors" title="Estornar">
                                  <RotateCcw size={14} />
                               </button>
@@ -311,7 +311,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                         )}
                         {/* Delete action for manual refunds if mistake made */}
                         {!invoiceInfo.isPaid && isRefund && (
-                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                               <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-white/10 rounded-lg transition-colors" title="Excluir Estorno">
                                  <Trash2 size={14} />
                               </button>

@@ -1,6 +1,6 @@
 import { LocalStorageAdapter } from './storageAdapter';
 
-export type AppTheme = 'dark' | 'midnight' | 'graphite' | 'royal';
+export type AppTheme = 'dark' | 'midnight' | 'graphite' | 'royal' | 'sunset' | 'forest';
 
 const THEME_KEY = 'nex-finance-theme';
 const DEFAULT_THEME: AppTheme = 'dark';

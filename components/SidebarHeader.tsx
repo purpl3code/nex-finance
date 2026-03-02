@@ -23,7 +23,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
       <div className={`flex items-center h-20 px-4 ${collapsed ? 'justify-center' : 'justify-between'}`}>
         <div className="flex items-center gap-3 overflow-hidden">
           {/* Logo Icon */}
-          <div className="h-10 w-10 min-w-[40px] bg-gradient-to-br from-blue-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-white/10 relative overflow-hidden group">
+          <div className="h-10 w-10 min-w-[40px] bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-white/10 relative overflow-hidden group">
             <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             <span className="font-bold text-white text-xl leading-none mt-0.5">N</span>
           </div>

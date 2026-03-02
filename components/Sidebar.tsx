@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, List, Wallet, CreditCard, Repeat, 
-  TrendingUp, PieChart, Settings, LineChart, 
+  TrendingUp, PieChart, Settings, 
   ChevronDown, X, Target
 } from 'lucide-react';
 import { SidebarHeader } from './SidebarHeader';
@@ -120,7 +120,6 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
   const [groupStates, setGroupStates] = useState<GroupState>({
     principal: true,
     planejamento: true,
-    patrimonio: true,
     sistema: true
   });
 
@@ -174,13 +173,6 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
         { id: 'recurring', label: 'Recorrências', icon: Repeat },
         { id: 'budgets', label: 'Orçamentos', icon: PieChart },
         { id: 'forecast', label: 'Previsão', icon: TrendingUp },
-      ]
-    },
-    {
-      id: 'patrimonio',
-      title: 'PATRIMÔNIO',
-      items: [
-        { id: 'investments', label: 'Investimentos', icon: LineChart },
       ]
     },
     {

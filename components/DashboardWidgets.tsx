@@ -14,7 +14,7 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
   
   return (
     <GlassCard className="relative overflow-hidden group">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/5 opacity-50 group-hover:opacity-70 transition-opacity" />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-400/5 opacity-50 group-hover:opacity-70 transition-opacity" />
       
       <div className={`absolute top-0 right-0 p-4 opacity-10 ${isPositive ? 'text-emerald-500' : 'text-red-500'} group-hover:scale-110 transition-transform duration-500`}>
         <ShoppingBag size={80} />
@@ -48,7 +48,7 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
 
   return (
     <GlassCard className="relative overflow-hidden group">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-violet-500/5 opacity-50 group-hover:opacity-70 transition-opacity" />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-400/5 opacity-50 group-hover:opacity-70 transition-opacity" />
 
       <div className="absolute top-0 right-0 p-4 opacity-10 text-blue-500 group-hover:scale-110 transition-transform duration-500">
         <TrendingUp size={80} />
