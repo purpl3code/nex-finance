@@ -57,7 +57,7 @@ export const LoginScreen: React.FC = () => {
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8">
         
         <div className="text-center mb-8">
-          <div className="h-12 w-12 bg-gradient-to-tr from-blue-600 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto mb-4">
+          <div className="h-12 w-12 bg-gradient-to-tr from-slate-900 to-black rounded-xl border border-slate-800 flex items-center justify-center shadow-lg shadow-black/50 mx-auto mb-4">
             <span className="font-bold text-white text-2xl leading-none mt-1">N</span>
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Nex Finance</h1>

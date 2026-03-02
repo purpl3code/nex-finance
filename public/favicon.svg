@@ -4,8 +4,8 @@
   <text x="50%" y="50%" font-family="sans-serif" font-weight="bold" font-size="320" fill="white" text-anchor="middle" dominant-baseline="central">N</text>
   <defs>
     <linearGradient id="grad" x1="0" y1="512" x2="512" y2="0" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#2563eb"/>
-      <stop offset="1" stop-color="#3b82f6"/>
+      <stop stop-color="#000000"/>
+      <stop offset="1" stop-color="#1a1a1a"/>
     </linearGradient>
   </defs>
 </svg>
