@@ -32,9 +32,9 @@ export const SyncService = {
   },
 
   // Push data to Supabase
-  pushToCloud: async (data: AppData, userId: string) => {
+  pushToCloud: async (data: AppData, userId: string): Promise<{success: boolean, error?: any}> => {
     try {
-      if (!navigator.onLine) return; // Skip if offline
+      if (!navigator.onLine) return { success: false, error: 'Offline' }; // Skip if offline
 
       const { error } = await supabase
         .from('user_data')
@@ -47,11 +47,14 @@ export const SyncService = {
 
       if (error) {
         console.error('Cloud Sync Error:', error);
+        return { success: false, error };
       } else {
         console.log('Cloud Sync Success');
+        return { success: true };
       }
     } catch (err) {
       console.error('Sync Exception:', err);
+      return { success: false, error: err };
     }
   },
 
@@ -95,9 +98,15 @@ export const SyncService = {
         console.log('Remote data found, updating local cache...');
         StorageService.save(remoteData);
         return true;
+      } else {
+        // No remote data found (new account).
+        // Push current local data to cloud so it's synced immediately.
+        console.log('No remote data found. Pushing local data to cloud...');
+        const localData = StorageService.load();
+        await SyncService.pushToCloud(localData, data.session.user.id);
+        return false;
       }
       
-      return false;
     } catch (e) {
       console.warn('Sync initialization failed:', e);
       return false;

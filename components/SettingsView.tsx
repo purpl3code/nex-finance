@@ -97,9 +97,11 @@ export const SettingsView: React.FC = () => {
     if(confirm('Tem certeza que deseja sair?')) {
       if (isDemoMode()) {
         disableDemoMode();
+        StorageService.clear();
         window.location.reload();
       } else {
         await supabase.auth.signOut();
+        StorageService.clear();
         window.location.reload();
       }
     }
@@ -114,9 +116,14 @@ export const SettingsView: React.FC = () => {
     if(!session) return;
     setIsSyncing(true);
     const data = SyncService.getLocalData();
-    await SyncService.pushToCloud(data, session.user.id);
+    const result = await SyncService.pushToCloud(data, session.user.id);
     setIsSyncing(false);
-    alert('Dados enviados para a nuvem com sucesso!');
+    
+    if (result && !result.success) {
+      alert(`Erro ao enviar para a nuvem: ${result.error?.message || result.error || 'Erro desconhecido'}. Verifique se a tabela 'user_data' foi criada no Supabase.`);
+    } else {
+      alert('Dados enviados para a nuvem com sucesso!');
+    }
   };
 
   const handlePullFromCloud = async () => {

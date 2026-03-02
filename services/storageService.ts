@@ -161,5 +161,13 @@ export const StorageService = {
     } catch (error) {
       console.error('Failed to save data', error);
     }
+  },
+
+  clear: (): void => {
+    try {
+      adapter.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('Failed to clear data', error);
+    }
   }
 };

@@ -3,12 +3,14 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement, Goal } from '../types';
 import { StorageService } from '../services/storageService';
 import { SyncService } from '../services/syncService';
+import { useAuth } from './useAuth';
 import { COLORS } from '../constants';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
 import { addMonths, isAfter, endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export const useFinance = () => {
+  const { session } = useAuth();
   // --- STATE ---
   const [dataVersion, setDataVersion] = useState(0); // Incremented on every write
   
@@ -35,7 +37,7 @@ export const useFinance = () => {
 
   // --- PERSISTENCE ---
 
-  // Initial Load
+  // Initial Load & Auth Sync
   useEffect(() => {
     // Try to load local data first
     const data = StorageService.load();
@@ -56,6 +58,7 @@ export const useFinance = () => {
     setLoading(false);
 
     // Then try to sync with cloud (if logged in)
+    // We re-run this if the user logs in (session changes)
     SyncService.initialize().then((updated) => {
       if (updated) {
         // If updated, reload from local storage
@@ -76,7 +79,7 @@ export const useFinance = () => {
         setGoals(newData.goals || []);
       }
     });
-  }, []);
+  }, [session]);
 
   // Save on change (Debounced slightly by React batching, but explicit here)
   useEffect(() => {
