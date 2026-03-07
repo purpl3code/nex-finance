@@ -8,6 +8,7 @@ import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
 import { GlassBadge } from './ui/GlassBadge';
 import { Plus, Edit2, Archive, AlertTriangle, Lock, RotateCcw } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CategoryManagerProps {
   categories: Category[];
@@ -94,7 +95,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
     );
 
     if (duplicate) {
-      alert('Já existe uma categoria com este nome.');
+      toast.error('Já existe uma categoria com este nome.');
       return;
     }
 

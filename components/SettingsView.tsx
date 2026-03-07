@@ -24,6 +24,7 @@ import {
   Trash2, Database, Server, RefreshCw, ShieldAlert, History,
   Activity, CheckCircle, Stethoscope, ChevronDown, ChevronUp, User, Camera, Palette, Cloud, LogOut, Tag
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const SettingsView: React.FC = () => {
   const { session } = useAuth();
@@ -81,7 +82,7 @@ export const SettingsView: React.FC = () => {
     e.preventDefault();
     if (profileName.trim()) {
       updateName(profileName.trim());
-      alert('Perfil atualizado com sucesso!');
+      toast.success('Perfil atualizado com sucesso!');
     }
   };
 
@@ -110,7 +111,7 @@ export const SettingsView: React.FC = () => {
   // Sync Handlers
   const handlePushToCloud = async () => {
     if (isDemo) {
-       alert("Sincronização na nuvem indisponível no Modo Demo.");
+       toast.error("Sincronização na nuvem indisponível no Modo Demo.");
        return;
     }
     if(!session) return;
@@ -120,15 +121,15 @@ export const SettingsView: React.FC = () => {
     setIsSyncing(false);
     
     if (result && !result.success) {
-      alert(`Erro ao enviar para a nuvem: ${result.error?.message || result.error || 'Erro desconhecido'}. Verifique se a tabela 'user_data' foi criada no Supabase.`);
+      toast.error(`Erro ao enviar para a nuvem: ${result.error?.message || result.error || 'Erro desconhecido'}. Verifique se a tabela 'user_data' foi criada no Supabase.`);
     } else {
-      alert('Dados enviados para a nuvem com sucesso!');
+      toast.success('Dados enviados para a nuvem com sucesso!');
     }
   };
 
   const handlePullFromCloud = async () => {
     if (isDemo) {
-       alert("Sincronização na nuvem indisponível no Modo Demo.");
+       toast.error("Sincronização na nuvem indisponível no Modo Demo.");
        return;
     }
     if(!session) return;
@@ -139,10 +140,10 @@ export const SettingsView: React.FC = () => {
     setIsSyncing(false);
     
     if(updated) {
-      alert('Dados baixados com sucesso! A página será recarregada.');
-      window.location.reload();
+      toast.success('Dados baixados com sucesso! A página será recarregada.');
+      setTimeout(() => window.location.reload(), 2000);
     } else {
-      alert('Nenhum dado encontrado na nuvem ou erro ao baixar.');
+      toast.error('Nenhum dado encontrado na nuvem ou erro ao baixar.');
     }
   };
 

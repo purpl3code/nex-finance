@@ -30,9 +30,9 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       bad: 'text-red-400 bg-red-900/10 border-red-900/30',
     };
     return (
-      <div className={`p-5 rounded-xl border ${colors[variant]} shadow-sm`}>
-        <p className="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider">{title}</p>
-        <p className="text-2xl font-bold">{typeof value === 'number' ? formatCurrency(value) : value}</p>
+      <div className={`p-4 sm:p-5 rounded-xl border ${colors[variant]} shadow-sm overflow-hidden`}>
+        <p className="text-[10px] sm:text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider truncate" title={title}>{title}</p>
+        <p className="text-lg sm:text-2xl font-bold truncate" title={typeof value === 'number' ? formatCurrency(value) : String(value)}>{typeof value === 'number' ? formatCurrency(value) : value}</p>
       </div>
     );
   };
@@ -48,7 +48,10 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
     }
   };
 
-  const dayEvents = (dateStr: string) => forecastData.eventsByDay[dateStr] || [];
+  const dayEvents = (dateStr: string) => {
+    const events = forecastData.eventsByDay[dateStr] || [];
+    return events.filter((e: any) => e.amount !== 0);
+  };
 
   return (
     <PageShell>
@@ -68,7 +71,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       />
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <StatCard title="Saldo Inicial" value={forecastData.initialBalance} variant="neutral" />
         <StatCard title="Saldo Final Previsto" value={forecastData.endBalance} variant={forecastData.endBalance >= 0 ? 'good' : 'bad'} />
         <StatCard title="Pior Cenário" value={forecastData.minBalance} variant={forecastData.minBalance >= 0 ? 'good' : 'bad'} />

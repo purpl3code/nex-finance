@@ -10,6 +10,7 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { Repeat, Plus, Trash2, Edit2, Play, CheckCircle, AlertCircle, ToggleLeft, ToggleRight, Calendar, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface RecurringManagerProps {
   rules: RecurringRule[];
@@ -127,7 +128,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
     onCommitGeneration(toCreate);
     setIsGenModalOpen(false);
     setHasGeneratedPreview(false);
-    alert(`${toCreate.length} lançamentos gerados com sucesso!`);
+    toast.success(`${toCreate.length} lançamentos gerados com sucesso!`);
   };
 
   const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);

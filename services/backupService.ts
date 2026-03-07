@@ -1,5 +1,6 @@
 import { AppData, BackupFile } from '../types';
 import { StorageService } from './storageService';
+import { toast } from 'sonner';
 
 export const BackupService = {
   createBackup: (): BackupFile => {
@@ -124,8 +125,8 @@ export const BackupService = {
     // We don't force reload here to show the stats, but we should eventually refresh state
     // For simplicity and safety, we reload to ensure all hooks get new data fresh
     setTimeout(() => {
-       alert(`Importação concluída!\nImportados: ${stats.imported}\nIgnorados (Já existiam): ${stats.ignored}`);
-       window.location.reload();
+       toast.success(`Importação concluída!\nImportados: ${stats.imported}\nIgnorados (Já existiam): ${stats.ignored}`);
+       setTimeout(() => window.location.reload(), 2000);
     }, 100);
   }
 };

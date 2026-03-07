@@ -1,4 +1,5 @@
 import { LocalStorageAdapter } from './storageAdapter';
+import { toast } from 'sonner';
 
 export interface UserProfile {
   displayName: string;
@@ -40,7 +41,7 @@ export const UserProfileService = {
       window.dispatchEvent(new Event(EVENT_KEY));
     } catch (e) {
       console.error('Failed to save profile (likely quota exceeded)', e);
-      alert('Erro ao salvar perfil: Espaço insuficiente no navegador. Tente uma foto menor.');
+      toast.error('Erro ao salvar perfil: Espaço insuficiente no navegador. Tente uma foto menor.');
     }
   },
 

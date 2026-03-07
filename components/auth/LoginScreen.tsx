@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase, setRememberMe, isSupabaseConfigured } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const LoginScreen: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -39,7 +40,7 @@ export const LoginScreen: React.FC = () => {
         });
         if (error) throw error;
         // Auto login handling or message
-        if (!error) alert('Conta criada! Você já pode entrar.');
+        if (!error) toast.success('Conta criada! Você já pode entrar.');
       }
     } catch (err: any) {
       let msg = err.message || 'Ocorreu um erro.';

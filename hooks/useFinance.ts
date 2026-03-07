@@ -332,7 +332,7 @@ export const useFinance = () => {
 
     for (let i = 0; i < installments; i++) {
       const txDate = addMonths(baseDate, i);
-      const dateStr = txDate.toISOString().split('T')[0];
+      const dateStr = format(txDate, 'yyyy-MM-dd');
       newTxs.push({
         ...tx,
         type: 'purchase',
@@ -390,10 +390,10 @@ export const useFinance = () => {
       id: crypto.randomUUID(),
       type: 'expense',
       amount: invoice.amount,
-      date: new Date().toISOString().split('T')[0],
+      date: format(new Date(), 'yyyy-MM-dd'),
       categoryId: 'cat_invoice_payment', 
       accountId: accountId,
-      description: `Fatura Cartão - Venc ${new Date(invoice.dueDate).toLocaleDateString('pt-BR')}`,
+      description: `Fatura Cartão - Venc ${format(parseISO(invoice.dueDate), 'dd/MM/yyyy')}`,
       createdAt: Date.now(),
       linkedInvoiceId: invoice.id
     };
@@ -559,10 +559,11 @@ export const useFinance = () => {
        if (rule.frequency === 'monthly') {
           const daysInTargetMonth = getDaysInMonth(targetMonthStart);
           const targetDay = Math.min(rule.dayOfMonth || 1, daysInTargetMonth);
-          const potentialDate = new Date(year, month, targetDay);
+          const potentialDate = new Date(year, month, targetDay, 12, 0, 0);
           if (potentialDate >= startDate && (!endDate || potentialDate <= endDate)) datesToGenerate.push(potentialDate);
        } else if (rule.frequency === 'weekly') {
           let d = new Date(targetMonthStart);
+          d.setHours(12, 0, 0, 0);
           while (d <= targetMonthEnd) {
             if (getDay(d) === (rule.dayOfWeek || 0)) {
                if (d >= startDate && (!endDate || d <= endDate)) datesToGenerate.push(new Date(d));
@@ -572,7 +573,7 @@ export const useFinance = () => {
        }
 
        datesToGenerate.forEach(date => {
-          const dateStr = date.toISOString().split('T')[0];
+          const dateStr = format(date, 'yyyy-MM-dd');
           const generatedKey = `${rule.id}_${dateStr}`;
           const exists = transactions.some(t => t.generatedKey === generatedKey);
           generated.push({
@@ -608,9 +609,22 @@ export const useFinance = () => {
     const storedInvoice = creditCardInvoices.find(i => i.cardId === cardId && i.month === month && i.year === year);
     if (storedInvoice) return storedInvoice;
 
-    const dueDate = new Date(year, month, card.dueDay);
-    const closingDate = new Date(year, month, card.closingDay);
-    const prevMonthClosing = new Date(year, month - 1, card.closingDay);
+    const daysInMonth = getDaysInMonth(new Date(year, month, 1));
+    const actualDueDay = Math.min(card.dueDay, daysInMonth);
+    const dueDate = new Date(year, month, actualDueDay);
+    
+    let closingMonth = month;
+    if (card.dueDay < card.closingDay) {
+      closingMonth = month - 1;
+    }
+    
+    const daysInClosingMonth = getDaysInMonth(new Date(year, closingMonth, 1));
+    const actualClosingDay = Math.min(card.closingDay, daysInClosingMonth);
+    const closingDate = new Date(year, closingMonth, actualClosingDay);
+    
+    const daysInPrevClosingMonth = getDaysInMonth(new Date(year, closingMonth - 1, 1));
+    const actualPrevClosingDay = Math.min(card.closingDay, daysInPrevClosingMonth);
+    const prevMonthClosing = new Date(year, closingMonth - 1, actualPrevClosingDay);
     
     // Updated: Now includes refunds and purchases
     const invoiceTxs = creditCardTransactions.filter(t => {
@@ -624,8 +638,8 @@ export const useFinance = () => {
       cardId,
       month,
       year,
-      dueDate: dueDate.toISOString().split('T')[0],
-      closingDate: closingDate.toISOString().split('T')[0],
+      dueDate: format(dueDate, 'yyyy-MM-dd'),
+      closingDate: format(closingDate, 'yyyy-MM-dd'),
       // Amount automatically subtracts negative values from refunds
       amount: invoiceTxs.reduce((sum, t) => sum + t.amount, 0),
       isPaid: false,
@@ -645,7 +659,6 @@ export const useFinance = () => {
   const forecastCache = useRef<Record<string, any>>({});
   
   const getForecast = useCallback((month: number, year: number) => {
-    // Cache key includes dataVersion so cache invalidates on any data change
     const cacheKey = `${dataVersion}_${month}_${year}`;
     if (forecastCache.current[cacheKey]) {
       return forecastCache.current[cacheKey];
@@ -653,94 +666,222 @@ export const useFinance = () => {
 
     const startOfForecastMonth = new Date(year, month, 1);
     const endOfForecastMonth = endOfMonth(startOfForecastMonth);
-    const daysInMonth = eachDayOfInterval({ start: startOfForecastMonth, end: endOfForecastMonth });
-    const startOfForecastStr = startOfForecastMonth.toISOString().split('T')[0];
+    const startOfForecastStr = format(startOfForecastMonth, 'yyyy-MM-dd');
+    const endOfForecastStr = format(endOfForecastMonth, 'yyyy-MM-dd');
+    
+    const today = new Date();
+    const todayStr = format(today, 'yyyy-MM-dd');
+    const currentMonthStart = format(new Date(today.getFullYear(), today.getMonth(), 1), 'yyyy-MM-dd');
+    
+    const isPastMonth = startOfForecastStr < currentMonthStart;
+    const shiftDate = isPastMonth ? startOfForecastStr : todayStr;
 
-    // 1. Calculate Initial Balance (Optimization: This is still heavy, but now cached)
-    const initialBalances: Record<string, number> = {};
-    let totalInitialBalance = 0;
+    const allEvents: any[] = [];
 
-    accounts.forEach(acc => {
-      let bal = acc.initialBalance;
-      const pastTxs = transactions.filter(t => t.accountId === acc.id && t.date < startOfForecastStr);
-      bal += pastTxs.reduce((sum, t) => t.type === 'income' ? sum + t.amount : sum - t.amount, 0);
-      const pastTransfersOut = transfers.filter(t => t.fromAccountId === acc.id && t.date < startOfForecastStr);
-      const pastTransfersIn = transfers.filter(t => t.toAccountId === acc.id && t.date < startOfForecastStr);
-      bal -= pastTransfersOut.reduce((sum, t) => sum + t.amount, 0);
-      bal += pastTransfersIn.reduce((sum, t) => sum + t.amount, 0);
-      initialBalances[acc.id] = bal;
-      totalInitialBalance += bal;
-    });
-
-    const events: any[] = [];
-    const actualTxs = transactions.filter(t => {
-      const d = new Date(t.date + 'T12:00:00');
-      return d.getMonth() === month && d.getFullYear() === year;
-    });
-    actualTxs.forEach(tx => events.push({
-      date: tx.date, type: 'transaction', amount: tx.type === 'income' ? tx.amount : -tx.amount,
-      accountId: tx.accountId, description: tx.description, isReal: true, raw: tx
-    }));
-
-    const recurringPreview = getRecurringPreview(month, year);
-    recurringPreview.forEach(item => {
-      if (!item.isDuplicate) {
-        events.push({
-          date: item.transaction.date, type: 'recurring', amount: item.transaction.type === 'income' ? item.transaction.amount : -item.transaction.amount,
-          accountId: item.transaction.accountId, description: `(Previsto) ${item.ruleName}`, isReal: false
-        });
-      }
-    });
-
-    creditCards.forEach(card => {
-       const invoice = getCardInvoiceInfo(card.id, month, year);
-       if (invoice && invoice.amount > 0 && !invoice.isPaid) {
-          const targetAccount = card.defaultPaymentAccountId || accounts[0]?.id;
-          events.push({
-            date: invoice.dueDate, type: 'invoice', amount: -invoice.amount,
-            accountId: targetAccount, description: `(Fatura) ${card.name}`, isReal: false, cardId: card.id
+    // 1a. Real Transactions
+    transactions.forEach(t => {
+       if (t.date <= endOfForecastStr) {
+          let effectiveDate = t.date;
+          let isOverdue = false;
+          if (!t.isPaid && t.date < shiftDate) {
+             effectiveDate = shiftDate;
+             isOverdue = true;
+          }
+          allEvents.push({
+             date: effectiveDate,
+             originalDate: t.date,
+             type: 'transaction',
+             amount: t.type === 'income' ? t.amount : -t.amount,
+             accountId: t.accountId,
+             description: isOverdue ? `(Atrasado) ${t.description}` : t.description,
+             isReal: true,
+             raw: t,
+             isOverdue
           });
        }
     });
 
-    const actualTransfers = transfers.filter(t => {
-       const d = new Date(t.date + 'T12:00:00');
-       return d.getMonth() === month && d.getFullYear() === year;
-    });
-    actualTransfers.forEach(tr => {
-       events.push({ date: tr.date, type: 'transfer_out', amount: -tr.amount, accountId: tr.fromAccountId, description: `Transf. para ${accounts.find(a => a.id === tr.toAccountId)?.name}`, isReal: true });
-       events.push({ date: tr.date, type: 'transfer_in', amount: tr.amount, accountId: tr.toAccountId, description: `Transf. de ${accounts.find(a => a.id === tr.fromAccountId)?.name}`, isReal: true });
+    // 1b. Transfers
+    transfers.forEach(t => {
+       if (t.date <= endOfForecastStr) {
+          allEvents.push({ date: t.date, type: 'transfer_out', amount: -t.amount, accountId: t.fromAccountId, isReal: true });
+          allEvents.push({ date: t.date, type: 'transfer_in', amount: t.amount, accountId: t.toAccountId, isReal: true });
+       }
     });
 
-    events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // 1c. Recurring Rules
+    recurringRules.forEach(rule => {
+       const startDate = new Date(rule.startDate + 'T12:00:00');
+       const endDate = rule.endDate ? new Date(rule.endDate + 'T12:00:00') : null;
+       
+       let d = new Date(rule.startDate + 'T12:00:00');
+       const endD = new Date(endOfForecastStr + 'T12:00:00');
+       
+       while (d <= endD) {
+          let shouldAdd = false;
+          if (rule.frequency === 'monthly') {
+             const daysInMonth = getDaysInMonth(d);
+             const targetDay = Math.min(rule.dayOfMonth || 1, daysInMonth);
+             if (d.getDate() === targetDay) shouldAdd = true;
+          } else if (rule.frequency === 'weekly') {
+             if (getDay(d) === (rule.dayOfWeek || 0)) shouldAdd = true;
+          }
+          
+          if (shouldAdd && d >= startDate && (!endDate || d <= endDate)) {
+             const dateStr = format(d, 'yyyy-MM-dd');
+             const isDuplicate = transactions.some(t => t.ruleId === rule.id && t.date === dateStr);
+             if (!isDuplicate) {
+                let effectiveDate = dateStr;
+                let isOverdue = false;
+                if (dateStr < shiftDate) {
+                   effectiveDate = shiftDate;
+                   isOverdue = true;
+                }
+                allEvents.push({
+                   date: effectiveDate,
+                   originalDate: dateStr,
+                   type: 'recurring',
+                   amount: rule.type === 'income' ? rule.amount : -rule.amount,
+                   accountId: rule.accountId,
+                   description: isOverdue ? `(Atrasado) ${rule.description}` : `(Previsto) ${rule.description}`,
+                   isReal: false,
+                   isOverdue
+                });
+             }
+          }
+          d.setDate(d.getDate() + 1);
+       }
+    });
 
+    // 1d. Credit Card Invoices
+    if (creditCards.length > 0 && creditCardTransactions.length > 0) {
+       const earliestTxDate = creditCardTransactions.reduce((min, t) => t.date < min ? t.date : min, endOfForecastStr);
+       const earliestDate = new Date(earliestTxDate + 'T12:00:00');
+       let m = earliestDate.getMonth();
+       let y = earliestDate.getFullYear();
+       
+       let iterations = 0;
+       while ((y < year || (y === year && m <= month)) && iterations < 120) {
+          creditCards.forEach(card => {
+             const invoice = getCardInvoiceInfo(card.id, m, y);
+             if (invoice && invoice.amount > 0 && !invoice.isPaid) {
+                const isPaidByTx = transactions.some(t => t.linkedInvoiceId === invoice.id);
+                if (!isPaidByTx && invoice.dueDate <= endOfForecastStr) {
+                   let effectiveDate = invoice.dueDate;
+                   let isOverdue = false;
+                   if (invoice.dueDate < shiftDate) {
+                      effectiveDate = shiftDate;
+                      isOverdue = true;
+                   }
+                   const targetAccount = card.defaultPaymentAccountId || accounts[0]?.id;
+                   allEvents.push({
+                      date: effectiveDate,
+                      originalDate: invoice.dueDate,
+                      type: 'invoice',
+                      amount: -invoice.amount,
+                      accountId: targetAccount,
+                      description: isOverdue ? `(Fatura Atrasada) ${card.name} - ${m+1}/${y}` : `Fatura Prevista - ${card.name}`,
+                      isReal: false,
+                      isOverdue,
+                      cardId: card.id
+                   });
+                }
+             }
+          });
+          m++;
+          if (m > 11) { m = 0; y++; }
+          iterations++;
+       }
+    }
+
+    // 2. Sort all events by date
+    allEvents.sort((a, b) => a.date.localeCompare(b.date));
+
+    // 3. Simulate balances
+    const runningBalances: Record<string, number> = {};
+    accounts.forEach(acc => runningBalances[acc.id] = acc.initialBalance);
+    
+    let totalInitialBalance = 0;
+    const initialBalances: Record<string, number> = {};
+    
+    let capturedInitial = false;
+    const eventsForForecastMonth: any[] = [];
+
+    for (const ev of allEvents) {
+       if (ev.date >= startOfForecastStr && !capturedInitial) {
+          accounts.forEach(acc => {
+             initialBalances[acc.id] = runningBalances[acc.id];
+             totalInitialBalance += runningBalances[acc.id];
+          });
+          capturedInitial = true;
+       }
+       
+       runningBalances[ev.accountId] = (runningBalances[ev.accountId] || 0) + ev.amount;
+       
+       if (ev.date >= startOfForecastStr && ev.date <= endOfForecastStr) {
+          eventsForForecastMonth.push(ev);
+       }
+    }
+    
+    if (!capturedInitial) {
+       accounts.forEach(acc => {
+          initialBalances[acc.id] = runningBalances[acc.id];
+          totalInitialBalance += runningBalances[acc.id];
+       });
+    }
+
+    // 4. Build Daily Data
     const dailyData: any[] = [];
-    const currentBalances = { ...initialBalances };
-    let currentTotal = totalInitialBalance;
-    let minBalance = currentTotal;
-    let riskDate: string | null = currentTotal < 0 ? startOfForecastStr : null;
+    let currentTotalBalance = totalInitialBalance;
+    const currentAccountBalances = { ...initialBalances };
     const eventsByDay: Record<string, any[]> = {};
+    
+    let minBalance = currentTotalBalance;
+    let riskDate: string | null = null;
+
+    const daysInMonth = eachDayOfInterval({ start: startOfForecastMonth, end: endOfForecastMonth });
 
     daysInMonth.forEach(day => {
-       const dateStr = format(day, 'yyyy-MM-dd');
-       const dayEvents = events.filter(e => e.date === dateStr);
-       eventsByDay[dateStr] = dayEvents;
-       dayEvents.forEach(e => {
-          if (e.accountId && currentBalances[e.accountId] !== undefined) currentBalances[e.accountId] += e.amount;
-          if (e.type !== 'transfer_out' && e.type !== 'transfer_in') currentTotal += e.amount;
-       });
-       if (currentTotal < 0 && !riskDate) riskDate = dateStr;
-       if (currentTotal < minBalance) minBalance = currentTotal;
-       dailyData.push({ date: dateStr, balance: currentTotal, formattedDate: format(day, 'dd/MM'), ...currentBalances });
+      const dateStr = format(day, 'yyyy-MM-dd');
+      const dayEvents = eventsForForecastMonth.filter(e => e.date === dateStr);
+      
+      if (dayEvents.length > 0) {
+        eventsByDay[dateStr] = dayEvents;
+        dayEvents.forEach(ev => {
+          currentAccountBalances[ev.accountId] = (currentAccountBalances[ev.accountId] || 0) + ev.amount;
+        });
+        currentTotalBalance = Object.values(currentAccountBalances).reduce((a, b) => a + b, 0);
+      }
+
+      if (currentTotalBalance < minBalance) {
+        minBalance = currentTotalBalance;
+        if (currentTotalBalance < 0 && !riskDate) {
+          riskDate = dateStr;
+        }
+      }
+
+      dailyData.push({
+        date: dateStr,
+        formattedDate: format(day, 'dd/MM'),
+        balance: currentTotalBalance,
+        events: dayEvents.length
+      });
     });
 
-    const result = { initialBalance: totalInitialBalance, endBalance: currentTotal, minBalance, riskDate, dailyData, eventsByDay };
-    
+    const result = {
+      initialBalance: totalInitialBalance,
+      endBalance: currentTotalBalance,
+      minBalance,
+      riskDate,
+      dailyData,
+      eventsByDay
+    };
+
     if (Object.keys(forecastCache.current).length > 20) forecastCache.current = {};
     forecastCache.current[cacheKey] = result;
     
     return result;
-  }, [dataVersion, accounts, transactions, transfers, creditCards, recurringRules, getRecurringPreview, getCardInvoiceInfo]);
+  }, [dataVersion, accounts, transactions, transfers, creditCards, creditCardTransactions, recurringRules, getCardInvoiceInfo]);
 
   // --- FILTERING (Memoized) ---
   const getUnifiedList = useCallback((filters: FilterState) => {

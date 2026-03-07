@@ -11,6 +11,7 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CreditCardManagerProps {
   cards: CreditCard[];
@@ -180,7 +181,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (refundingTx && onAddRefund) {
       const amt = parseFloat(refundForm.amount);
       if (amt > refundingTx.amount) {
-        alert('O valor do estorno não pode ser maior que o valor da compra.');
+        toast.error('O valor do estorno não pode ser maior que o valor da compra.');
         return;
       }
       onAddRefund(refundingTx, amt, refundForm.date, refundForm.description);

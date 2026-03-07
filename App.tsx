@@ -23,6 +23,7 @@ import { FilterState } from './types';
 import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft } from 'lucide-react';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { MobileFab } from './components/ui/MobileFab';
+import { Toaster } from 'sonner';
 
 // Define valid tabs for type safety
 type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals';
@@ -253,6 +254,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-transparent text-slate-100 font-sans overflow-hidden">
+      <Toaster theme="dark" position="bottom-right" />
       
       {/* SIDEBAR */}
       <Sidebar 
