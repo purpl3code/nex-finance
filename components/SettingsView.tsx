@@ -26,6 +26,28 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+const SectionCard = ({ title, description, icon, children, danger = false }: any) => (
+  <GlassCard 
+    className={`overflow-hidden ${danger ? 'border-red-500/30 shadow-red-900/10' : ''}`}
+    variant={danger ? 'base' : 'base'}
+  >
+    <div className={`p-6 border-b ${danger ? 'border-red-500/20 bg-red-500/5' : 'border-white/5 bg-white/5'}`}>
+      <div className="flex items-start gap-4">
+        <div className={`p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
+          {icon}
+        </div>
+        <div>
+          <h3 className={`text-lg font-semibold ${danger ? 'text-red-400' : 'text-white'}`}>{title}</h3>
+          {description && <p className="text-sm text-slate-400 mt-1">{description}</p>}
+        </div>
+      </div>
+    </div>
+    <div className="p-6">
+      {children}
+    </div>
+  </GlassCard>
+);
+
 export const SettingsView: React.FC = () => {
   const { session } = useAuth();
   const { 
@@ -221,28 +243,6 @@ export const SettingsView: React.FC = () => {
      DataHealthService.exportOrphans(healthReport, fullData);
   };
 
-  const SectionCard = ({ title, description, icon, children, danger = false }: any) => (
-    <GlassCard 
-      className={`overflow-hidden ${danger ? 'border-red-500/30 shadow-red-900/10' : ''}`}
-      variant={danger ? 'base' : 'base'}
-    >
-      <div className={`p-6 border-b ${danger ? 'border-red-500/20 bg-red-500/5' : 'border-white/5 bg-white/5'}`}>
-        <div className="flex items-start gap-4">
-          <div className={`p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
-            {icon}
-          </div>
-          <div>
-            <h3 className={`text-lg font-semibold ${danger ? 'text-red-400' : 'text-white'}`}>{title}</h3>
-            {description && <p className="text-sm text-slate-400 mt-1">{description}</p>}
-          </div>
-        </div>
-      </div>
-      <div className="p-6">
-        {children}
-      </div>
-    </GlassCard>
-  );
-
   return (
     <PageShell className="max-w-4xl">
       <PageHeader 
@@ -351,116 +351,6 @@ export const SettingsView: React.FC = () => {
         </div>
       </SectionCard>
 
-      {/* 1. DATA HEALTH */}
-      <SectionCard
-        title="Saúde dos Dados"
-        description="Verifique inconsistências e corrija referências quebradas."
-        icon={<Stethoscope size={24} />}
-      >
-        <div className="space-y-6">
-           {/* Status Bar */}
-           {!healthReport ? (
-              <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-700/50 border-dashed">
-                 <Activity size={40} className="mx-auto text-slate-600 mb-4" />
-                 <p className="text-slate-400 mb-6">Execute uma verificação para detectar itens órfãos ou quebrados.</p>
-                 <GlassButton onClick={runHealthScan} disabled={isScanning} icon={isScanning ? <RefreshCw className="animate-spin" size={16}/> : <Activity size={16}/>}>
-                    {isScanning ? 'Verificando...' : 'Executar Verificação'}
-                 </GlassButton>
-              </div>
-           ) : (
-              <div className="space-y-4">
-                 <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-lg border border-white/10">
-                    <div className={`p-3 rounded-full ${healthReport.summary.errorCount > 0 ? 'bg-red-500/20 text-red-400' : healthReport.summary.warningCount > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                       {healthReport.summary.errorCount > 0 || healthReport.summary.warningCount > 0 ? <AlertTriangle size={24}/> : <CheckCircle size={24}/>}
-                    </div>
-                    <div className="flex-1">
-                       <h4 className="font-semibold text-white">
-                          {healthReport.summary.errorCount === 0 && healthReport.summary.warningCount === 0 
-                             ? 'Tudo certo com seus dados!' 
-                             : 'Problemas encontrados'}
-                       </h4>
-                       <p className="text-xs text-slate-400">
-                          {healthReport.summary.errorCount} erros críticos • {healthReport.summary.warningCount} avisos
-                       </p>
-                    </div>
-                    <div className="flex gap-2">
-                       <GlassButton size="sm" variant="secondary" onClick={runHealthScan} disabled={isScanning}>Re-escanear</GlassButton>
-                       {healthReport.issues.some(i => i.canAutoFix) && (
-                          <GlassButton size="sm" onClick={runAutoFix} className="bg-emerald-600 hover:bg-emerald-700 text-white">Corrigir Automático</GlassButton>
-                       )}
-                       {healthReport.issues.some(i => !i.canAutoFix) && (
-                          <GlassButton size="sm" variant="ghost" onClick={exportOrphans} icon={<Download size={14}/>}>Exportar Órfãos</GlassButton>
-                       )}
-                    </div>
-                 </div>
-
-                 {/* Issues List */}
-                 {healthReport.issues.length > 0 && (
-                    <div className="space-y-2">
-                       {healthReport.issues.map(issue => (
-                          <div key={issue.id} className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800">
-                             <button 
-                                onClick={() => setExpandedIssue(expandedIssue === issue.id ? null : issue.id)}
-                                className="w-full flex justify-between items-center p-3 hover:bg-slate-700/50 transition-colors"
-                             >
-                                <div className="flex items-center gap-3">
-                                   <div className={`w-2 h-2 rounded-full ${issue.severity === 'error' ? 'bg-red-500' : 'bg-amber-500'}`}></div>
-                                   <span className="text-sm font-medium text-slate-200">{issue.title}</span>
-                                   <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">{issue.affectedCount} itens</span>
-                                </div>
-                                {expandedIssue === issue.id ? <ChevronUp size={16} className="text-slate-500"/> : <ChevronDown size={16} className="text-slate-500"/>}
-                             </button>
-                             
-                             {expandedIssue === issue.id && (
-                                <div className="p-3 bg-slate-900/30 border-t border-slate-700 text-sm">
-                                   <p className="text-slate-400 mb-2">{issue.description}</p>
-                                   <div className="space-y-1 mb-2">
-                                      {issue.examples.map(ex => (
-                                         <div key={ex.id} className="flex justify-between text-xs text-slate-500 bg-slate-900/50 p-1.5 rounded">
-                                            <span>{ex.label}</span>
-                                            <span>{ex.info}</span>
-                                         </div>
-                                      ))}
-                                   </div>
-                                   <div className="text-xs font-medium mt-2">
-                                      {issue.canAutoFix ? (
-                                         <span className="text-emerald-400 flex items-center gap-1"><CheckCircle size={12}/> Correção Segura Disponível</span>
-                                      ) : (
-                                         <span className="text-amber-400 flex items-center gap-1"><AlertTriangle size={12}/> Requer Revisão Manual (Exporte a lista)</span>
-                                      )}
-                                   </div>
-                                </div>
-                             )}
-                          </div>
-                       ))}
-                    </div>
-                 )}
-              </div>
-           )}
-
-           {/* Log History */}
-           {fixLogs.length > 0 && (
-              <div className="mt-6 pt-6 border-t border-slate-700/50">
-                 <div className="flex justify-between items-center mb-3">
-                    <h4 className="text-sm font-semibold text-slate-300 flex items-center gap-2"><History size={14}/> Histórico de Correções</h4>
-                    <button onClick={() => { DataHealthService.clearLogs(); setFixLogs([]); }} className="text-xs text-red-400 hover:text-red-300">Limpar Histórico</button>
-                 </div>
-                 <div className="bg-slate-900 rounded-lg p-3 max-h-40 overflow-y-auto space-y-2 custom-scrollbar">
-                    {fixLogs.map(log => (
-                       <div key={log.id} className="text-xs flex justify-between items-center border-b border-slate-800 last:border-0 pb-2 last:pb-0">
-                          <div>
-                             <p className="text-slate-300 font-medium">{log.action}</p>
-                             <p className="text-slate-500">{log.details}</p>
-                          </div>
-                          <span className="text-slate-600 ml-2 whitespace-nowrap">{new Date(log.dateISO).toLocaleDateString()}</span>
-                       </div>
-                    ))}
-                 </div>
-              </div>
-           )}
-        </div>
-      </SectionCard>
-
       {/* 2. BACKUP & RESTORE */}
       <SectionCard 
         title="Backup e Restauração" 
@@ -500,54 +390,6 @@ export const SettingsView: React.FC = () => {
              </GlassButton>
            </div>
         </div>
-      </SectionCard>
-
-      {/* 3. APP DATA STATS */}
-      <SectionCard 
-        title="Dados do Aplicativo" 
-        description="Resumo dos registros armazenados no seu navegador."
-        icon={<Database size={24} />}
-      >
-         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
-            {[
-               { val: transactions.length, label: 'Transações' },
-               { val: accounts.length, label: 'Contas' },
-               { val: creditCards.length, label: 'Cartões' },
-               { val: recurringRules.length, label: 'Recorrências' },
-               { val: investmentAccounts.length, label: 'Inv. Contas' },
-               { val: assets.length, label: 'Inv. Ativos' },
-               { val: investmentMovements.length, label: 'Inv. Movs' },
-            ].map((stat, i) => (
-               <div key={i} className="bg-slate-900/50 p-3 rounded-lg text-center border border-white/10">
-                  <p className="text-xl font-bold text-white">{stat.val}</p>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{stat.label}</p>
-               </div>
-            ))}
-         </div>
-         <div className="mt-6 flex justify-end">
-            <GlassButton size="sm" variant="ghost" onClick={() => window.location.reload()} icon={<RefreshCw size={14}/>}>Recalcular Dados</GlassButton>
-         </div>
-      </SectionCard>
-
-      {/* 4. SYSTEM INFO */}
-      <SectionCard 
-        title="Sistema" 
-        icon={<Server size={24} />}
-      >
-         <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-center py-2 border-b border-white/5">
-               <span className="text-slate-400 text-sm">Versão do Schema (Banco de Dados)</span>
-               <span className="text-slate-200 font-mono text-sm bg-slate-900 px-2 py-1 rounded border border-white/5">v{StorageService.load().version}</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-white/5">
-               <span className="text-slate-400 text-sm">Armazenamento</span>
-               <span className="text-emerald-400 text-sm font-medium flex items-center gap-1"><HardDrive size={14}/> LocalStorage (Browser)</span>
-            </div>
-            <div className="flex justify-between items-center py-2">
-               <span className="text-slate-400 text-sm">Status</span>
-               <span className="text-emerald-400 text-sm font-medium">{isDemo ? 'Offline (Demo)' : 'Online (Sync)'}</span>
-            </div>
-         </div>
       </SectionCard>
 
       {/* 5. DANGER ZONE */}
