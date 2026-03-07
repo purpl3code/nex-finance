@@ -670,218 +670,130 @@ export const useFinance = () => {
     const endOfForecastStr = format(endOfForecastMonth, 'yyyy-MM-dd');
     
     const today = new Date();
-    const todayStr = format(today, 'yyyy-MM-dd');
-    const currentMonthStart = format(new Date(today.getFullYear(), today.getMonth(), 1), 'yyyy-MM-dd');
-    
-    const isPastMonth = startOfForecastStr < currentMonthStart;
-    const shiftDate = isPastMonth ? startOfForecastStr : todayStr;
+    const startOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const startOfCurrentMonthStr = format(startOfCurrentMonth, 'yyyy-MM-dd');
 
-    const allEvents: any[] = [];
-
-    // 1a. Real Transactions
-    transactions.forEach(t => {
-       if (t.date <= endOfForecastStr) {
-          let effectiveDate = t.date;
-          let isOverdue = false;
-          if (!t.isPaid && t.date < shiftDate) {
-             effectiveDate = shiftDate;
-             isOverdue = true;
-          }
-          allEvents.push({
-             date: effectiveDate,
-             originalDate: t.date,
-             type: 'transaction',
-             amount: t.type === 'income' ? t.amount : -t.amount,
-             accountId: t.accountId,
-             description: isOverdue ? `(Atrasado) ${t.description}` : t.description,
-             isReal: true,
-             raw: t,
-             isOverdue
-          });
-       }
-    });
-
-    // 1b. Transfers
-    transfers.forEach(t => {
-       if (t.date <= endOfForecastStr) {
-          allEvents.push({ date: t.date, type: 'transfer_out', amount: -t.amount, accountId: t.fromAccountId, isReal: true });
-          allEvents.push({ date: t.date, type: 'transfer_in', amount: t.amount, accountId: t.toAccountId, isReal: true });
-       }
-    });
-
-    // 1c. Recurring Rules
-    recurringRules.forEach(rule => {
-       const startDate = new Date(rule.startDate + 'T12:00:00');
-       const endDate = rule.endDate ? new Date(rule.endDate + 'T12:00:00') : null;
-       
-       let d = new Date(rule.startDate + 'T12:00:00');
-       const endD = new Date(endOfForecastStr + 'T12:00:00');
-       
-       while (d <= endD) {
-          let shouldAdd = false;
-          if (rule.frequency === 'monthly') {
-             const daysInMonth = getDaysInMonth(d);
-             const targetDay = Math.min(rule.dayOfMonth || 1, daysInMonth);
-             if (d.getDate() === targetDay) shouldAdd = true;
-          } else if (rule.frequency === 'weekly') {
-             if (getDay(d) === (rule.dayOfWeek || 0)) shouldAdd = true;
-          }
-          
-          if (shouldAdd && d >= startDate && (!endDate || d <= endDate)) {
-             const dateStr = format(d, 'yyyy-MM-dd');
-             const isDuplicate = transactions.some(t => t.ruleId === rule.id && t.date === dateStr);
-             if (!isDuplicate) {
-                let effectiveDate = dateStr;
-                let isOverdue = false;
-                if (dateStr < shiftDate) {
-                   effectiveDate = shiftDate;
-                   isOverdue = true;
-                }
-                allEvents.push({
-                   date: effectiveDate,
-                   originalDate: dateStr,
-                   type: 'recurring',
-                   amount: rule.type === 'income' ? rule.amount : -rule.amount,
-                   accountId: rule.accountId,
-                   description: isOverdue ? `(Atrasado) ${rule.description}` : `(Previsto) ${rule.description}`,
-                   isReal: false,
-                   isOverdue
-                });
-             }
-          }
-          d.setDate(d.getDate() + 1);
-       }
-    });
-
-    // 1d. Credit Card Invoices
-    if (creditCards.length > 0 && creditCardTransactions.length > 0) {
-       const earliestTxDate = creditCardTransactions.reduce((min, t) => t.date < min ? t.date : min, endOfForecastStr);
-       const earliestDate = new Date(earliestTxDate + 'T12:00:00');
-       let m = earliestDate.getMonth();
-       let y = earliestDate.getFullYear();
-       
-       let iterations = 0;
-       while ((y < year || (y === year && m <= month)) && iterations < 120) {
-          creditCards.forEach(card => {
-             const invoice = getCardInvoiceInfo(card.id, m, y);
-             if (invoice && invoice.amount > 0 && !invoice.isPaid) {
-                const isPaidByTx = transactions.some(t => t.linkedInvoiceId === invoice.id);
-                if (!isPaidByTx && invoice.dueDate <= endOfForecastStr) {
-                   let effectiveDate = invoice.dueDate;
-                   let isOverdue = false;
-                   if (invoice.dueDate < shiftDate) {
-                      effectiveDate = shiftDate;
-                      isOverdue = true;
-                   }
-                   const targetAccount = card.defaultPaymentAccountId || accounts[0]?.id;
-                   allEvents.push({
-                      date: effectiveDate,
-                      originalDate: invoice.dueDate,
-                      type: 'invoice',
-                      amount: -invoice.amount,
-                      accountId: targetAccount,
-                      description: isOverdue ? `(Fatura Atrasada) ${card.name} - ${m+1}/${y}` : `Fatura Prevista - ${card.name}`,
-                      isReal: false,
-                      isOverdue,
-                      cardId: card.id
-                   });
-                }
-             }
-          });
-          m++;
-          if (m > 11) { m = 0; y++; }
-          iterations++;
-       }
-    }
-
-    // 2. Sort all events by date
-    allEvents.sort((a, b) => a.date.localeCompare(b.date));
-
-    // 3. Simulate balances
-    const runningBalances: Record<string, number> = {};
-    accounts.forEach(acc => runningBalances[acc.id] = acc.initialBalance);
-    
-    let totalInitialBalance = 0;
+    // 1. Calculate Base Initial Balance (from real transactions only, up to startOfForecastStr)
     const initialBalances: Record<string, number> = {};
-    
-    let capturedInitial = false;
-    const eventsForForecastMonth: any[] = [];
+    let totalInitialBalance = 0;
 
-    for (const ev of allEvents) {
-       if (ev.date >= startOfForecastStr && !capturedInitial) {
-          accounts.forEach(acc => {
-             initialBalances[acc.id] = runningBalances[acc.id];
-             totalInitialBalance += runningBalances[acc.id];
+    accounts.forEach(acc => {
+      let bal = acc.initialBalance;
+      const pastTxs = transactions.filter(t => t.accountId === acc.id && t.date < startOfForecastStr);
+      bal += pastTxs.reduce((sum, t) => t.type === 'income' ? sum + t.amount : sum - t.amount, 0);
+      const pastTransfersOut = transfers.filter(t => t.fromAccountId === acc.id && t.date < startOfForecastStr);
+      const pastTransfersIn = transfers.filter(t => t.toAccountId === acc.id && t.date < startOfForecastStr);
+      bal -= pastTransfersOut.reduce((sum, t) => sum + t.amount, 0);
+      bal += pastTransfersIn.reduce((sum, t) => sum + t.amount, 0);
+      initialBalances[acc.id] = bal;
+      totalInitialBalance += bal;
+    });
+
+    // 2. If forecast is in the future, add unrealized recurring & invoices between current month and forecast month
+    if (startOfForecastStr > startOfCurrentMonthStr) {
+       let simMonth = startOfCurrentMonth.getMonth();
+       let simYear = startOfCurrentMonth.getFullYear();
+       
+       while (simYear < year || (simYear === year && simMonth < month)) {
+          // Add recurring
+          const recPreview = getRecurringPreview(simMonth, simYear);
+          recPreview.forEach(item => {
+             if (!item.isDuplicate && item.transaction.date < startOfForecastStr) {
+                const amt = item.transaction.type === 'income' ? item.transaction.amount : -item.transaction.amount;
+                initialBalances[item.transaction.accountId] = (initialBalances[item.transaction.accountId] || 0) + amt;
+                totalInitialBalance += amt;
+             }
           });
-          capturedInitial = true;
-       }
-       
-       runningBalances[ev.accountId] = (runningBalances[ev.accountId] || 0) + ev.amount;
-       
-       if (ev.date >= startOfForecastStr && ev.date <= endOfForecastStr) {
-          eventsForForecastMonth.push(ev);
+          
+          // Add invoices
+          creditCards.forEach(card => {
+             const invoice = getCardInvoiceInfo(card.id, simMonth, simYear);
+             if (invoice && invoice.amount > 0 && !invoice.isPaid && invoice.dueDate < startOfForecastStr) {
+                const isPaidByTx = transactions.some(t => t.linkedInvoiceId === invoice.id);
+                if (!isPaidByTx) {
+                   const targetAccount = card.defaultPaymentAccountId || accounts[0]?.id;
+                   initialBalances[targetAccount] = (initialBalances[targetAccount] || 0) - invoice.amount;
+                   totalInitialBalance -= invoice.amount;
+                }
+             }
+          });
+          
+          simMonth++;
+          if (simMonth > 11) { simMonth = 0; simYear++; }
        }
     }
-    
-    if (!capturedInitial) {
-       accounts.forEach(acc => {
-          initialBalances[acc.id] = runningBalances[acc.id];
-          totalInitialBalance += runningBalances[acc.id];
-       });
-    }
+
+    // 3. Gather events ONLY for the forecast month
+    const events: any[] = [];
+
+    const actualTxs = transactions.filter(t => t.date >= startOfForecastStr && t.date <= endOfForecastStr);
+    actualTxs.forEach(tx => events.push({
+      date: tx.date, type: 'transaction', amount: tx.type === 'income' ? tx.amount : -tx.amount,
+      accountId: tx.accountId, description: tx.description, isReal: true, raw: tx
+    }));
+
+    const actualTransfers = transfers.filter(t => t.date >= startOfForecastStr && t.date <= endOfForecastStr);
+    actualTransfers.forEach(tr => {
+       events.push({ date: tr.date, type: 'transfer_out', amount: -tr.amount, accountId: tr.fromAccountId, description: `Transf. para ${accounts.find(a => a.id === tr.toAccountId)?.name}`, isReal: true });
+       events.push({ date: tr.date, type: 'transfer_in', amount: tr.amount, accountId: tr.toAccountId, description: `Transf. de ${accounts.find(a => a.id === tr.fromAccountId)?.name}`, isReal: true });
+    });
+
+    const recurringPreview = getRecurringPreview(month, year);
+    recurringPreview.forEach(item => {
+      if (!item.isDuplicate && item.transaction.date >= startOfForecastStr && item.transaction.date <= endOfForecastStr) {
+        events.push({
+          date: item.transaction.date, type: 'recurring', amount: item.transaction.type === 'income' ? item.transaction.amount : -item.transaction.amount,
+          accountId: item.transaction.accountId, description: `(Previsto) ${item.ruleName}`, isReal: false
+        });
+      }
+    });
+
+    creditCards.forEach(card => {
+       const invoice = getCardInvoiceInfo(card.id, month, year);
+       if (invoice && invoice.amount > 0 && !invoice.isPaid && invoice.dueDate >= startOfForecastStr && invoice.dueDate <= endOfForecastStr) {
+          const isPaidByTx = transactions.some(t => t.linkedInvoiceId === invoice.id);
+          if (!isPaidByTx) {
+             const targetAccount = card.defaultPaymentAccountId || accounts[0]?.id;
+             events.push({
+               date: invoice.dueDate, type: 'invoice', amount: -invoice.amount,
+               accountId: targetAccount, description: `Fatura Prevista - ${card.name}`, isReal: false, cardId: card.id
+             });
+          }
+       }
+    });
+
+    events.sort((a, b) => a.date.localeCompare(b.date));
 
     // 4. Build Daily Data
     const dailyData: any[] = [];
-    let currentTotalBalance = totalInitialBalance;
-    const currentAccountBalances = { ...initialBalances };
+    const currentBalances = { ...initialBalances };
+    let currentTotal = totalInitialBalance;
+    let minBalance = currentTotal;
+    let riskDate: string | null = currentTotal < 0 ? startOfForecastStr : null;
     const eventsByDay: Record<string, any[]> = {};
-    
-    let minBalance = currentTotalBalance;
-    let riskDate: string | null = null;
 
     const daysInMonth = eachDayOfInterval({ start: startOfForecastMonth, end: endOfForecastMonth });
 
     daysInMonth.forEach(day => {
-      const dateStr = format(day, 'yyyy-MM-dd');
-      const dayEvents = eventsForForecastMonth.filter(e => e.date === dateStr);
-      
-      if (dayEvents.length > 0) {
-        eventsByDay[dateStr] = dayEvents;
-        dayEvents.forEach(ev => {
-          currentAccountBalances[ev.accountId] = (currentAccountBalances[ev.accountId] || 0) + ev.amount;
-        });
-        currentTotalBalance = Object.values(currentAccountBalances).reduce((a, b) => a + b, 0);
-      }
-
-      if (currentTotalBalance < minBalance) {
-        minBalance = currentTotalBalance;
-        if (currentTotalBalance < 0 && !riskDate) {
-          riskDate = dateStr;
-        }
-      }
-
-      dailyData.push({
-        date: dateStr,
-        formattedDate: format(day, 'dd/MM'),
-        balance: currentTotalBalance,
-        events: dayEvents.length
-      });
+       const dateStr = format(day, 'yyyy-MM-dd');
+       const dayEvents = events.filter(e => e.date === dateStr);
+       eventsByDay[dateStr] = dayEvents;
+       dayEvents.forEach(e => {
+          if (e.accountId && currentBalances[e.accountId] !== undefined) currentBalances[e.accountId] += e.amount;
+          if (e.type !== 'transfer_out' && e.type !== 'transfer_in') currentTotal += e.amount;
+       });
+       if (currentTotal < 0 && !riskDate) riskDate = dateStr;
+       if (currentTotal < minBalance) minBalance = currentTotal;
+       dailyData.push({ date: dateStr, balance: currentTotal, formattedDate: format(day, 'dd/MM'), ...currentBalances });
     });
 
-    const result = {
-      initialBalance: totalInitialBalance,
-      endBalance: currentTotalBalance,
-      minBalance,
-      riskDate,
-      dailyData,
-      eventsByDay
-    };
-
+    const result = { initialBalance: totalInitialBalance, endBalance: currentTotal, minBalance, riskDate, dailyData, eventsByDay };
+    
     if (Object.keys(forecastCache.current).length > 20) forecastCache.current = {};
     forecastCache.current[cacheKey] = result;
     
     return result;
-  }, [dataVersion, accounts, transactions, transfers, creditCards, creditCardTransactions, recurringRules, getCardInvoiceInfo]);
+  }, [dataVersion, accounts, transactions, transfers, creditCards, recurringRules, getRecurringPreview, getCardInvoiceInfo]);
 
   // --- FILTERING (Memoized) ---
   const getUnifiedList = useCallback((filters: FilterState) => {
