@@ -166,6 +166,22 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     }
   };
 
+  const handleSelectCard = (cardId: string) => {
+    let checkDate = new Date();
+    let currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
+    
+    let attempts = 0;
+    while (currentMonthInfo?.isPaid && attempts < 12) {
+      checkDate.setMonth(checkDate.getMonth() + 1);
+      currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
+      attempts++;
+    }
+    
+    setCurrentDate(checkDate);
+    setSelectedCardId(cardId);
+    setView('details');
+  };
+
   const openRefundModal = (tx: CreditCardTransaction) => {
     setRefundingTx(tx);
     setRefundForm({
@@ -191,9 +207,23 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
   const handlePaySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!invoiceInfo || !payAccount) return;
+    if (!invoiceInfo || !payAccount || !selectedCardId) return;
     onPayInvoice(invoiceInfo, payAccount);
     setIsPayModalOpen(false);
+    
+    // Advance to next unpaid month automatically after paying
+    let checkDate = new Date(currentDate);
+    checkDate.setMonth(checkDate.getMonth() + 1);
+    let nextMonthInfo = getInvoiceInfo(selectedCardId, checkDate.getMonth(), checkDate.getFullYear());
+    
+    let attempts = 0;
+    while (nextMonthInfo?.isPaid && attempts < 12) {
+      checkDate.setMonth(checkDate.getMonth() + 1);
+      nextMonthInfo = getInvoiceInfo(selectedCardId, checkDate.getMonth(), checkDate.getFullYear());
+      attempts++;
+    }
+    
+    setCurrentDate(checkDate);
   };
 
   const selectedCard = cards.find(c => c.id === selectedCardId);
@@ -586,7 +616,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map(card => (
-          <GlassCard key={card.id} onClick={() => { setSelectedCardId(card.id); setView('details'); }} className="cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56 hover:border-blue-500/30">
+          <GlassCard key={card.id} onClick={() => handleSelectCard(card.id)} className="cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56 hover:border-blue-500/30">
              {/* Decorative Background */}
              <div className="absolute top-0 right-0 p-6 opacity-[0.03] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
                 <CardIcon size={160} />

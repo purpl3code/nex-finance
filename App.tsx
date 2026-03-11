@@ -167,12 +167,28 @@ const App: React.FC = () => {
     if (editingItem && editingItem.id) {
       if (data.isTransfer) {
         editTransfer(editingItem.id, data);
+      } else if (data.isCreditCard || ('cardId' in editingItem)) {
+        editCreditCardTransaction(editingItem.id, {
+          cardId: data.accountId,
+          amount: data.amount,
+          date: data.date,
+          categoryId: data.categoryId,
+          description: data.description,
+        });
       } else {
         editTransaction(editingItem.id, data);
       }
     } else {
       if (data.isTransfer) {
         addTransfer(data);
+      } else if (data.isCreditCard) {
+        addCreditCardTransaction({
+          cardId: data.accountId,
+          amount: data.amount,
+          date: data.date,
+          categoryId: data.categoryId,
+          description: data.description,
+        }, data.installments || 1);
       } else {
         addTransaction(data);
       }
@@ -484,6 +500,7 @@ const App: React.FC = () => {
             initialData={editingItem} 
             categories={categories} 
             accounts={accounts}
+            creditCards={creditCards}
             onSubmit={handleSubmitForm}
             onCancel={handleCloseModal}
             currentMonth={filters.month}

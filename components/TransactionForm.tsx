@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer } from '../types';
+import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer, CreditCard } from '../types';
 import { Button } from './ui/Button';
 import { ModalFooter } from './ui/ModalShell';
 import { ArrowDownCircle, ArrowUpCircle, ArrowRightLeft } from 'lucide-react';
@@ -9,6 +9,7 @@ interface TransactionFormProps {
   initialData?: Transaction | Transfer | any;
   categories: Category[];
   accounts: Account[];
+  creditCards?: CreditCard[];
   onSubmit: (data: any) => void;
   onCancel: () => void;
   currentMonth?: number;
@@ -19,6 +20,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   initialData, 
   categories, 
   accounts,
+  creditCards,
   onSubmit, 
   onCancel,
   currentMonth,
@@ -26,9 +28,11 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 }) => {
   // Check if initial data is a transfer
   const initialIsTransfer = initialData && 'fromAccountId' in initialData;
+  const isEditingCreditCard = initialData?.id && 'cardId' in initialData;
+  const isEditingRegular = initialData?.id && 'accountId' in initialData;
 
   const [mode, setMode] = useState<TransactionType | 'transfer'>(
-    initialIsTransfer ? 'transfer' : (initialData?.type || 'expense')
+    initialIsTransfer ? 'transfer' : (isEditingCreditCard ? 'expense' : (initialData?.type || 'expense'))
   );
 
   const [amount, setAmount] = useState<string>(initialData?.amount?.toString() || '');
@@ -49,7 +53,8 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   
   // Transaction State
   const [categoryId, setCategoryId] = useState<string>(initialData?.categoryId || '');
-  const [accountId, setAccountId] = useState<string>(initialData?.accountId || (accounts[0]?.id || ''));
+  const [accountId, setAccountId] = useState<string>(initialData?.accountId || initialData?.cardId || (accounts[0]?.id || ''));
+  const [installments, setInstallments] = useState<number>(1);
 
   // Transfer State
   const [fromAccountId, setFromAccountId] = useState<string>(initialData?.fromAccountId || (accounts[0]?.id || ''));
@@ -135,7 +140,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         return;
       }
       if (!accountId) {
-        setError('Selecione uma conta.');
+        setError('Selecione uma conta ou cartão.');
         return;
       }
       
@@ -146,14 +151,18 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         return;
       }
 
+      const isCreditCard = creditCards?.some(c => c.id === accountId);
+
       onSubmit({
         isTransfer: false, // Internal flag
+        isCreditCard,
         type: mode,
         amount: numAmount,
         date,
         categoryId,
         accountId,
-        description
+        description,
+        installments: isCreditCard ? installments : 1
       });
     }
   };
@@ -267,16 +276,27 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         </div>
       ) : (
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">Conta / Carteira</label>
+          <label className="block text-sm font-medium text-slate-300 mb-1">Conta / Cartão</label>
           <select 
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
             className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all appearance-none"
           >
-            <option value="">Selecione a conta...</option>
-            {accounts.map(acc => (
-              <option key={acc.id} value={acc.id}>{acc.name}</option>
-            ))}
+            <option value="">Selecione...</option>
+            {(!isEditingCreditCard) && (
+              <optgroup label="Contas">
+                {accounts.map(acc => (
+                  <option key={acc.id} value={acc.id}>{acc.name}</option>
+                ))}
+              </optgroup>
+            )}
+            {mode === 'expense' && creditCards && creditCards.length > 0 && (!isEditingRegular) && (
+              <optgroup label="Cartões de Crédito">
+                {creditCards.map(card => (
+                  <option key={card.id} value={card.id}>{card.name}</option>
+                ))}
+              </optgroup>
+            )}
           </select>
         </div>
       )}
@@ -301,6 +321,24 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                   </option>
                 ))}
               </optgroup>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Installments (Only for Credit Card) */}
+      {mode === 'expense' && creditCards?.some(c => c.id === accountId) && !initialData?.id && (
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-1">Parcelas</label>
+          <select
+            value={installments}
+            onChange={(e) => setInstallments(parseInt(e.target.value))}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all appearance-none"
+          >
+            {Array.from({ length: 24 }, (_, i) => i + 1).map(num => (
+              <option key={num} value={num}>
+                {num}x {num > 1 ? `(R$ ${(parseFloat(amount || '0') / num).toFixed(2)})` : ''}
+              </option>
             ))}
           </select>
         </div>
