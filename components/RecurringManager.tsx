@@ -198,7 +198,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
         ))}
 
         {rules.length === 0 && (
-          <GlassCard className="text-center py-16 border-dashed border-2 border-slate-700/50 bg-transparent">
+          <GlassCard className="text-center py-16 border-dashed border-2 border-white/10 bg-transparent">
              <Repeat size={48} className="mx-auto mb-4 text-slate-600" />
              <p className="text-lg font-medium text-slate-300">Nenhuma regra cadastrada.</p>
              <p className="text-sm text-slate-500">Crie regras para lançar contas fixas automaticamente.</p>
@@ -336,7 +336,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
       <ModalShell isOpen={isGenModalOpen} onClose={() => setIsGenModalOpen(false)} title="Gerar Lançamentos">
          <ModalBody>
             <div className="space-y-6">
-               <GlassCard className="flex gap-4 items-center justify-center p-6 bg-slate-900/50">
+               <GlassCard className="flex gap-4 items-center justify-center p-6 bg-white/5 border-white/10">
                   <Calendar className="text-blue-400" size={24} />
                   <div className="flex gap-2 w-full">
                     <div className="flex-1">
@@ -376,7 +376,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                            <p className="text-center text-slate-500 text-sm py-4">Nenhuma regra ativa para este período.</p>
                         ) : (
                            previewData.map((item, idx) => (
-                              <div key={idx} className={`p-3 rounded-lg border flex justify-between items-center transition-all ${item.isDuplicate ? 'bg-slate-900/30 border-slate-800 opacity-60' : 'bg-slate-800/50 border-white/10'}`}>
+                              <div key={idx} className={`p-3 rounded-xl border flex justify-between items-center transition-all ${item.isDuplicate ? 'bg-white/5 border-white/5 opacity-60' : 'bg-white/10 border-white/10'}`}>
                                  <div>
                                     <p className="text-sm font-medium text-white">{item.ruleName}</p>
                                     <p className="text-xs text-slate-400">{new Date(item.transaction.date).toLocaleDateString('pt-BR')} • {formatCurrency(item.transaction.amount)}</p>

@@ -94,11 +94,11 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
           disabled={disabled}
           onClick={() => setIsOpen(true)}
           className={`
-            w-full bg-slate-900/50 border border-slate-700/50 rounded-xl 
+            w-full bg-white/5 border border-white/10 rounded-xl 
             pl-4 pr-10 py-2.5 text-sm text-left
             focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
             transition-all duration-200
-            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-slate-600/50'}
+            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-white/20'}
             ${error ? 'border-red-500/50 focus:ring-red-500/50' : ''}
             ${value === '' || value === undefined ? 'text-slate-400' : 'text-slate-100'}
             ${className}
@@ -120,7 +120,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
       {isOpen && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div 
-            className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
             onClick={() => setIsOpen(false)}
           />
           
@@ -128,7 +128,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
             relative 
             w-[92vw] sm:w-[min(400px,92vw)]
             max-h-[80vh] sm:max-h-[70vh]
-            bg-slate-900 border border-slate-700/50
+            bg-white/10 backdrop-blur-md border border-white/10
             rounded-2xl
             shadow-2xl
             flex flex-col
@@ -156,7 +156,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
                   onClick={() => handleSelect(opt.value)}
                   className={`
                     w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-sm transition-colors
-                    ${opt.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-800'}
+                    ${opt.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5'}
                     ${String(value) === String(opt.value) ? 'text-blue-400 bg-blue-500/10 font-medium' : 'text-slate-200'}
                   `}
                 >
@@ -172,7 +172,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
 
               {groups && groups.map((group, idx) => (
                 <div key={idx} className="mb-2 last:mb-0">
-                  <div className="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/95 backdrop-blur z-10">
+                  <div className="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-white/5 backdrop-blur-md z-10 border-b border-white/5">
                     {group.label}
                   </div>
                   {group.options.map(opt => (
@@ -183,7 +183,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
                       onClick={() => handleSelect(opt.value)}
                       className={`
                         w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-sm transition-colors
-                        ${opt.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-800'}
+                        ${opt.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5'}
                         ${String(value) === String(opt.value) ? 'text-blue-400 bg-blue-500/10 font-medium' : 'text-slate-200'}
                       `}
                     >

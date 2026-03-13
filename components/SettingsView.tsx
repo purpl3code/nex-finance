@@ -31,18 +31,16 @@ const SectionCard = ({ title, description, icon, children, danger = false }: any
     className={`overflow-hidden ${danger ? 'border-red-500/30 shadow-red-900/10' : ''}`}
     variant={danger ? 'base' : 'base'}
   >
-    <div className={`p-6 border-b ${danger ? 'border-red-500/20 bg-red-500/5' : 'border-white/5 bg-white/5'}`}>
-      <div className="flex items-start gap-4">
-        <div className={`p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
-          {icon}
-        </div>
-        <div>
-          <h3 className={`text-lg font-semibold ${danger ? 'text-red-400' : 'text-white'}`}>{title}</h3>
-          {description && <p className="text-sm text-slate-400 mt-1">{description}</p>}
-        </div>
+    <div className="flex items-start gap-4 mb-6">
+      <div className={`p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
+        {icon}
+      </div>
+      <div>
+        <h3 className={`text-lg font-semibold ${danger ? 'text-red-400' : 'text-white'}`}>{title}</h3>
+        {description && <p className="text-sm text-white/50 mt-1">{description}</p>}
       </div>
     </div>
-    <div className="p-6">
+    <div>
       {children}
     </div>
   </GlassCard>
@@ -308,9 +306,9 @@ export const SettingsView: React.FC = () => {
         icon={<Cloud size={24} />}
       >
         <div className="space-y-4">
-          <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-white/10">
+          <div className="flex items-center gap-3 text-sm text-white/50 bg-white/5 px-4 py-3 rounded-xl border border-white/10">
              <div className={`w-2 h-2 rounded-full shadow-lg ${navigator.onLine ? 'bg-emerald-500 shadow-emerald-500/50' : 'bg-red-500 shadow-red-500/50'}`}></div>
-             <span>Status da conexão: <span className="text-slate-200 font-medium">{navigator.onLine ? 'Online' : 'Offline'}</span></span>
+             <span>Status da conexão: <span className="text-white/80 font-medium">{navigator.onLine ? 'Online' : 'Offline'}</span></span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -321,7 +319,7 @@ export const SettingsView: React.FC = () => {
                 {isSyncing ? 'Baixando...' : 'Baixar Dados da Nuvem'}
              </GlassButton>
           </div>
-          <p className="text-xs text-slate-500 text-center">
+          <p className="text-xs text-white/40 text-center">
             {isDemo ? 'Recurso desativado no modo demo.' : 'Seus dados são salvos automaticamente na nuvem ao fazer alterações.'}
           </p>
         </div>
@@ -358,7 +356,7 @@ export const SettingsView: React.FC = () => {
         icon={<Download size={24} />}
       >
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
-           <div className="flex items-center gap-3 text-sm text-slate-400 bg-slate-900/50 px-4 py-3 rounded-lg border border-white/10 w-full md:w-auto">
+           <div className="flex items-center gap-3 text-sm text-slate-400 bg-white/5 px-4 py-3 rounded-xl border border-white/10 w-full md:w-auto">
               <History size={16} />
               {lastBackup ? (
                 <span>Último export: <span className="text-slate-200 font-medium">{new Date(lastBackup).toLocaleDateString()} às {new Date(lastBackup).toLocaleTimeString().slice(0,5)}</span></span>
@@ -443,7 +441,7 @@ export const SettingsView: React.FC = () => {
                  </div>
               ) : previewBackup && (
                  <div className="space-y-4">
-                    <div className="bg-slate-900/50 p-4 border rounded-lg border-white/10">
+                    <div className="bg-white/5 p-4 border rounded-xl border-white/10">
                        <div className="flex justify-between items-center mb-2">
                           <span className="text-slate-400 text-xs">Arquivo</span>
                           <span className="text-slate-200 text-xs font-mono">{previewBackup.appName} v{previewBackup.schemaVersion}</span>
@@ -461,15 +459,15 @@ export const SettingsView: React.FC = () => {
                     )}
 
                     <div className="grid grid-cols-3 gap-2 text-center">
-                        <div className="bg-slate-700/30 p-2 rounded border border-white/5">
+                        <div className="bg-white/5 p-2 rounded border border-white/5">
                            <span className="block text-lg font-bold text-white">{previewBackup.data.transactions?.length || 0}</span>
                            <span className="text-[10px] text-slate-400 uppercase">Transações</span>
                         </div>
-                        <div className="bg-slate-700/30 p-2 rounded border border-white/5">
+                        <div className="bg-white/5 p-2 rounded border border-white/5">
                            <span className="block text-lg font-bold text-white">{previewBackup.data.accounts?.length || 0}</span>
                            <span className="text-[10px] text-slate-400 uppercase">Contas</span>
                         </div>
-                        <div className="bg-slate-700/30 p-2 rounded border border-white/5">
+                        <div className="bg-white/5 p-2 rounded border border-white/5">
                            <span className="block text-lg font-bold text-white">{previewBackup.data.creditCards?.length || 0}</span>
                            <span className="text-[10px] text-slate-400 uppercase">Cartões</span>
                         </div>

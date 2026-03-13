@@ -69,7 +69,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
             className={`
               flex flex-col items-center gap-3 p-4 transition-all h-full
               ${currentTheme === theme.id 
-                ? 'ring-2 ring-blue-500/50 bg-slate-800/80' 
+                ? 'ring-2 ring-blue-500/50 bg-white/10' 
                 : 'hover:bg-white/5'}
             `}
           >

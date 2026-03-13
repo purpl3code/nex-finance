@@ -7,6 +7,7 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { GlassSelect } from './ui/GlassSelect';
+import { GlassCard } from './ui/GlassCard';
 import { PieChart, Trash2, Edit2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface BudgetManagerProps {
@@ -133,13 +134,13 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
       {/* Suggestion Box */}
       {suggestions.length > 0 && (
-         <div className="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-xl shadow-sm">
+         <div className="bg-white/5 border border-white/10 p-4 rounded-2xl shadow-sm backdrop-blur-md">
            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Sugerido para você</h3>
            <div className="flex flex-wrap gap-2">
               {suggestions.map(s => (
-                 <button key={s.category.id} onClick={() => { setForm({...form, categoryId: s.category.id}); openModal(); }} className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-sm text-slate-200 transition-colors border border-slate-600">
+                 <button key={s.category.id} onClick={() => { setForm({...form, categoryId: s.category.id}); openModal(); }} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-3 py-2 rounded-xl text-sm text-slate-200 transition-colors border border-white/5">
                     <span>{s.category.emoji} {s.category.name}</span>
-                    <span className="text-slate-400 text-xs bg-slate-800 px-1.5 py-0.5 rounded">Gastou: {formatCurrency(s.spent)}</span>
+                    <span className="text-slate-400 text-xs bg-black/20 px-1.5 py-0.5 rounded-md">Gastou: {formatCurrency(s.spent)}</span>
                     <Plus size={14} className="text-blue-400 ml-1"/>
                  </button>
               ))}
@@ -157,10 +158,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
            const isWarning = percent >= budget.alertAtPercent && !isDanger;
            
            return (
-             <div key={budget.id} className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-sm relative group hover:border-slate-600 transition-colors">
+             <GlassCard key={budget.id} className="p-6 relative group hover:border-white/10 transition-colors">
                 <div className="flex justify-between items-start mb-4">
                    <div className="flex items-center gap-4">
-                      <div className="text-3xl bg-slate-700/30 p-2 rounded-xl">{category?.emoji}</div>
+                      <div className="text-3xl bg-white/5 p-2 rounded-xl border border-white/5">{category?.emoji}</div>
                       <div>
                          <h3 className="font-semibold text-white">{category?.name}</h3>
                          <div className="text-xs font-bold flex gap-2 mt-1">
@@ -171,8 +172,8 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                       </div>
                    </div>
                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openModal(budget)} className="p-2 text-blue-400 hover:bg-slate-700 rounded-lg transition-colors"><Edit2 size={16}/></button>
-                      <button onClick={() => setDeletingBudgetId(budget.id)} className="p-2 text-red-400 hover:bg-slate-700 rounded-lg transition-colors"><Trash2 size={16}/></button>
+                      <button onClick={() => openModal(budget)} className="p-2 text-blue-400 hover:bg-white/10 rounded-lg transition-colors"><Edit2 size={16}/></button>
+                      <button onClick={() => setDeletingBudgetId(budget.id)} className="p-2 text-red-400 hover:bg-white/10 rounded-lg transition-colors"><Trash2 size={16}/></button>
                    </div>
                 </div>
 
@@ -181,7 +182,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                       <span className="text-slate-400">Gasto: <span className="text-slate-200 font-medium">{formatCurrency(spent)}</span></span>
                       <span className="text-slate-400">Limite: <span className="text-slate-200 font-medium">{formatCurrency(budget.amountLimit)}</span></span>
                    </div>
-                   <div className="h-3 w-full bg-slate-700 rounded-full overflow-hidden shadow-inner">
+                   <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden shadow-inner border border-white/5">
                       <div 
                         className={`h-full rounded-full transition-all duration-500 shadow-sm ${isDanger ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'}`} 
                         style={{ width: `${Math.min(percent, 100)}%` }}
@@ -189,16 +190,16 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                    </div>
                    <div className="text-right text-xs text-slate-500 font-medium">{percent.toFixed(0)}% utilizado</div>
                 </div>
-             </div>
+             </GlassCard>
            );
         })}
       </div>
       
       {sortedBudgets.length === 0 && (
-         <div className="text-center py-16 text-slate-500 border-2 border-dashed border-slate-700 rounded-xl">
-            <PieChart size={48} className="mx-auto mb-4 opacity-20" />
-            <p className="text-lg font-medium">Nenhum orçamento definido para este mês.</p>
-            <p className="text-sm opacity-70">Crie orçamentos para acompanhar seus gastos por categoria.</p>
+         <div className="text-center py-20 bg-white/5 border border-white/10 border-dashed rounded-2xl backdrop-blur-md">
+            <PieChart size={48} className="mx-auto mb-4 opacity-50 text-slate-500" />
+            <p className="text-lg font-medium text-slate-300">Nenhum orçamento definido para este mês.</p>
+            <p className="text-sm text-slate-400 mt-1">Crie orçamentos para acompanhar seus gastos por categoria.</p>
          </div>
       )}
 
@@ -221,11 +222,11 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                </div>
                <div>
                   <label className="block text-sm text-slate-300 mb-1">Limite (R$)</label>
-                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={form.amountLimit} onChange={e => setForm({...form, amountLimit: e.target.value})} required />
+                  <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={form.amountLimit} onChange={e => setForm({...form, amountLimit: e.target.value})} required />
                </div>
                <div>
                   <label className="block text-sm text-slate-300 mb-1">Alertar em (%)</label>
-                  <input type="number" min="1" max="100" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={form.alertAtPercent} onChange={e => setForm({...form, alertAtPercent: e.target.value})} required />
+                  <input type="number" min="1" max="100" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={form.alertAtPercent} onChange={e => setForm({...form, alertAtPercent: e.target.value})} required />
                   <p className="text-xs text-slate-500 mt-1">Quando o gasto atingir essa %, a barra ficará amarela.</p>
                </div>
             </form>

@@ -145,15 +145,15 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
   return (
     <div className="min-h-full flex flex-col">
       {/* Sticky Toolbar */}
-      <div className="sticky -top-4 -mx-4 px-4 py-3 bg-slate-900/80 backdrop-blur-md z-10 border-b border-white/5 mb-4 flex flex-wrap gap-3 items-center justify-between shadow-sm">
-         <div className="flex bg-slate-800/50 p-1 rounded-lg shrink-0 border border-white/5">
+      <div className="sticky -top-4 -mx-4 px-4 py-3 bg-white/5 backdrop-blur-md z-10 border-b border-white/5 mb-4 flex flex-wrap gap-3 items-center justify-between shadow-sm">
+         <div className="flex bg-white/5 p-1 rounded-lg shrink-0 border border-white/5">
             <button onClick={() => setActiveTab('expense')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${activeTab === 'expense' ? 'bg-red-500/20 text-red-400 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}>Despesas</button>
             <button onClick={() => setActiveTab('income')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${activeTab === 'income' ? 'bg-emerald-500/20 text-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}>Entradas</button>
          </div>
          
          <div className="flex items-center gap-3 w-full sm:w-auto">
             <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 cursor-pointer select-none hover:text-slate-300 transition-colors">
-               <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="rounded bg-slate-800 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
+               <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="rounded bg-white/5 border-white/10 text-blue-500 focus:ring-blue-500/20" />
                Arquivadas
             </label>
             <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={16}/>} className="flex-1 sm:flex-none">Nova</GlassButton>
@@ -162,8 +162,8 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
 
       {/* Grid Content - Desktop Optimized (md:grid-cols-2 lg:grid-cols-3) */}
       {displayedCategories.length === 0 ? (
-        <GlassCard className="flex flex-col items-center justify-center py-16 text-slate-500 border-dashed border-2 border-slate-700/50 bg-transparent">
-           <div className="bg-slate-800/50 p-4 rounded-full mb-3 border border-white/5">
+        <GlassCard className="flex flex-col items-center justify-center py-16 text-slate-500 border-dashed border-2 border-white/10 bg-transparent">
+           <div className="bg-white/5 p-4 rounded-full mb-3 border border-white/5">
               <Archive size={24} className="opacity-50" />
            </div>
            <p className="text-sm">Nenhuma categoria encontrada.</p>
@@ -171,9 +171,9 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-3 lg:gap-4 pb-2">
            {displayedCategories.map(cat => (
-              <GlassCard key={cat.id} className={`p-3 flex items-center justify-between group h-20 md:h-22 transition-all hover:border-slate-500/50 hover:bg-slate-800/80 ${cat.isArchived ? 'opacity-50 grayscale' : ''}`}>
+              <GlassCard key={cat.id} className={`p-3 flex items-center justify-between group h-20 md:h-22 transition-all hover:border-white/20 hover:bg-white/5 ${cat.isArchived ? 'opacity-50 grayscale' : ''}`}>
                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-slate-800/50 shrink-0 border border-white/10 shadow-sm" style={{ color: cat.color }}>
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-white/5 shrink-0 border border-white/10 shadow-sm" style={{ color: cat.color }}>
                        {cat.emoji}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -237,7 +237,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
 
                <div>
                   <label className="block text-sm text-slate-300 mb-2">Cor</label>
-                  <div className="flex flex-wrap gap-3 p-3 bg-slate-900/30 rounded-lg border border-white/5">
+                  <div className="flex flex-wrap gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
                      {colors.map(c => (
                         <button 
                            type="button" 
@@ -276,15 +276,15 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                   <div>
                      <label className="block text-sm text-slate-300 mb-2">O que deseja fazer com os itens existentes?</label>
                      <div className="space-y-3">
-                        <label className="flex items-start gap-3 p-3 rounded-lg border border-white/10 bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition-colors">
-                           <input type="radio" name="archiveAction" checked={!reassignId} onChange={() => setReassignId('')} className="mt-1 bg-slate-900 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
+                        <label className="flex items-start gap-3 p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                           <input type="radio" name="archiveAction" checked={!reassignId} onChange={() => setReassignId('')} className="mt-1 bg-white/5 border-white/10 text-blue-500 focus:ring-blue-500/20" />
                            <div>
                               <span className="block text-sm font-medium text-white">Manter histórico (Recomendado)</span>
                               <span className="block text-xs text-slate-400">Itens antigos continuam nesta categoria, mas ela não aparecerá para novos lançamentos.</span>
                            </div>
                         </label>
-                        <label className="flex items-start gap-3 p-3 rounded-lg border border-white/10 bg-slate-800/50 cursor-pointer hover:bg-slate-800 transition-colors">
-                           <input type="radio" name="archiveAction" checked={!!reassignId} onChange={() => setReassignId(categories.find(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)?.id || '')} className="mt-1 bg-slate-900 border-slate-600 text-blue-500 focus:ring-blue-500/20" />
+                        <label className="flex items-start gap-3 p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                           <input type="radio" name="archiveAction" checked={!!reassignId} onChange={() => setReassignId(categories.find(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)?.id || '')} className="mt-1 bg-white/5 border-white/10 text-blue-500 focus:ring-blue-500/20" />
                            <div className="w-full">
                               <span className="block text-sm font-medium text-white">Mover para outra categoria</span>
                               {!!reassignId && (

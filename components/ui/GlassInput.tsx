@@ -28,12 +28,12 @@ export const GlassInput: React.FC<GlassInputProps> = ({
         )}
         <input
           className={`
-            w-full bg-slate-900/50 border border-slate-700/50 rounded-xl 
+            w-full bg-white/5 border border-white/10 rounded-xl 
             ${icon ? 'pl-10' : 'pl-4'} pr-4 py-2.5 text-sm text-slate-100 
             placeholder:text-slate-600
             focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
             transition-all duration-200
-            hover:border-slate-600/50
+            hover:border-white/20
             ${error ? 'border-red-500/50 focus:ring-red-500/50' : ''}
             ${className}
           `}

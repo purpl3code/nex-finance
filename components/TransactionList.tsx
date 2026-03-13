@@ -48,84 +48,86 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
   return (
     <div className="space-y-4">
       {/* Desktop Table */}
-      <GlassCard className="hidden md:block p-0 overflow-hidden">
-        <table className="w-full text-left text-sm text-slate-400">
-          <thead className="bg-white/5 text-xs uppercase font-medium text-slate-300">
-            <tr>
-              <th className="px-6 py-4 font-semibold tracking-wider">Data</th>
-              <th className="px-6 py-4 font-semibold tracking-wider">Categoria / Tipo</th>
-              <th className="px-6 py-4 font-semibold tracking-wider">Descrição</th>
-              <th className="px-6 py-4 text-right font-semibold tracking-wider">Valor</th>
-              <th className="px-6 py-4 text-center font-semibold tracking-wider">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {transactions.map((item) => {
-              const isTransfer = item.isTransfer;
-              
-              return (
-                <tr key={item.id} className="hover:bg-white/5 transition-colors group">
-                  <td className="px-6 py-4 whitespace-nowrap text-slate-300">
-                    {formatDate(item.date)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {isTransfer ? (
-                       <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-medium">
-                         <ArrowRightLeft size={12} />
-                         <span>Transferência</span>
-                       </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 text-slate-200 border border-white/10 text-xs font-medium">
-                        <span>{getCategory(item.categoryId)?.emoji}</span>
-                        <span>{getCategory(item.categoryId)?.name}</span>
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-slate-300 max-w-xs truncate">
-                    {isTransfer ? (
-                      <div className="flex flex-col text-xs">
-                         <span className="text-slate-200 font-medium">{item.description || 'Sem descrição'}</span>
-                         <span className="text-slate-500 flex items-center gap-1 mt-0.5">
-                            {getAccountName(item.fromAccountId)} <ArrowRightLeft size={10} /> {getAccountName(item.toAccountId)}
+      <GlassCard className="hidden md:block overflow-hidden">
+        <div className="overflow-x-auto -mx-6 px-6">
+          <table className="w-full text-left text-sm text-slate-400">
+            <thead className="text-xs uppercase font-medium text-slate-500 border-b border-white/10">
+              <tr>
+                <th className="pb-4 font-semibold tracking-wider">Data</th>
+                <th className="pb-4 font-semibold tracking-wider">Categoria / Tipo</th>
+                <th className="pb-4 font-semibold tracking-wider">Descrição</th>
+                <th className="pb-4 text-right font-semibold tracking-wider">Valor</th>
+                <th className="pb-4 text-center font-semibold tracking-wider">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {transactions.map((item) => {
+                const isTransfer = item.isTransfer;
+                
+                return (
+                  <tr key={item.id} className="hover:bg-white/5 transition-colors group">
+                    <td className="py-4 whitespace-nowrap text-slate-300">
+                      {formatDate(item.date)}
+                    </td>
+                    <td className="py-4 whitespace-nowrap">
+                      {isTransfer ? (
+                         <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-medium">
+                           <ArrowRightLeft size={12} />
+                           <span>Transferência</span>
                          </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 text-slate-200 border border-white/10 text-xs font-medium">
+                          <span>{getCategory(item.categoryId)?.emoji}</span>
+                          <span>{getCategory(item.categoryId)?.name}</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-4 text-slate-300 max-w-xs truncate">
+                      {isTransfer ? (
+                        <div className="flex flex-col text-xs">
+                           <span className="text-slate-200 font-medium">{item.description || 'Sem descrição'}</span>
+                           <span className="text-slate-500 flex items-center gap-1 mt-0.5">
+                              {getAccountName(item.fromAccountId)} <ArrowRightLeft size={10} /> {getAccountName(item.toAccountId)}
+                           </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          {item.generatedByRuleId && (
+                             <span title="Gerado automaticamente" className="text-blue-400"><Repeat size={12} /></span>
+                          )}
+                          <span title={item.description} className="text-slate-200">{item.description || '-'}</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className={`py-4 whitespace-nowrap text-right font-bold 
+                      ${isTransfer ? 'text-slate-300' : (item.type === 'income' ? 'text-emerald-400' : 'text-red-400')}`}>
+                      {isTransfer ? '' : (item.type === 'expense' ? '- ' : '+ ')}
+                      {formatCurrency(item.amount)}
+                    </td>
+                    <td className="py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => onEdit(item)}
+                          className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          onClick={() => setDeletingItem(item)}
+                          className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        {item.generatedByRuleId && (
-                           <span title="Gerado automaticamente" className="text-blue-400"><Repeat size={12} /></span>
-                        )}
-                        <span title={item.description} className="text-slate-200">{item.description || '-'}</span>
-                      </div>
-                    )}
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-right font-bold 
-                    ${isTransfer ? 'text-slate-300' : (item.type === 'income' ? 'text-emerald-400' : 'text-red-400')}`}>
-                    {isTransfer ? '' : (item.type === 'expense' ? '- ' : '+ ')}
-                    {formatCurrency(item.amount)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => onEdit(item)}
-                        className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
-                        title="Editar"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button 
-                        onClick={() => setDeletingItem(item)}
-                        className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                        title="Excluir"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </GlassCard>
 
       {/* Mobile Cards */}

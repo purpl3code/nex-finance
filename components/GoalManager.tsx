@@ -121,7 +121,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
         }
       />
 
-      <div className="border-b border-slate-700 mb-6">
+      <div className="border-b border-white/10 mb-6">
          <div className="flex gap-4">
             <button onClick={() => setActiveTab('active')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'active' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Em Aberto</button>
             <button onClick={() => setActiveTab('archived')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'archived' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Arquivadas</button>
@@ -129,10 +129,10 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
       </div>
 
       {displayedGoals.length === 0 ? (
-        <div className="text-center py-20 bg-slate-800/30 border border-slate-700 border-dashed rounded-xl">
-           <Target size={48} className="mx-auto text-slate-600 mb-4" />
-           <p className="text-slate-400 text-lg">Nenhuma meta {activeTab === 'active' ? 'ativa' : 'arquivada'} encontrada.</p>
-           {activeTab === 'active' && <p className="text-slate-500 text-sm mt-1">Crie sua primeira meta para começar a poupar.</p>}
+        <div className="text-center py-20 bg-white/5 border border-white/10 border-dashed rounded-2xl backdrop-blur-md">
+           <Target size={48} className="mx-auto text-slate-500 mb-4 opacity-50" />
+           <p className="text-slate-300 text-lg font-medium">Nenhuma meta {activeTab === 'active' ? 'ativa' : 'arquivada'} encontrada.</p>
+           {activeTab === 'active' && <p className="text-slate-400 text-sm mt-1">Crie sua primeira meta para começar a poupar.</p>}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -155,40 +155,40 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
             <form id="goal-form" onSubmit={handleSubmitForm} className="space-y-4">
                <div>
                   <label className="block text-sm text-slate-300 mb-1">Nome da Meta</label>
-                  <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required placeholder="Ex: Viagem para Europa, PS5..." />
+                  <input className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required placeholder="Ex: Viagem para Europa, PS5..." />
                </div>
                
                <div className="grid grid-cols-2 gap-4">
                   <div>
                      <label className="block text-sm text-slate-300 mb-1">Valor Alvo (R$)</label>
-                     <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.targetAmount} onChange={e => setFormData({...formData, targetAmount: e.target.value})} required />
+                     <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={formData.targetAmount} onChange={e => setFormData({...formData, targetAmount: e.target.value})} required />
                   </div>
                   <div>
                      <label className="block text-sm text-slate-300 mb-1">Já Tenho (R$)</label>
-                     <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.currentAmount} onChange={e => setFormData({...formData, currentAmount: e.target.value})} />
+                     <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={formData.currentAmount} onChange={e => setFormData({...formData, currentAmount: e.target.value})} />
                   </div>
                </div>
 
                <div>
                   <label className="block text-sm text-slate-300 mb-1">Aporte Mensal Estimado (R$)</label>
-                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.monthlyContribution} onChange={e => setFormData({...formData, monthlyContribution: e.target.value})} />
+                  <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={formData.monthlyContribution} onChange={e => setFormData({...formData, monthlyContribution: e.target.value})} />
                   <p className="text-xs text-slate-500 mt-1">Usado para calcular quando você atingirá a meta.</p>
                </div>
 
                <div className="grid grid-cols-2 gap-4">
                   <div>
                      <label className="block text-sm text-slate-300 mb-1">Data Início</label>
-                     <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} required />
+                     <input type="date" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} required />
                   </div>
                   <div>
                      <label className="block text-sm text-slate-300 mb-1">Prazo Final (Opcional)</label>
-                     <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" value={formData.deadline} onChange={e => setFormData({...formData, deadline: e.target.value})} />
+                     <input type="date" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]" value={formData.deadline} onChange={e => setFormData({...formData, deadline: e.target.value})} />
                   </div>
                </div>
 
                <div>
                   <label className="block text-sm text-slate-300 mb-1">Descrição (Opcional)</label>
-                  <textarea className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white h-20 resize-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                  <textarea className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white h-20 resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                </div>
             </form>
          </ModalBody>
@@ -202,12 +202,12 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
       <ModalShell isOpen={isAddValueModalOpen} onClose={() => setIsAddValueModalOpen(false)} title="Adicionar Valor">
          <ModalBody>
             <form id="add-value-form" onSubmit={handleSubmitAddValue} className="space-y-4">
-               <div className="p-4 bg-slate-900/50 border border-blue-500/20 rounded-lg text-sm text-slate-300">
+               <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-200">
                   Isso apenas atualiza o saldo da meta. Não cria uma transação no extrato.
                </div>
                <div>
                   <label className="block text-sm text-slate-300 mb-1">Valor a adicionar (R$)</label>
-                  <input type="number" step="0.01" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-lg font-bold" value={addAmount} onChange={e => setAddAmount(e.target.value)} autoFocus required />
+                  <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-lg font-bold focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={addAmount} onChange={e => setAddAmount(e.target.value)} autoFocus required />
                </div>
             </form>
          </ModalBody>

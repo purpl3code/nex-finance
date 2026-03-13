@@ -34,15 +34,15 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div 
         ref={modalRef}
-        className={`relative w-full max-w-lg bg-slate-800 rounded-xl shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto ${className}`}
+        className={`relative w-full max-w-lg bg-white/5 backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto ${className}`}
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
           <h2 className="text-xl font-semibold text-white">{title}</h2>
           <button 
             onClick={onClose}
-            className="p-1 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-slate-700"
+            className="p-1 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
           >
             <X size={20} />
           </button>

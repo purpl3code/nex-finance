@@ -78,42 +78,44 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
 // --- 3. RECENT ACTIVITY LIST ---
 export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities }) => {
   return (
-    <GlassCard className="h-full flex flex-col p-0 overflow-hidden">
-      <div className="px-6 py-4 border-b border-white/5 bg-white/5 backdrop-blur-md">
-        <h3 className="text-sm font-bold text-white">Últimas Movimentações</h3>
+    <GlassCard className="h-full flex flex-col">
+      <div className="flex justify-between items-start mb-6">
+        <h3 className="text-lg font-semibold text-white">Últimas Movimentações</h3>
       </div>
-      <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-white/5">
+      <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2">
         {activities.length === 0 ? (
           <div className="p-8 flex flex-col items-center justify-center text-slate-500 h-full">
              <Calendar size={32} className="mb-2 opacity-20" />
              <p className="text-sm">Nenhuma movimentação neste mês.</p>
           </div>
         ) : (
-          activities.map(item => (
-            <div key={`${item.source}-${item.id}`} className="px-6 py-3.5 flex items-center justify-between hover:bg-white/5 transition-colors group">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <div className="text-xl bg-white/5 p-2.5 rounded-xl shrink-0 border border-white/5 group-hover:border-white/10 transition-colors">
-                  {item.category?.emoji || (item.isCard ? '💳' : '💰')}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">{item.description || item.category?.name || 'Sem descrição'}</p>
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <span>{new Date(item.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</span>
-                    <span>•</span>
-                    <div className="flex items-center gap-1.5">
-                      {item.color && (
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                      )}
-                      <span className={`${item.isCard ? 'text-violet-400' : 'text-blue-400'}`}>{item.source}</span>
+          <div className="space-y-2">
+            {activities.map(item => (
+              <div key={`${item.source}-${item.id}`} className="p-3 rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors group border border-transparent hover:border-white/5">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="text-xl bg-white/5 p-2.5 rounded-xl shrink-0 border border-white/5 group-hover:border-white/10 transition-colors">
+                    {item.category?.emoji || (item.isCard ? '💳' : '💰')}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">{item.description || item.category?.name || 'Sem descrição'}</p>
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <span>{new Date(item.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</span>
+                      <span>•</span>
+                      <div className="flex items-center gap-1.5">
+                        {item.color && (
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                        )}
+                        <span className={`${item.isCard ? 'text-violet-400' : 'text-blue-400'}`}>{item.source}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
+                <div className={`text-sm font-bold whitespace-nowrap ${item.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {item.type === 'income' ? '+' : '-'} {formatCurrency(item.amount)}
+                </div>
               </div>
-              <div className={`text-sm font-bold whitespace-nowrap ${item.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
-                {item.type === 'income' ? '+' : '-'} {formatCurrency(item.amount)}
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </GlassCard>
@@ -221,7 +223,7 @@ export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, invoiceAmou
       <div className="text-right">
         <p className="text-sm font-bold text-white">{formatCurrency(invoiceAmount)}</p>
         <div className="flex items-center justify-end gap-2">
-          <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div 
               className={`h-full rounded-full ${usedPercentage > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 
               style={{ width: `${Math.min(usedPercentage, 100)}%` }}

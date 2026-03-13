@@ -31,7 +31,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div 
-        className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
         onClick={onClose}
       />
       
@@ -70,7 +70,7 @@ export const ModalBody: React.FC<{ children: React.ReactNode; className?: string
 );
 
 export const ModalFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <div className={`shrink-0 p-4 border-t border-white/10 flex justify-end gap-3 bg-slate-900/50 backdrop-blur-sm ${className}`}>
+  <div className={`shrink-0 p-4 border-t border-white/10 flex justify-end gap-3 bg-white/5 backdrop-blur-md ${className}`}>
     {children}
   </div>
 );

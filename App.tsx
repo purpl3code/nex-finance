@@ -392,7 +392,7 @@ const App: React.FC = () => {
                               placeholder="Buscar transação..." 
                               value={filters.search}
                               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                              className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none placeholder-slate-500 hover:border-slate-600/50 transition-all"
+                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none placeholder-slate-500 hover:border-white/20 transition-all"
                             />
                           </div>
                         </>

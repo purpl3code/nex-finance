@@ -4,6 +4,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { GlassSelect } from './ui/GlassSelect';
+import { GlassCard } from './ui/GlassCard';
 import { TrendingUp, Calendar, ArrowRight, CreditCard, Repeat } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -26,26 +27,26 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
 
   const StatCard = ({ title, value, variant }: { title: string, value: string | number, variant: 'neutral' | 'good' | 'bad' }) => {
     const colors = {
-      neutral: 'text-white bg-slate-800 border-slate-700',
-      good: 'text-emerald-400 bg-emerald-900/10 border-emerald-900/30',
-      bad: 'text-red-400 bg-red-900/10 border-red-900/30',
+      neutral: 'text-white bg-white/5 border-white/5',
+      good: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+      bad: 'text-red-400 bg-red-500/10 border-red-500/20',
     };
     return (
-      <div className={`p-4 sm:p-5 rounded-xl border ${colors[variant]} shadow-sm overflow-hidden`}>
+      <GlassCard className={`p-4 sm:p-5 ${colors[variant]} overflow-hidden`}>
         <p className="text-[10px] sm:text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider truncate" title={title}>{title}</p>
         <p className="text-lg sm:text-2xl font-bold truncate" title={typeof value === 'number' ? formatCurrency(value) : String(value)}>{typeof value === 'number' ? formatCurrency(value) : value}</p>
-      </div>
+      </GlassCard>
     );
   };
 
   const getEventIcon = (type: string) => {
     switch(type) {
-      case 'transaction': return <div className="p-1.5 bg-slate-700 rounded text-slate-300"><Calendar size={14} /></div>;
+      case 'transaction': return <div className="p-1.5 bg-white/10 rounded text-slate-300"><Calendar size={14} /></div>;
       case 'recurring': return <div className="p-1.5 bg-blue-500/10 rounded text-blue-400"><Repeat size={14} /></div>;
       case 'invoice': return <div className="p-1.5 bg-red-500/10 rounded text-red-400"><CreditCard size={14} /></div>;
-      case 'transfer_out': return <div className="p-1.5 bg-slate-700 rounded text-slate-400"><ArrowRight size={14} /></div>;
-      case 'transfer_in': return <div className="p-1.5 bg-slate-700 rounded text-slate-400"><ArrowRight size={14} className="rotate-180" /></div>;
-      default: return <div className="p-1.5 bg-slate-700 rounded text-slate-300"><Calendar size={14} /></div>;
+      case 'transfer_out': return <div className="p-1.5 bg-white/10 rounded text-slate-400"><ArrowRight size={14} /></div>;
+      case 'transfer_in': return <div className="p-1.5 bg-white/10 rounded text-slate-400"><ArrowRight size={14} className="rotate-180" /></div>;
+      default: return <div className="p-1.5 bg-white/10 rounded text-slate-300"><Calendar size={14} /></div>;
     }
   };
 
@@ -98,7 +99,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       </div>
 
       {/* Chart */}
-      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm">
+      <GlassCard className="p-6">
         <h3 className="text-sm font-bold text-slate-300 mb-6 uppercase tracking-wider">Projeção de Saldo Diário</h3>
         <div className="h-72 w-full">
            <ResponsiveContainer width="100%" height="100%">
@@ -124,7 +125,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                    tickFormatter={(val) => `R$${val/1000}k`}
                  />
                  <Tooltip 
-                   contentStyle={{backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px'}}
+                   contentStyle={{backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', borderColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px'}}
                    itemStyle={{color: '#fff'}}
                    formatter={(val: number) => formatCurrency(val)}
                    labelStyle={{color: '#94a3b8', marginBottom: '0.5rem'}}
@@ -140,7 +141,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
               </AreaChart>
            </ResponsiveContainer>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Timeline View */}
       <div className="space-y-6">
@@ -151,22 +152,22 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
               if (events.length === 0) return null;
 
               return (
-                 <div key={day.date} className="bg-slate-800/60 border border-slate-700/50 rounded-xl overflow-hidden">
-                    <div className="bg-slate-800 px-4 py-3 flex justify-between items-center border-b border-slate-700/50">
+                 <GlassCard key={day.date} className="overflow-hidden p-0">
+                    <div className="bg-white/5 px-4 py-3 flex justify-between items-center border-b border-white/5">
                        <span className="text-sm font-medium text-slate-200 capitalize">{format(parseISO(day.date), 'dd ')} de {format(parseISO(day.date), 'MMMM', {locale: ptBR})}</span>
                        <span className={`text-xs font-bold ${day.balance < 0 ? 'text-red-400' : 'text-slate-400'}`}>
                           Saldo do dia: {formatCurrency(day.balance)}
                        </span>
                     </div>
-                    <div className="divide-y divide-slate-700/30">
+                    <div className="divide-y divide-white/5">
                        {events.map((event: any, idx: number) => (
-                          <div key={idx} className="px-4 py-3 flex items-center justify-between hover:bg-slate-700/20 transition-colors">
+                          <div key={idx} className="px-4 py-3 flex items-center justify-between hover:bg-white/5 transition-colors">
                              <div className="flex items-center gap-3">
                                 {getEventIcon(event.type)}
                                 <div>
                                    <p className="text-sm text-slate-200 font-medium">
                                       {event.description || 'Sem descrição'}
-                                      {!event.isReal && <span className="ml-2 text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded font-bold uppercase">Previsto</span>}
+                                      {!event.isReal && <span className="ml-2 text-[10px] bg-white/10 text-slate-300 px-1.5 py-0.5 rounded font-bold uppercase">Previsto</span>}
                                    </p>
                                    <p className="text-xs text-slate-500">
                                       {accounts.find(a => a.id === event.accountId)?.name || 'Conta não inf.'}
@@ -179,7 +180,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                           </div>
                        ))}
                     </div>
-                 </div>
+                 </GlassCard>
               );
            })}
         </div>

@@ -53,7 +53,7 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
 
   const getVariantColor = (variant?: string) => {
     switch (variant) {
-      case 'secondary': return 'bg-slate-700 text-white hover:bg-slate-600';
+      case 'secondary': return 'bg-white/10 text-white hover:bg-white/20';
       case 'danger': return 'bg-red-500 text-white hover:bg-red-600';
       case 'success': return 'bg-emerald-500 text-white hover:bg-emerald-600';
       case 'warning': return 'bg-amber-500 text-white hover:bg-amber-600';
@@ -81,7 +81,7 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
               onClick={() => handleActionClick(action)}
               className="flex items-center gap-3 group"
             >
-              <span className="bg-slate-900/90 text-white text-sm px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-md border border-white/10 font-medium">
+              <span className="bg-white/10 text-white text-sm px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md border border-white/10 font-medium">
                 {action.label}
               </span>
               <div className={`w-10 h-10 rounded-full shadow-lg flex items-center justify-center border border-white/10 ${getVariantColor(action.variant)}`}>
@@ -94,7 +94,7 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
         {/* Main FAB Button */}
         <button
           onClick={handleMainClick}
-          className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 pointer-events-auto active:scale-90 border border-white/20 text-white ${isOpen ? 'bg-slate-700 rotate-45' : 'bg-blue-600'}`}
+          className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 pointer-events-auto active:scale-90 border border-white/20 text-white ${isOpen ? 'bg-white/10 rotate-45' : 'bg-blue-600'}`}
           aria-label={actions.length > 1 && isOpen ? "Fechar menu" : "Adicionar"}
         >
           {actions.length === 1 ? (

@@ -30,7 +30,7 @@ export const GlassAvatar: React.FC<GlassAvatarProps> = ({ src, name, size = 'md'
         relative rounded-full overflow-hidden flex items-center justify-center font-bold text-white shrink-0
         border border-white/10 shadow-lg backdrop-blur-sm
         ${sizeClasses[size]} 
-        ${!src ? 'bg-gradient-to-tr from-blue-500/80 to-blue-600/80' : 'bg-slate-800/50'}
+        ${!src ? 'bg-gradient-to-tr from-blue-500/80 to-blue-600/80' : 'bg-white/5'}
         ${className}
       `}
     >

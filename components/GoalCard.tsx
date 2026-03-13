@@ -5,6 +5,7 @@ import { Edit2, Plus, Archive, Calendar, Target, Clock, AlertTriangle, Trash2 } 
 import { Button } from './ui/Button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { GlassCard } from './ui/GlassCard';
 
 interface GoalCardProps {
   goal: Goal;
@@ -22,8 +23,8 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
   // For now we trigger the parent's modal handler
 
   return (
-    <div 
-      className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-sm relative group overflow-hidden"
+    <GlassCard 
+      className="p-6 relative group overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -39,13 +40,13 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
           {goal.description && <p className="text-slate-400 text-xs mt-1 line-clamp-1">{goal.description}</p>}
         </div>
         <div className={`flex gap-1 transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-           <button onClick={() => onEdit(goal)} className="p-1.5 bg-slate-700/50 hover:bg-slate-600 rounded text-slate-300 transition-colors" title="Editar">
+           <button onClick={() => onEdit(goal)} className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title="Editar">
              <Edit2 size={14} />
            </button>
-           <button onClick={() => onArchive(goal.id)} className="p-1.5 bg-slate-700/50 hover:bg-slate-600 rounded text-slate-300 transition-colors" title={goal.isArchived ? "Desarquivar" : "Arquivar"}>
+           <button onClick={() => onArchive(goal.id)} className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-slate-300 transition-colors" title={goal.isArchived ? "Desarquivar" : "Arquivar"}>
              <Archive size={14} />
            </button>
-           <button onClick={onDelete} className="p-1.5 bg-red-500/10 hover:bg-red-500/20 rounded text-red-400 transition-colors" title="Excluir">
+           <button onClick={onDelete} className="p-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-lg text-red-400 transition-colors" title="Excluir">
              <Trash2 size={14} />
            </button>
         </div>
@@ -59,7 +60,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">
          {/* Monthly Contribution Info */}
          {goal.monthlyContribution > 0 ? (
-            <div className="bg-slate-900/50 p-2.5 rounded border border-slate-700/50">
+            <div className="bg-white/5 p-3 rounded-xl border border-white/5">
                <p className="text-slate-400 text-xs flex items-center gap-1 mb-1">
                   <Clock size={12} /> Estimativa
                </p>
@@ -73,7 +74,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
                </p>
             </div>
          ) : (
-            <div className="bg-slate-900/50 p-2.5 rounded border border-slate-700/50 opacity-60">
+            <div className="bg-white/5 p-3 rounded-xl border border-white/5 opacity-60">
                <p className="text-slate-400 text-xs flex items-center gap-1 mb-1"><Clock size={12} /> Estimativa</p>
                <p className="text-slate-300 text-xs italic">Defina um aporte mensal</p>
             </div>
@@ -81,7 +82,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
 
          {/* Deadline Info */}
          {goal.deadline ? (
-            <div className={`p-2.5 rounded border ${stats.isDelayed ? 'bg-amber-900/10 border-amber-500/30' : 'bg-slate-900/50 border-slate-700/50'}`}>
+            <div className={`p-3 rounded-xl border ${stats.isDelayed ? 'bg-amber-500/10 border-amber-500/20' : 'bg-white/5 border-white/5'}`}>
                <p className={`${stats.isDelayed ? 'text-amber-400' : 'text-slate-400'} text-xs flex items-center gap-1 mb-1`}>
                   {stats.isDelayed ? <AlertTriangle size={12}/> : <Target size={12} />} 
                   {stats.isDelayed ? 'Atenção' : 'Prazo'}
@@ -96,14 +97,14 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
                )}
             </div>
          ) : (
-            <div className="bg-slate-900/50 p-2.5 rounded border border-slate-700/50">
+            <div className="bg-white/5 p-3 rounded-xl border border-white/5">
                <p className="text-slate-400 text-xs flex items-center gap-1 mb-1"><Target size={12} /> Restante</p>
                <p className="text-slate-200 font-medium">{formatCurrency(stats.remaining)}</p>
             </div>
          )}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-slate-700/50 flex justify-end">
+      <div className="mt-6 pt-4 border-t border-white/5 flex justify-end">
          <Button 
             onClick={() => onAddValue(goal.id, 0)} // 0 triggers open modal with 0
             size="sm" 
@@ -114,6 +115,6 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
             Adicionar Valor
          </Button>
       </div>
-    </div>
+    </GlassCard>
   );
 };

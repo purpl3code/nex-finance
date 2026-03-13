@@ -48,8 +48,8 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               size={collapsed ? "sm" : "md"} 
               className="ring-2 ring-white/10 group-hover:ring-white/20 transition-all"
             />
-            <div className="absolute -bottom-0.5 -right-0.5 bg-slate-900 rounded-full p-0.5">
-               <div className="bg-emerald-500 w-2.5 h-2.5 rounded-full border-2 border-slate-900 shadow-sm shadow-emerald-500/50"></div>
+            <div className="absolute -bottom-0.5 -right-0.5 bg-white/10 rounded-full p-0.5">
+               <div className="bg-emerald-500 w-2.5 h-2.5 rounded-full border-2 border-black shadow-sm shadow-emerald-500/50"></div>
             </div>
           </div>
 

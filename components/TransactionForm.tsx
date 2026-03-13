@@ -172,7 +172,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     <>
       <form id="transaction-form" onSubmit={handleSubmit} className="space-y-4">
         {/* Type Toggle */}
-      <div className="grid grid-cols-3 gap-2 p-1 bg-slate-900 rounded-lg">
+      <div className="grid grid-cols-3 gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
         <button
           type="button"
           onClick={() => setMode('income')}
@@ -221,7 +221,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             step="0.01" 
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
             placeholder="0,00"
           />
         </div>
@@ -234,7 +234,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           type="date" 
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]"
+          className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]"
         />
         {date && currentMonth !== undefined && currentYear !== undefined && (
           (new Date(date + 'T12:00:00').getMonth() !== currentMonth || new Date(date + 'T12:00:00').getFullYear() !== currentYear)
@@ -336,7 +336,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           type="text" 
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-4 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+          className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
           placeholder={mode === 'transfer' ? "Ex: Reserva de emergência" : "Ex: Supermercado semanal"}
         />
       </div>

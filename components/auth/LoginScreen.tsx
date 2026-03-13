@@ -54,11 +54,11 @@ export const LoginScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-8">
         
         <div className="text-center mb-8">
-          <div className="h-12 w-12 bg-gradient-to-tr from-slate-900 to-black rounded-xl border border-slate-800 flex items-center justify-center shadow-lg shadow-black/50 mx-auto mb-4">
+          <div className="h-12 w-12 bg-gradient-to-tr from-blue-500 to-blue-600 rounded-xl border border-white/10 flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto mb-4">
             <span className="font-bold text-white text-2xl leading-none mt-1">N</span>
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Nex Finance</h1>
@@ -83,7 +83,7 @@ export const LoginScreen: React.FC = () => {
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                 placeholder="seu@email.com"
                 required
               />
@@ -100,7 +100,7 @@ export const LoginScreen: React.FC = () => {
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                 placeholder="••••••••"
                 required
                 minLength={6}
@@ -114,7 +114,7 @@ export const LoginScreen: React.FC = () => {
               id="keepSigned"
               checked={keepSigned} 
               onChange={(e) => setKeepSigned(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500/20"
+              className="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-600 focus:ring-blue-500/20"
             />
             <label htmlFor="keepSigned" className="text-sm text-slate-400 cursor-pointer select-none">
               Manter conectado
@@ -126,7 +126,7 @@ export const LoginScreen: React.FC = () => {
           </Button>
         </form>
 
-        <div className="mt-6 text-center border-t border-slate-800 pt-6">
+        <div className="mt-6 text-center border-t border-white/10 pt-6">
           <p className="text-slate-400 text-sm">
             {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}
             <button 
