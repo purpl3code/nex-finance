@@ -107,7 +107,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
       {error && <p className="mt-1 text-xs text-red-400 ml-1">{error}</p>}
 
       {isOpen && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div 
             className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" 
             onClick={() => setIsOpen(false)}
@@ -115,13 +115,13 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
           
           <div className="
             relative 
-            w-full sm:w-[min(400px,92vw)]
+            w-[92vw] sm:w-[min(400px,92vw)]
             max-h-[80vh] sm:max-h-[70vh]
             bg-slate-900 border border-slate-700/50
-            rounded-t-2xl sm:rounded-2xl
+            rounded-2xl
             shadow-2xl
             flex flex-col
-            animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200
+            animate-in zoom-in-95 duration-200
           ">
             {/* Header */}
             <div className="shrink-0 flex items-center justify-between p-4 border-b border-white/10">
