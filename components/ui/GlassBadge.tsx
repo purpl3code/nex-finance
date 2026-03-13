@@ -2,7 +2,7 @@ import React from 'react';
 
 interface GlassBadgeProps {
   children: React.ReactNode;
-  variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+  variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'secondary' | 'outline';
   className?: string;
 }
 
@@ -17,6 +17,8 @@ export const GlassBadge: React.FC<GlassBadgeProps> = ({
     danger: 'bg-red-500/10 text-red-400 border-red-500/20',
     info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     neutral: 'bg-white/10 text-slate-400 border-white/20',
+    secondary: 'bg-white/5 text-slate-400 border-white/10',
+    outline: 'bg-transparent text-slate-400 border-white/20',
   };
 
   return (

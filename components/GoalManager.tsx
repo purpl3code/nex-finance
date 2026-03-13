@@ -121,7 +121,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
         }
       />
 
-      <div className="border-b border-white/10 mb-6">
+      <div className="border-b border-white/10 mb-4">
          <div className="flex gap-4">
             <button onClick={() => setActiveTab('active')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'active' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Em Aberto</button>
             <button onClick={() => setActiveTab('archived')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'archived' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Arquivadas</button>
@@ -135,7 +135,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
            {activeTab === 'active' && <p className="text-slate-400 text-sm mt-1">Crie sua primeira meta para começar a poupar.</p>}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayedGoals.map(goal => (
             <GoalCard 
               key={goal.id} 
@@ -152,7 +152,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
       {/* FORM MODAL */}
       <ModalShell isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} title={editingGoal ? 'Editar Meta' : 'Nova Meta'}>
          <ModalBody>
-            <form id="goal-form" onSubmit={handleSubmitForm} className="space-y-4">
+            <form id="goal-form" onSubmit={handleSubmitForm} className="space-y-3">
                <div>
                   <label className="block text-sm text-slate-300 mb-1">Nome da Meta</label>
                   <input className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required placeholder="Ex: Viagem para Europa, PS5..." />

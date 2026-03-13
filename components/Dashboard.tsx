@@ -121,21 +121,21 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   }, [getCategorySpending, categories, month, year]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
       {/* 1. PREMIUM HEADER: MAIN CARDS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RemainingBalanceCard summary={monthlySummary} />
         <ForecastCard summary={forecast} totalCurrentBalance={totalBalance} />
       </div>
 
       {/* 2. MIDDLE SECTION: GRAPH & INSIGHTS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-80">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-auto lg:h-80">
         <div className="lg:col-span-2 h-full">
           <BalanceChart data={balanceHistory} />
         </div>
-        <div className="space-y-4 overflow-y-auto pr-1 custom-scrollbar h-full">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="space-y-3 overflow-y-auto pr-1 custom-scrollbar h-full">
+          <div className="flex items-center gap-2 mb-1">
             <Sparkles size={16} className="text-amber-400" />
             <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Insights</h3>
           </div>
@@ -149,13 +149,13 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
       </div>
 
       {/* 3. BOTTOM SECTION: SPENDING & ACTIVITY */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
         {/* Left: Expenses & Cards */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Chart */}
           <GlassCard className="h-auto">
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-white">Despesas por Categoria</h3>
                   <p className="text-xs text-slate-400">Total gasto: {formatCurrency(monthlySummary.totalSpent)}</p>

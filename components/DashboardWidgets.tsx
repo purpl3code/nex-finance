@@ -22,7 +22,7 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
       
       <div className="relative z-10">
         <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Saldo Restante no Mês</h3>
-        <div className={`text-3xl font-bold mb-6 ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+        <div className={`text-3xl font-bold mb-4 ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
           {formatCurrency(summary.remainingBalance)}
         </div>
         
@@ -56,7 +56,7 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
 
       <div className="relative z-10">
         <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Previsão (Fim do Mês)</h3>
-        <div className={`text-3xl font-bold mb-6 ${isPositive ? 'text-blue-400' : 'text-amber-400'}`}>
+        <div className={`text-3xl font-bold mb-4 ${isPositive ? 'text-blue-400' : 'text-amber-400'}`}>
           {formatCurrency(predicted)}
         </div>
 
@@ -79,7 +79,7 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
 export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities }) => {
   return (
     <GlassCard className="h-full flex flex-col">
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-semibold text-white">Últimas Movimentações</h3>
       </div>
       <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2">
@@ -126,7 +126,7 @@ export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities
 export const BalanceChart: React.FC<{ data: DailyBalance[] }> = ({ data }) => {
   return (
     <GlassCard className="h-full flex flex-col">
-      <h3 className="text-sm font-bold text-slate-200 mb-6">Evolução do Saldo (Mês Atual)</h3>
+      <h3 className="text-sm font-bold text-slate-200 mb-4">Evolução do Saldo (Mês Atual)</h3>
       <div className="flex-1 min-h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>

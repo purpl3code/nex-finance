@@ -19,6 +19,7 @@ interface GlassSelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectEle
   error?: string;
   options?: SelectOption[];
   groups?: SelectGroup[];
+  placeholder?: string;
 }
 
 export const GlassSelect: React.FC<GlassSelectProps> = ({ 

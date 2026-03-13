@@ -7,13 +7,15 @@ interface ModalShellProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  className?: string;
 }
 
 export const ModalShell: React.FC<ModalShellProps> = ({
   isOpen,
   onClose,
   title,
-  children
+  children,
+  className = ''
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -35,7 +37,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
         onClick={onClose}
       />
       
-      <div className="
+      <div className={`
         relative 
         w-[min(560px,92vw)]
         max-h-[85vh]
@@ -44,7 +46,8 @@ export const ModalShell: React.FC<ModalShellProps> = ({
         rounded-2xl
         glass-lg shadow-2xl
         transform transition-all duration-300 scale-100 opacity-100
-      ">
+        ${className}
+      `}>
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between p-4 border-b border-white/10">
           <h2 className="text-lg font-semibold text-white tracking-tight">{title}</h2>

@@ -170,7 +170,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
   return (
     <>
-      <form id="transaction-form" onSubmit={handleSubmit} className="space-y-4">
+      <form id="transaction-form" onSubmit={handleSubmit} className="space-y-3">
         {/* Type Toggle */}
       <div className="grid grid-cols-3 gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
         <button

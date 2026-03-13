@@ -198,7 +198,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
         ))}
 
         {rules.length === 0 && (
-          <GlassCard className="text-center py-16 border-dashed border-2 border-white/10 bg-transparent">
+          <GlassCard className="text-center py-10 border-dashed border-2 border-white/10 bg-transparent">
              <Repeat size={48} className="mx-auto mb-4 text-slate-600" />
              <p className="text-lg font-medium text-slate-300">Nenhuma regra cadastrada.</p>
              <p className="text-sm text-slate-500">Crie regras para lançar contas fixas automaticamente.</p>
@@ -209,7 +209,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
       {/* CREATE/EDIT MODAL */}
       <ModalShell isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={editingRuleId ? 'Editar Regra' : 'Nova Regra'}>
          <ModalBody>
-            <form id="rule-form" onSubmit={handleSubmit} className="space-y-4">
+            <form id="rule-form" onSubmit={handleSubmit} className="space-y-3">
                <div className="grid grid-cols-2 gap-4">
                   <GlassSelect 
                      label="Tipo" 
@@ -335,7 +335,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
       {/* GENERATE MODAL */}
       <ModalShell isOpen={isGenModalOpen} onClose={() => setIsGenModalOpen(false)} title="Gerar Lançamentos">
          <ModalBody>
-            <div className="space-y-6">
+            <div className="space-y-4">
                <GlassCard className="flex gap-4 items-center justify-center p-6 bg-white/5 border-white/10">
                   <Calendar className="text-blue-400" size={24} />
                   <div className="flex gap-2 w-full">

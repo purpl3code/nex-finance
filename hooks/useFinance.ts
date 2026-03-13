@@ -472,7 +472,7 @@ export const useFinance = () => {
               return [...prev, {
                  id: crypto.randomUUID(),
                  investmentAccountId: movement.investmentAccountId,
-                 assetId: movement.assetId,
+                 assetId: movement.assetId!,
                  quantity: movement.quantity!,
                  averagePrice: movement.amount / movement.quantity!,
                  createdAt: Date.now()

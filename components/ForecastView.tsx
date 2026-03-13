@@ -87,7 +87,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       />
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard title="Saldo Inicial" value={forecastData.initialBalance} variant="neutral" />
         <StatCard title="Saldo Final Previsto" value={forecastData.endBalance} variant={forecastData.endBalance >= 0 ? 'good' : 'bad'} />
         <StatCard title="Pior Cenário" value={forecastData.minBalance} variant={forecastData.minBalance >= 0 ? 'good' : 'bad'} />
@@ -144,7 +144,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       </GlassCard>
 
       {/* Timeline View */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h3 className="text-lg font-semibold text-slate-200">Linha do Tempo Detalhada</h3>
         <div className="space-y-4">
            {forecastData.dailyData.map((day: any) => {

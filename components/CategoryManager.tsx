@@ -162,7 +162,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
 
       {/* Grid Content - Desktop Optimized (md:grid-cols-2 lg:grid-cols-3) */}
       {displayedCategories.length === 0 ? (
-        <GlassCard className="flex flex-col items-center justify-center py-16 text-slate-500 border-dashed border-2 border-white/10 bg-transparent">
+        <GlassCard className="flex flex-col items-center justify-center py-10 text-slate-500 border-dashed border-2 border-white/10 bg-transparent">
            <div className="bg-white/5 p-4 rounded-full mb-3 border border-white/5">
               <Archive size={24} className="opacity-50" />
            </div>
@@ -179,8 +179,8 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                     <div className="min-w-0 flex-1">
                        <div className="flex items-center gap-1.5 min-w-0">
                           <span className={`font-semibold text-slate-200 text-sm truncate flex-1 min-w-0 ${cat.isArchived ? 'line-through' : ''}`} title={cat.name}>{cat.name}</span>
-                          {cat.isSystem && <GlassBadge variant="secondary" size="sm" className="px-1 py-0.5 shrink-0"><Lock size={10}/></GlassBadge>}
-                          {cat.isArchived && <GlassBadge variant="outline" size="sm" className="px-1 py-0.5 shrink-0">Arq.</GlassBadge>}
+                          {cat.isSystem && <GlassBadge variant="secondary" className="px-1 py-0.5 shrink-0"><Lock size={10}/></GlassBadge>}
+                          {cat.isArchived && <GlassBadge variant="outline" className="px-1 py-0.5 shrink-0">Arq.</GlassBadge>}
                        </div>
                        <span className="text-xs text-slate-500 truncate block opacity-80" title={cat.group}>{cat.group}</span>
                     </div>
@@ -205,7 +205,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
       {/* CREATE/EDIT MODAL */}
       <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCategory ? 'Editar Categoria' : 'Nova Categoria'}>
          <ModalBody>
-            <form id="category-form" onSubmit={handleSubmit} className="space-y-4">
+            <form id="category-form" onSubmit={handleSubmit} className="space-y-3">
                <div>
                   <GlassInput 
                      label="Nome" 

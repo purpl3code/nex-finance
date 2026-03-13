@@ -261,7 +261,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         </button>
 
         {/* Card Header */}
-        <GlassCard className="mb-6">
+        <GlassCard className="mb-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -288,7 +288,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         </GlassCard>
 
         {/* Invoice Controls */}
-        <div className="flex items-center justify-between glass-sm p-4 rounded-xl border border-white/5 mb-6">
+        <div className="flex items-center justify-between glass-sm p-4 rounded-xl border border-white/5 mb-4">
           <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-white/5 rounded-lg text-slate-300 transition-colors"><ChevronLeft size={24} /></button>
           <div className="text-center">
             <span className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Fatura de</span>
@@ -326,7 +326,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                (invoiceInfo.transactions as any[]).map((tx: CreditCardTransaction) => {
                  const isRefund = tx.type === 'refund';
                  return (
-                  <div key={tx.id} className={`flex justify-between items-center py-3 border-b border-white/5 last:border-0 hover:bg-white/5 px-3 -mx-3 rounded-lg transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
+                  <div key={tx.id} className={`flex justify-between items-center py-2 border-b border-white/5 last:border-0 hover:bg-white/5 px-3 -mx-3 rounded-lg transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={`p-2.5 rounded-xl text-xl shadow-inner border border-white/5 shrink-0 ${isRefund ? 'bg-red-500/10 text-red-400' : 'bg-white/5'}`}>
                         {isRefund ? <RotateCcw size={20}/> : (categories.find(c => c.id === tx.categoryId)?.emoji || '🛒')}
@@ -650,7 +650,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(card => (
           <GlassCard key={card.id} onClick={() => handleSelectCard(card.id)} className="cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56 hover:border-blue-500/30">
              {/* Decorative Background */}
@@ -692,7 +692,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         ))}
         
         {cards.length === 0 && (
-           <div className="col-span-full text-center py-16 text-slate-500 border-2 border-dashed border-white/10 rounded-2xl bg-white/5">
+           <div className="col-span-full text-center py-10 text-slate-500 border-2 border-dashed border-white/10 rounded-2xl bg-white/5">
              <CardIcon size={48} className="mx-auto mb-4 opacity-20" />
              <p className="text-lg font-medium">Nenhum cartão cadastrado.</p>
              <p className="text-sm opacity-70">Adicione um cartão para controlar seus gastos a crédito.</p>

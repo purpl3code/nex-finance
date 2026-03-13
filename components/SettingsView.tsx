@@ -29,9 +29,8 @@ import { toast } from 'sonner';
 const SectionCard = ({ title, description, icon, children, danger = false }: any) => (
   <GlassCard 
     className={`overflow-hidden ${danger ? 'border-red-500/30 shadow-red-900/10' : ''}`}
-    variant={danger ? 'base' : 'base'}
   >
-    <div className="flex items-start gap-4 mb-6">
+    <div className="flex items-start gap-4 mb-4">
       <div className={`p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
         {icon}
       </div>
@@ -355,7 +354,7 @@ export const SettingsView: React.FC = () => {
         description="Mantenha seus dados seguros exportando regularmente."
         icon={<Download size={24} />}
       >
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-4">
            <div className="flex items-center gap-3 text-sm text-slate-400 bg-white/5 px-4 py-3 rounded-xl border border-white/10 w-full md:w-auto">
               <History size={16} />
               {lastBackup ? (
@@ -492,7 +491,7 @@ export const SettingsView: React.FC = () => {
       {/* CLEAR CONFIRM MODAL */}
       <ModalShell isOpen={isClearModalOpen} onClose={() => setIsClearModalOpen(false)} title="Apagar Tudo?">
          <ModalBody>
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-3">
                <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
                   <Trash2 size={32} className="text-red-500" />
                </div>

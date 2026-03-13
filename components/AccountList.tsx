@@ -89,12 +89,12 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {accounts.map(acc => {
           const balance = getBalance(acc.id);
           return (
             <GlassCard key={acc.id} className="flex flex-col justify-between group hover:border-white/20 transition-colors">
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-white/5 rounded-xl shadow-inner border border-white/5">
                     {getIcon(acc.type)}
@@ -135,8 +135,8 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                    </button>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-white/5">
-                <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-1">Saldo Atual</p>
+              <div className="mt-3 pt-3 border-t border-white/5">
+                <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-0.5">Saldo Atual</p>
                 <p className={`text-2xl font-bold ${balance >= 0 ? 'text-white' : 'text-red-400'}`}>
                   {formatCurrency(balance)}
                 </p>
@@ -148,7 +148,7 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
 
       <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingAcc ? 'Editar Conta' : 'Nova Conta'}>
         <ModalBody>
-          <form id="account-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="account-form" onSubmit={handleSubmit} className="space-y-3">
              <GlassInput
                label="Nome da Conta"
                value={name}

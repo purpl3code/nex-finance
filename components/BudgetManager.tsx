@@ -149,7 +149,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
       )}
 
       {/* Budgets List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sortedBudgets.map(budget => {
            const category = getCategory(budget.categoryId);
            const spent = getCategorySpending(budget.categoryId, selectedMonth, selectedYear);
@@ -206,7 +206,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
       {/* Modal */}
       <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingBudget ? 'Editar Orçamento' : 'Novo Orçamento'}>
          <ModalBody>
-            <form id="budget-form" onSubmit={handleSubmit} className="space-y-4">
+            <form id="budget-form" onSubmit={handleSubmit} className="space-y-3">
                <div>
                   <GlassSelect 
                      label="Categoria"
