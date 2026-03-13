@@ -118,6 +118,8 @@ export interface CreditCardTransaction {
   originalTransactionId?: string; // If type is refund, points to the purchase
 
   createdAt: number;
+  generatedByRuleId?: string;
+  generatedKey?: string;
 }
 
 export interface CreditCardInvoice {

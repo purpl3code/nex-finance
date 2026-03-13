@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer, CreditCard } from '../types';
 import { Button } from './ui/Button';
 import { ModalFooter } from './ui/ModalShell';
+import { GlassSelect } from './ui/GlassSelect';
 import { ArrowDownCircle, ArrowUpCircle, ArrowRightLeft } from 'lucide-react';
 
 interface TransactionFormProps {
@@ -248,99 +249,83 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       {mode === 'transfer' ? (
         <div className="grid grid-cols-2 gap-4">
           <div>
-             <label className="block text-sm font-medium text-slate-300 mb-1">De (Origem)</label>
-             <select 
+             <GlassSelect 
+               label="De (Origem)"
                value={fromAccountId}
                onChange={(e) => setFromAccountId(e.target.value)}
-               className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-2 text-white text-sm focus:border-blue-500 focus:ring-1 outline-none"
-             >
-               <option value="">Selecione...</option>
-               {accounts.map(acc => (
-                 <option key={acc.id} value={acc.id} disabled={acc.id === toAccountId}>{acc.name}</option>
-               ))}
-             </select>
+               options={[
+                 { value: '', label: 'Selecione...' },
+                 ...accounts.map(acc => ({ value: acc.id, label: acc.name, disabled: acc.id === toAccountId }))
+               ]}
+             />
           </div>
           <div>
-             <label className="block text-sm font-medium text-slate-300 mb-1">Para (Destino)</label>
-             <select 
+             <GlassSelect 
+               label="Para (Destino)"
                value={toAccountId}
                onChange={(e) => setToAccountId(e.target.value)}
-               className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-2 text-white text-sm focus:border-blue-500 focus:ring-1 outline-none"
-             >
-               <option value="">Selecione...</option>
-               {accounts.map(acc => (
-                 <option key={acc.id} value={acc.id} disabled={acc.id === fromAccountId}>{acc.name}</option>
-               ))}
-             </select>
+               options={[
+                 { value: '', label: 'Selecione...' },
+                 ...accounts.map(acc => ({ value: acc.id, label: acc.name, disabled: acc.id === fromAccountId }))
+               ]}
+             />
           </div>
         </div>
       ) : (
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">Conta / Cartão</label>
-          <select 
+          <GlassSelect 
+            label="Conta / Cartão"
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all appearance-none"
-          >
-            <option value="">Selecione...</option>
-            {(!isEditingCreditCard) && (
-              <optgroup label="Contas">
-                {accounts.map(acc => (
-                  <option key={acc.id} value={acc.id}>{acc.name}</option>
-                ))}
-              </optgroup>
-            )}
-            {mode === 'expense' && creditCards && creditCards.length > 0 && (!isEditingRegular) && (
-              <optgroup label="Cartões de Crédito">
-                {creditCards.map(card => (
-                  <option key={card.id} value={card.id}>{card.name}</option>
-                ))}
-              </optgroup>
-            )}
-          </select>
+            groups={[
+              ...((!isEditingCreditCard) ? [{
+                label: 'Contas',
+                options: accounts.map(acc => ({ value: acc.id, label: acc.name }))
+              }] : []),
+              ...((mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular) ? [{
+                label: 'Cartões de Crédito',
+                options: creditCards.map(card => ({ value: card.id, label: card.name }))
+              }] : [])
+            ]}
+            options={(!isEditingCreditCard && !(mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular)) ? [
+              { value: '', label: 'Selecione...' },
+              ...accounts.map(acc => ({ value: acc.id, label: acc.name }))
+            ] : undefined}
+          />
         </div>
       )}
 
       {/* Category (Only for Transaction) */}
       {mode !== 'transfer' && (
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">Categoria</label>
-          <select 
+          <GlassSelect 
+            label="Categoria"
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className={`w-full bg-slate-900 border rounded-lg py-2.5 px-4 text-white focus:ring-1 outline-none transition-all appearance-none ${
-               categoryId && categories.find(c => c.id === categoryId)?.kind !== mode ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-700 focus:border-blue-500 focus:ring-blue-500'
-            }`}
-          >
-            <option value="">Selecione...</option>
-            {Object.entries(groupedCategories).map(([group, cats]) => (
-              <optgroup key={group} label={group} className="bg-slate-900 text-slate-300">
-                {(cats as Category[])?.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.emoji} {cat.name} {cat.isArchived ? '(Arquivada)' : ''}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+            error={categoryId && categories.find(c => c.id === categoryId)?.kind !== mode ? 'Categoria incompatível com o tipo' : undefined}
+            groups={Object.entries(groupedCategories).map(([group, cats]) => ({
+              label: group,
+              options: (cats as Category[]).map(cat => ({
+                value: cat.id,
+                label: `${cat.emoji} ${cat.name} ${cat.isArchived ? '(Arquivada)' : ''}`
+              }))
+            }))}
+          />
         </div>
       )}
 
       {/* Installments (Only for Credit Card) */}
       {mode === 'expense' && creditCards?.some(c => c.id === accountId) && !initialData?.id && (
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">Parcelas</label>
-          <select
+          <GlassSelect
+            label="Parcelas"
             value={installments}
             onChange={(e) => setInstallments(parseInt(e.target.value))}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all appearance-none"
-          >
-            {Array.from({ length: 24 }, (_, i) => i + 1).map(num => (
-              <option key={num} value={num}>
-                {num}x {num > 1 ? `(R$ ${(parseFloat(amount || '0') / num).toFixed(2)})` : ''}
-              </option>
-            ))}
-          </select>
+            options={Array.from({ length: 24 }, (_, i) => i + 1).map(num => ({
+              value: num,
+              label: `${num}x ${num > 1 ? `(R$ ${(parseFloat(amount || '0') / num).toFixed(2)})` : ''}`
+            }))}
+          />
         </div>
       )}
 

@@ -441,6 +441,7 @@ const App: React.FC = () => {
                   rules={recurringRules}
                   categories={categories}
                   accounts={accounts}
+                  creditCards={creditCards}
                   onAddRule={addRecurringRule}
                   onEditRule={editRecurringRule}
                   onDeleteRule={deleteRecurringRule}

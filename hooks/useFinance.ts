@@ -575,11 +575,32 @@ export const useFinance = () => {
        datesToGenerate.forEach(date => {
           const dateStr = format(date, 'yyyy-MM-dd');
           const generatedKey = `${rule.id}_${dateStr}`;
-          const exists = transactions.some(t => t.generatedKey === generatedKey);
-          generated.push({
-            ruleName: rule.description || (categories.find(c => c.id === rule.categoryId)?.name || 'Recorrência'),
-            isDuplicate: exists,
-            transaction: {
+          
+          const isCreditCard = creditCards.some(c => c.id === rule.accountId);
+          
+          const exists = isCreditCard 
+            ? creditCardTransactions.some(t => t.generatedKey === generatedKey)
+            : transactions.some(t => t.generatedKey === generatedKey);
+            
+          let transactionData: any;
+          
+          if (isCreditCard) {
+            transactionData = {
+              id: crypto.randomUUID(),
+              cardId: rule.accountId,
+              amount: rule.amount,
+              date: dateStr,
+              categoryId: rule.categoryId,
+              description: rule.description || 'Lançamento recorrente',
+              installment: { current: 1, total: 1 },
+              type: 'purchase',
+              createdAt: Date.now(),
+              generatedByRuleId: rule.id,
+              generatedKey: generatedKey,
+              isCreditCard: true
+            };
+          } else {
+            transactionData = {
               id: crypto.randomUUID(),
               type: rule.type,
               amount: rule.amount,
@@ -590,15 +611,32 @@ export const useFinance = () => {
               createdAt: Date.now(),
               generatedByRuleId: rule.id,
               generatedKey: generatedKey
-            }
+            };
+          }
+
+          generated.push({
+            ruleName: rule.description || (categories.find(c => c.id === rule.categoryId)?.name || 'Recorrência'),
+            isDuplicate: exists,
+            transaction: transactionData
           });
        });
     });
     return generated.sort((a, b) => new Date(a.transaction.date).getTime() - new Date(b.transaction.date).getTime());
-  }, [recurringRules, transactions, categories]);
+  }, [recurringRules, transactions, creditCardTransactions, creditCards, categories]);
 
-  const commitRecurringTransactions = useCallback((txs: Transaction[]) => {
-    setTransactions(prev => [...txs, ...prev]);
+  const commitRecurringTransactions = useCallback((txs: any[]) => {
+    const regularTxs = txs.filter(t => !t.isCreditCard);
+    const ccTxs = txs.filter(t => t.isCreditCard).map(t => {
+      const { isCreditCard, ...rest } = t;
+      return rest;
+    });
+    
+    if (regularTxs.length > 0) {
+      setTransactions(prev => [...regularTxs, ...prev]);
+    }
+    if (ccTxs.length > 0) {
+      setCreditCardTransactions(prev => [...ccTxs, ...prev]);
+    }
     touchData();
   }, [touchData]);
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RecurringRule, Category, Account, TransactionType } from '../types';
+import { RecurringRule, Category, Account, TransactionType, CreditCard } from '../types';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassButton } from './ui/GlassButton';
 import { GlassInput } from './ui/GlassInput';
@@ -16,6 +16,7 @@ interface RecurringManagerProps {
   rules: RecurringRule[];
   categories: Category[];
   accounts: Account[];
+  creditCards?: CreditCard[];
   onAddRule: (rule: any) => void;
   onEditRule: (id: string, rule: any) => void;
   onDeleteRule: (id: string) => void;
@@ -28,6 +29,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
   rules,
   categories,
   accounts,
+  creditCards = [],
   onAddRule,
   onEditRule,
   onDeleteRule,
@@ -133,7 +135,13 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
 
   const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
   const getCategoryName = (id: string) => categories.find(c => c.id === id)?.name || '-';
-  const getAccountName = (id: string) => accounts.find(a => a.id === id)?.name || '-';
+  const getAccountName = (id: string) => {
+    const account = accounts.find(a => a.id === id);
+    if (account) return account.name;
+    const card = creditCards.find(c => c.id === id);
+    if (card) return card.name;
+    return '-';
+  };
 
   const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -206,7 +214,15 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                   <GlassSelect 
                      label="Tipo" 
                      value={formData.type} 
-                     onChange={e => setFormData({...formData, type: e.target.value as any})}
+                     onChange={e => {
+                       const newType = e.target.value as any;
+                       const isCreditCard = creditCards.some(c => c.id === formData.accountId);
+                       setFormData({
+                         ...formData, 
+                         type: newType,
+                         accountId: (newType === 'income' && isCreditCard) ? '' : formData.accountId
+                       });
+                     }}
                      options={[
                        { value: 'expense', label: 'Saída' },
                        { value: 'income', label: 'Entrada' }
@@ -234,11 +250,24 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                />
 
                <GlassSelect 
-                  label="Conta" 
-                  value={formData.accountId} 
-                  onChange={e => setFormData({...formData, accountId: e.target.value})} 
-                  required
-                  options={accounts.map(a => ({ value: a.id, label: a.name }))}
+                 label="Conta / Cartão"
+                 value={formData.accountId} 
+                 onChange={e => setFormData({...formData, accountId: e.target.value})} 
+                 required
+                 groups={[
+                   {
+                     label: 'Contas',
+                     options: accounts.map(a => ({ value: a.id, label: a.name }))
+                   },
+                   ...(formData.type === 'expense' && creditCards.length > 0 ? [{
+                     label: 'Cartões de Crédito',
+                     options: creditCards.map(c => ({ value: c.id, label: c.name }))
+                   }] : [])
+                 ]}
+                 options={!(formData.type === 'expense' && creditCards.length > 0) ? [
+                   { value: '', label: 'Selecione...' },
+                   ...accounts.map(a => ({ value: a.id, label: a.name }))
+                 ] : undefined}
                />
 
                <GlassInput 
@@ -309,21 +338,27 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
             <div className="space-y-6">
                <GlassCard className="flex gap-4 items-center justify-center p-6 bg-slate-900/50">
                   <Calendar className="text-blue-400" size={24} />
-                  <div className="flex gap-2">
-                    <select 
-                       className="bg-slate-800 text-white border border-white/10 rounded-lg p-2 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all" 
-                       value={genMonth} 
-                       onChange={e => { setGenMonth(parseInt(e.target.value)); setHasGeneratedPreview(false); }}
-                    >
-                       {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
-                    </select>
-                    <select 
-                       className="bg-slate-800 text-white border border-white/10 rounded-lg p-2 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all" 
-                       value={genYear} 
-                       onChange={e => { setGenYear(parseInt(e.target.value)); setHasGeneratedPreview(false); }}
-                    >
-                       {Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
-                    </select>
+                  <div className="flex gap-2 w-full">
+                    <div className="flex-1">
+                      <GlassSelect 
+                         value={genMonth} 
+                         onChange={e => { setGenMonth(parseInt(e.target.value)); setHasGeneratedPreview(false); }}
+                         options={Array.from({length: 12}, (_, i) => i).map(m => ({
+                           value: m,
+                           label: new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})
+                         }))}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <GlassSelect 
+                         value={genYear} 
+                         onChange={e => { setGenYear(parseInt(e.target.value)); setHasGeneratedPreview(false); }}
+                         options={Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => ({
+                           value: y,
+                           label: String(y)
+                         }))}
+                      />
+                    </div>
                   </div>
                </GlassCard>
 

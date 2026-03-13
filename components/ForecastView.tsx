@@ -3,6 +3,7 @@ import { Account } from '../types';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
+import { GlassSelect } from './ui/GlassSelect';
 import { TrendingUp, Calendar, ArrowRight, CreditCard, Repeat } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -59,14 +60,28 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
         title="Previsão Financeira" 
         subtitle="Simulação futura baseada em lançamentos, recorrências e faturas."
         controls={
-          <>
-             <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-                {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
-             </select>
-             <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-                {Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
-             </select>
-          </>
+          <div className="flex gap-2 w-full sm:w-auto">
+             <div className="w-32">
+               <GlassSelect 
+                  value={selectedMonth} 
+                  onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                  options={Array.from({length: 12}, (_, i) => i).map(m => ({
+                    value: m,
+                    label: new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})
+                  }))}
+               />
+             </div>
+             <div className="w-24">
+               <GlassSelect 
+                  value={selectedYear} 
+                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                  options={Array.from({length: 5}, (_, i) => currentDate.getFullYear() - 1 + i).map(y => ({
+                    value: y,
+                    label: String(y)
+                  }))}
+               />
+             </div>
+          </div>
         }
       />
 

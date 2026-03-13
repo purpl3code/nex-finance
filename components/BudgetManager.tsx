@@ -6,6 +6,7 @@ import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
+import { GlassSelect } from './ui/GlassSelect';
 import { PieChart, Trash2, Edit2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface BudgetManagerProps {
@@ -105,14 +106,28 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
           <Button onClick={() => openModal()} icon={<Plus size={18} />} className="hidden md:flex">Novo Orçamento</Button>
         }
         controls={
-          <>
-             <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-                {Array.from({length: 12}, (_, i) => i).map(m => <option key={m} value={m}>{new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})}</option>)}
-             </select>
-             <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none" value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-                {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 1 + i).map(y => <option key={y} value={y}>{y}</option>)}
-             </select>
-          </>
+          <div className="flex gap-2 w-full sm:w-auto">
+             <div className="w-32">
+               <GlassSelect 
+                  value={selectedMonth} 
+                  onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                  options={Array.from({length: 12}, (_, i) => i).map(m => ({
+                    value: m,
+                    label: new Date(2000, m, 1).toLocaleDateString('pt-BR', {month: 'long'})
+                  }))}
+               />
+             </div>
+             <div className="w-24">
+               <GlassSelect 
+                  value={selectedYear} 
+                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                  options={Array.from({length: 5}, (_, i) => new Date().getFullYear() - 1 + i).map(y => ({
+                    value: y,
+                    label: String(y)
+                  }))}
+               />
+             </div>
+          </div>
         }
       />
 
@@ -192,17 +207,17 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
          <ModalBody>
             <form id="budget-form" onSubmit={handleSubmit} className="space-y-4">
                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Categoria</label>
-                  <select 
-                     className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" 
+                  <GlassSelect 
+                     label="Categoria"
                      value={form.categoryId} 
                      onChange={e => setForm({...form, categoryId: e.target.value})}
                      disabled={!!editingBudget}
                      required
-                  >
-                     <option value="">Selecione...</option>
-                     {categories.filter(c => c.kind === 'expense').map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
-                  </select>
+                     options={[
+                       { value: '', label: 'Selecione...' },
+                       ...categories.filter(c => c.kind === 'expense').map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                     ]}
+                  />
                </div>
                <div>
                   <label className="block text-sm text-slate-300 mb-1">Limite (R$)</label>
