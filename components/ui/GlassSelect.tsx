@@ -6,6 +6,7 @@ export interface SelectOption {
   value: string | number;
   label: string;
   disabled?: boolean;
+  color?: string;
 }
 
 export interface SelectGroup {
@@ -35,17 +36,22 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Find selected label
+  // Find selected label and color
   let selectedLabel = placeholder;
+  let selectedColor: string | undefined = undefined;
   if (value !== undefined && value !== '') {
     if (options) {
       const opt = options.find(o => String(o.value) === String(value));
-      if (opt) selectedLabel = opt.label;
+      if (opt) {
+        selectedLabel = opt.label;
+        selectedColor = opt.color;
+      }
     } else if (groups) {
       for (const g of groups) {
         const opt = g.options.find(o => String(o.value) === String(value));
         if (opt) {
           selectedLabel = opt.label;
+          selectedColor = opt.color;
           break;
         }
       }
@@ -98,7 +104,12 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
             ${className}
           `}
         >
-          <span className="block truncate">{selectedLabel}</span>
+          <div className="flex items-center gap-2 truncate">
+            {selectedColor && (
+              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: selectedColor }} />
+            )}
+            <span className="block truncate">{selectedLabel}</span>
+          </div>
         </button>
         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
           <ChevronDown size={16} />
@@ -149,7 +160,12 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
                     ${String(value) === String(opt.value) ? 'text-blue-400 bg-blue-500/10 font-medium' : 'text-slate-200'}
                   `}
                 >
-                  <span className="truncate">{opt.label}</span>
+                  <div className="flex items-center gap-2 truncate">
+                    {opt.color && (
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: opt.color }} />
+                    )}
+                    <span className="truncate">{opt.label}</span>
+                  </div>
                   {String(value) === String(opt.value) && <Check size={16} className="shrink-0 ml-2" />}
                 </button>
               ))}
@@ -171,7 +187,12 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
                         ${String(value) === String(opt.value) ? 'text-blue-400 bg-blue-500/10 font-medium' : 'text-slate-200'}
                       `}
                     >
-                      <span className="truncate">{opt.label}</span>
+                      <div className="flex items-center gap-2 truncate">
+                        {opt.color && (
+                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: opt.color }} />
+                        )}
+                        <span className="truncate">{opt.label}</span>
+                      </div>
                       {String(value) === String(opt.value) && <Check size={16} className="shrink-0 ml-2" />}
                     </button>
                   ))}

@@ -284,7 +284,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               }] : []),
               ...((mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular) ? [{
                 label: 'Cartões de Crédito',
-                options: creditCards.map(card => ({ value: card.id, label: card.name }))
+                options: creditCards.map(card => ({ value: card.id, label: card.name, color: card.color }))
               }] : [])
             ]}
             options={(!isEditingCreditCard && !(mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular)) ? [

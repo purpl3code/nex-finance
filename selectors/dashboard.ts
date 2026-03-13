@@ -141,7 +141,8 @@ export const getRecentActivity = (
   categories: Category[],
   month: number, // Added: Filter by month
   year: number,  // Added: Filter by year
-  limit: number = 5
+  limit: number = 5,
+  creditCards: CreditCard[] = []
 ) => {
   const unified = [
     ...transactions.map(t => ({
@@ -152,18 +153,23 @@ export const getRecentActivity = (
       type: t.type, // income | expense
       categoryId: t.categoryId,
       isCard: false,
-      source: 'Conta'
+      source: 'Conta',
+      color: undefined
     })),
-    ...cardTransactions.map(t => ({
-      id: t.id,
-      date: t.date,
-      description: t.description,
-      amount: t.amount,
-      type: t.type === 'refund' ? 'income' : 'expense', // Map refund to income for color logic
-      categoryId: t.categoryId,
-      isCard: true,
-      source: 'Cartão'
-    }))
+    ...cardTransactions.map(t => {
+      const card = creditCards.find(c => c.id === t.cardId);
+      return {
+        id: t.id,
+        date: t.date,
+        description: t.description,
+        amount: t.amount,
+        type: t.type === 'refund' ? 'income' : 'expense', // Map refund to income for color logic
+        categoryId: t.categoryId,
+        isCard: true,
+        source: card ? card.name : 'Cartão',
+        color: card?.color
+      };
+    })
   ];
 
   return unified

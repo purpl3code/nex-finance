@@ -10,8 +10,21 @@ import { GlassCard } from './ui/GlassCard';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
-import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote } from 'lucide-react';
+import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check } from 'lucide-react';
 import { toast } from 'sonner';
+
+const CARD_COLORS = [
+  '#3b82f6', // blue
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+  '#ef4444', // red
+  '#f59e0b', // amber
+  '#10b981', // emerald
+  '#14b8a6', // teal
+  '#64748b', // slate
+  '#1e293b', // slate-800
+  '#0f172a', // slate-900
+];
 
 interface CreditCardManagerProps {
   cards: CreditCard[];
@@ -60,7 +73,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [refundingTx, setRefundingTx] = useState<CreditCardTransaction | null>(null);
 
   // Form States
-  const [cardForm, setCardForm] = useState({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '' });
+  const [cardForm, setCardForm] = useState({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '', color: '#3b82f6' });
   const [txForm, setTxForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], categoryId: '', description: '', installments: '1' });
   const [refundForm, setRefundForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], description: '' });
   const [payAccount, setPayAccount] = useState('');
@@ -75,11 +88,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         limit: card.limit.toString(),
         closingDay: card.closingDay.toString(),
         dueDay: card.dueDay.toString(),
-        defaultPaymentAccountId: card.defaultPaymentAccountId || ''
+        defaultPaymentAccountId: card.defaultPaymentAccountId || '',
+        color: card.color || '#3b82f6'
       });
     } else {
       setEditingCard(null);
-      setCardForm({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '' });
+      setCardForm({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '', color: '#3b82f6' });
     }
     setIsCardModalOpen(true);
   };
@@ -91,7 +105,8 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       limit: parseFloat(cardForm.limit),
       closingDay: parseInt(cardForm.closingDay),
       dueDay: parseInt(cardForm.dueDay),
-      defaultPaymentAccountId: cardForm.defaultPaymentAccountId || undefined
+      defaultPaymentAccountId: cardForm.defaultPaymentAccountId || undefined,
+      color: cardForm.color
     };
 
     if (editingCard && onEditCard) {
@@ -249,7 +264,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         <GlassCard className="mb-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">{selectedCard.name}</h2>
+              <div className="flex items-center gap-3 mb-2">
+                {selectedCard.color && (
+                  <div className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: selectedCard.color }} />
+                )}
+                <h2 className="text-3xl font-bold text-white">{selectedCard.name}</h2>
+              </div>
               <div className="flex flex-wrap gap-4 text-sm">
                 <p className="text-slate-400">Limite: <span className="text-slate-200 font-medium">{formatCurrency(selectedCard.limit)}</span></p>
                 {selectedCard.defaultPaymentAccountId && (
@@ -570,6 +590,22 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      />
                      <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
                   </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do Cartão</label>
+                    <div className="flex flex-wrap gap-2 px-1">
+                      {CARD_COLORS.map(color => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setCardForm({...cardForm, color})}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${cardForm.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
+                          style={{ backgroundColor: color }}
+                        >
+                          {cardForm.color === color && <Check size={16} className="text-white" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                </form>
             </ModalBody>
             <ModalFooter>
@@ -625,14 +661,19 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
              <div className="relative z-10">
                <div className="flex justify-between items-start mb-6">
                  <div>
-                   <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors">{card.name}</h3>
+                   <div className="flex items-center gap-2">
+                     {card.color && (
+                       <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: card.color }} />
+                     )}
+                     <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors">{card.name}</h3>
+                   </div>
                    <div className="flex gap-2 text-xs text-slate-400 mt-1">
                       <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded">Fecha dia {card.closingDay}</span>
                       <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded">Vence dia {card.dueDay}</span>
                    </div>
                  </div>
                  <div className="bg-white/5 border border-white/10 p-2.5 rounded-xl shadow-inner">
-                   <CardIcon className="text-blue-400" size={24} />
+                   <CardIcon style={{ color: card.color || '#60a5fa' }} size={24} />
                  </div>
                </div>
                
@@ -708,6 +749,22 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                     ]}
                  />
                  <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do Cartão</label>
+                <div className="flex flex-wrap gap-2 px-1">
+                  {CARD_COLORS.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setCardForm({...cardForm, color})}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${cardForm.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
+                      style={{ backgroundColor: color }}
+                    >
+                      {cardForm.color === color && <Check size={16} className="text-white" />}
+                    </button>
+                  ))}
+                </div>
               </div>
            </form>
         </ModalBody>

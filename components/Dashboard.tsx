@@ -85,8 +85,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
 
   // Updated to pass month/year filter
   const recentActivity = useMemo(() => 
-    getRecentActivity(transactions, creditCardTransactions, categories, month, year, 8),
-  [transactions, creditCardTransactions, categories, month, year]);
+    getRecentActivity(transactions, creditCardTransactions, categories, month, year, 8, creditCards),
+  [transactions, creditCardTransactions, categories, month, year, creditCards]);
 
   const balanceHistory = useMemo(() => 
     getBalanceHistory(accounts, transactions, month, year),

@@ -100,7 +100,12 @@ export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities
                   <div className="flex items-center gap-2 text-xs text-slate-500">
                     <span>{new Date(item.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</span>
                     <span>•</span>
-                    <span className={`${item.isCard ? 'text-violet-400' : 'text-blue-400'}`}>{item.source}</span>
+                    <div className="flex items-center gap-1.5">
+                      {item.color && (
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                      )}
+                      <span className={`${item.isCard ? 'text-violet-400' : 'text-blue-400'}`}>{item.source}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -198,7 +203,10 @@ export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, invoiceAmou
   return (
     <div className="bg-white/5 border border-white/5 p-4 rounded-xl flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer group">
       <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-slate-800 rounded-lg text-slate-300 group-hover:text-white group-hover:bg-blue-600 transition-colors">
+        <div 
+          className="p-2.5 rounded-lg text-white transition-colors shadow-sm"
+          style={{ backgroundColor: card.color || '#1e293b' }}
+        >
           <CreditCard size={20} />
         </div>
         <div>

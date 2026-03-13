@@ -261,7 +261,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                    },
                    ...(formData.type === 'expense' && creditCards.length > 0 ? [{
                      label: 'Cartões de Crédito',
-                     options: creditCards.map(c => ({ value: c.id, label: c.name }))
+                     options: creditCards.map(c => ({ value: c.id, label: c.name, color: c.color }))
                    }] : [])
                  ]}
                  options={!(formData.type === 'expense' && creditCards.length > 0) ? [
