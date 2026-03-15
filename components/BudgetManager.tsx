@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Budget, Category } from '../types';
-import { Button } from './ui/Button';
+import { GlassInput } from './ui/GlassInput';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { PageShell } from './ui/PageShell';
@@ -104,7 +104,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
         title="Orçamentos" 
         subtitle="Defina limites de gastos por categoria para controlar suas finanças."
         actions={
-          <Button onClick={() => openModal()} icon={<Plus size={18} />} className="hidden md:flex">Novo Orçamento</Button>
+          <GlassButton onClick={() => openModal()} icon={<Plus size={18} />} className="hidden md:flex">Novo Orçamento</GlassButton>
         }
         controls={
           <div className="flex gap-2 w-full sm:w-auto">
@@ -207,33 +207,42 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
       <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingBudget ? 'Editar Orçamento' : 'Novo Orçamento'}>
          <ModalBody>
             <form id="budget-form" onSubmit={handleSubmit} className="space-y-3">
+               <GlassSelect 
+                  label="Categoria"
+                  value={form.categoryId} 
+                  onChange={e => setForm({...form, categoryId: e.target.value})}
+                  disabled={!!editingBudget}
+                  required
+                  options={[
+                    { value: '', label: 'Selecione...' },
+                    ...categories.filter(c => c.kind === 'expense').map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                  ]}
+               />
+               <GlassInput 
+                  label="Limite (R$)" 
+                  type="number" 
+                  step="0.01" 
+                  value={form.amountLimit} 
+                  onChange={e => setForm({...form, amountLimit: e.target.value})} 
+                  required 
+               />
                <div>
-                  <GlassSelect 
-                     label="Categoria"
-                     value={form.categoryId} 
-                     onChange={e => setForm({...form, categoryId: e.target.value})}
-                     disabled={!!editingBudget}
-                     required
-                     options={[
-                       { value: '', label: 'Selecione...' },
-                       ...categories.filter(c => c.kind === 'expense').map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
-                     ]}
+                  <GlassInput 
+                     label="Alertar em (%)" 
+                     type="number" 
+                     min="1" 
+                     max="100" 
+                     value={form.alertAtPercent} 
+                     onChange={e => setForm({...form, alertAtPercent: e.target.value})} 
+                     required 
                   />
-               </div>
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Limite (R$)</label>
-                  <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={form.amountLimit} onChange={e => setForm({...form, amountLimit: e.target.value})} required />
-               </div>
-               <div>
-                  <label className="block text-sm text-slate-300 mb-1">Alertar em (%)</label>
-                  <input type="number" min="1" max="100" className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" value={form.alertAtPercent} onChange={e => setForm({...form, alertAtPercent: e.target.value})} required />
-                  <p className="text-xs text-slate-500 mt-1">Quando o gasto atingir essa %, a barra ficará amarela.</p>
+                  <p className="text-xs text-slate-500 mt-1 ml-1">Quando o gasto atingir essa %, a barra ficará amarela.</p>
                </div>
             </form>
          </ModalBody>
          <ModalFooter>
-            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" form="budget-form">Salvar</Button>
+            <GlassButton type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</GlassButton>
+            <GlassButton type="submit" form="budget-form">Salvar</GlassButton>
          </ModalFooter>
       </ModalShell>
 

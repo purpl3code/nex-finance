@@ -1,8 +1,9 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer, CreditCard } from '../types';
-import { Button } from './ui/Button';
-import { ModalFooter } from './ui/ModalShell';
+import { GlassButton } from './ui/GlassButton';
+import { GlassInput } from './ui/GlassInput';
+import { ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassSelect } from './ui/GlassSelect';
 import { ArrowDownCircle, ArrowUpCircle, ArrowRightLeft } from 'lucide-react';
 
@@ -170,185 +171,180 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
   return (
     <>
-      <form id="transaction-form" onSubmit={handleSubmit} className="space-y-3">
-        {/* Type Toggle */}
-      <div className="grid grid-cols-3 gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
-        <button
-          type="button"
-          onClick={() => setMode('income')}
-          className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
-            mode === 'income' 
-              ? 'bg-emerald-600 text-white shadow-lg' 
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <ArrowUpCircle size={16} />
-          Entrada
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('expense')}
-          className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
-            mode === 'expense' 
-              ? 'bg-red-600 text-white shadow-lg' 
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <ArrowDownCircle size={16} />
-          Saída
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('transfer')}
-          className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
-            mode === 'transfer' 
-              ? 'bg-blue-600 text-white shadow-lg' 
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <ArrowRightLeft size={16} />
-          Transferência
-        </button>
-      </div>
+      <ModalBody>
+        <form id="transaction-form" onSubmit={handleSubmit} className="space-y-3">
+          {/* Type Toggle */}
+          <div className="grid grid-cols-3 gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
+            <button
+              type="button"
+              onClick={() => setMode('income')}
+              className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
+                mode === 'income' 
+                  ? 'bg-emerald-600 text-white shadow-lg' 
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <ArrowUpCircle size={16} />
+              Entrada
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('expense')}
+              className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
+                mode === 'expense' 
+                  ? 'bg-red-600 text-white shadow-lg' 
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <ArrowDownCircle size={16} />
+              Saída
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('transfer')}
+              className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
+                mode === 'transfer' 
+                  ? 'bg-blue-600 text-white shadow-lg' 
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <ArrowRightLeft size={16} />
+              Transferência
+            </button>
+          </div>
 
-      {/* Amount */}
-      <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1">Valor</label>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">R$</span>
-          <input 
+          {/* Amount */}
+          <GlassInput 
+            label="Valor"
             type="number" 
             step="0.01" 
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+            icon={<span className="text-sm font-semibold">R$</span>}
             placeholder="0,00"
           />
-        </div>
-      </div>
 
-      {/* Date */}
-      <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1">Data</label>
-        <input 
-          type="date" 
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]"
-        />
-        {date && currentMonth !== undefined && currentYear !== undefined && (
-          (new Date(date + 'T12:00:00').getMonth() !== currentMonth || new Date(date + 'T12:00:00').getFullYear() !== currentYear)
-        ) && (
-          <p className="text-xs text-amber-400 mt-1">
-            Aviso: Esta data está fora do mês selecionado no filtro ({currentMonth + 1}/{currentYear}).
-          </p>
-        )}
-      </div>
-
-      {/* Account Selection Logic */}
-      {mode === 'transfer' ? (
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-             <GlassSelect 
-               label="De (Origem)"
-               value={fromAccountId}
-               onChange={(e) => setFromAccountId(e.target.value)}
-               options={[
-                 { value: '', label: 'Selecione...' },
-                 ...accounts.map(acc => ({ value: acc.id, label: acc.name, disabled: acc.id === toAccountId }))
-               ]}
-             />
+          {/* Date */}
+          <div className="space-y-1">
+            <GlassInput 
+              label="Data"
+              type="date" 
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="[color-scheme:dark]"
+            />
+            {date && currentMonth !== undefined && currentYear !== undefined && (
+              (new Date(date + 'T12:00:00').getMonth() !== currentMonth || new Date(date + 'T12:00:00').getFullYear() !== currentYear)
+            ) && (
+              <p className="text-[10px] text-amber-400/80 mt-1 ml-1 flex items-center gap-1">
+                <span className="w-1 h-1 rounded-full bg-amber-400" />
+                Data fora do mês selecionado ({currentMonth + 1}/{currentYear})
+              </p>
+            )}
           </div>
-          <div>
-             <GlassSelect 
-               label="Para (Destino)"
-               value={toAccountId}
-               onChange={(e) => setToAccountId(e.target.value)}
-               options={[
-                 { value: '', label: 'Selecione...' },
-                 ...accounts.map(acc => ({ value: acc.id, label: acc.name, disabled: acc.id === fromAccountId }))
-               ]}
-             />
-          </div>
-        </div>
-      ) : (
-        <div>
-          <GlassSelect 
-            label="Conta / Cartão"
-            value={accountId}
-            onChange={(e) => setAccountId(e.target.value)}
-            groups={[
-              ...((!isEditingCreditCard) ? [{
-                label: 'Contas',
-                options: accounts.map(acc => ({ value: acc.id, label: acc.name }))
-              }] : []),
-              ...((mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular) ? [{
-                label: 'Cartões de Crédito',
-                options: creditCards.map(card => ({ value: card.id, label: card.name, color: card.color }))
-              }] : [])
-            ]}
-            options={(!isEditingCreditCard && !(mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular)) ? [
-              { value: '', label: 'Selecione...' },
-              ...accounts.map(acc => ({ value: acc.id, label: acc.name }))
-            ] : undefined}
+
+          {/* Account Selection Logic */}
+          {mode === 'transfer' ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                 <GlassSelect 
+                   label="De (Origem)"
+                   value={fromAccountId}
+                   onChange={(e) => setFromAccountId(e.target.value)}
+                   options={[
+                     { value: '', label: 'Selecione...' },
+                     ...accounts.map(acc => ({ value: acc.id, label: acc.name, disabled: acc.id === toAccountId }))
+                   ]}
+                 />
+              </div>
+              <div>
+                 <GlassSelect 
+                   label="Para (Destino)"
+                   value={toAccountId}
+                   onChange={(e) => setToAccountId(e.target.value)}
+                   options={[
+                     { value: '', label: 'Selecione...' },
+                     ...accounts.map(acc => ({ value: acc.id, label: acc.name, disabled: acc.id === fromAccountId }))
+                   ]}
+                 />
+              </div>
+            </div>
+          ) : (
+            <div>
+              <GlassSelect 
+                label="Conta / Cartão"
+                value={accountId}
+                onChange={(e) => setAccountId(e.target.value)}
+                groups={[
+                  ...((!isEditingCreditCard) ? [{
+                    label: 'Contas',
+                    options: accounts.map(acc => ({ value: acc.id, label: acc.name }))
+                  }] : []),
+                  ...((mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular) ? [{
+                    label: 'Cartões de Crédito',
+                    options: creditCards.map(card => ({ value: card.id, label: card.name, color: card.color }))
+                  }] : [])
+                ]}
+                options={(!isEditingCreditCard && !(mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular)) ? [
+                  { value: '', label: 'Selecione...' },
+                  ...accounts.map(acc => ({ value: acc.id, label: acc.name }))
+                ] : undefined}
+              />
+            </div>
+          )}
+
+          {/* Category (Only for Transaction) */}
+          {mode !== 'transfer' && (
+            <div>
+              <GlassSelect 
+                label="Categoria"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                error={categoryId && categories.find(c => c.id === categoryId)?.kind !== mode ? 'Categoria incompatível com o tipo' : undefined}
+                groups={Object.entries(groupedCategories).map(([group, cats]) => ({
+                  label: group,
+                  options: (cats as Category[]).map(cat => ({
+                    value: cat.id,
+                    label: `${cat.emoji} ${cat.name} ${cat.isArchived ? '(Arquivada)' : ''}`
+                  }))
+                }))}
+              />
+            </div>
+          )}
+
+          {/* Installments (Only for Credit Card) */}
+          {mode === 'expense' && creditCards?.some(c => c.id === accountId) && !initialData?.id && (
+            <div>
+              <GlassSelect
+                label="Parcelas"
+                value={installments}
+                onChange={(e) => setInstallments(parseInt(e.target.value))}
+                options={Array.from({ length: 24 }, (_, i) => i + 1).map(num => ({
+                  value: num,
+                  label: `${num}x ${num > 1 ? `(R$ ${(parseFloat(amount || '0') / num).toFixed(2)})` : ''}`
+                }))}
+              />
+            </div>
+          )}
+
+          {/* Description */}
+          <GlassInput 
+            label="Descrição (Opcional)"
+            type="text" 
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={mode === 'transfer' ? "Ex: Reserva de emergência" : "Ex: Supermercado semanal"}
           />
-        </div>
-      )}
 
-      {/* Category (Only for Transaction) */}
-      {mode !== 'transfer' && (
-        <div>
-          <GlassSelect 
-            label="Categoria"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            error={categoryId && categories.find(c => c.id === categoryId)?.kind !== mode ? 'Categoria incompatível com o tipo' : undefined}
-            groups={Object.entries(groupedCategories).map(([group, cats]) => ({
-              label: group,
-              options: (cats as Category[]).map(cat => ({
-                value: cat.id,
-                label: `${cat.emoji} ${cat.name} ${cat.isArchived ? '(Arquivada)' : ''}`
-              }))
-            }))}
-          />
-        </div>
-      )}
-
-      {/* Installments (Only for Credit Card) */}
-      {mode === 'expense' && creditCards?.some(c => c.id === accountId) && !initialData?.id && (
-        <div>
-          <GlassSelect
-            label="Parcelas"
-            value={installments}
-            onChange={(e) => setInstallments(parseInt(e.target.value))}
-            options={Array.from({ length: 24 }, (_, i) => i + 1).map(num => ({
-              value: num,
-              label: `${num}x ${num > 1 ? `(R$ ${(parseFloat(amount || '0') / num).toFixed(2)})` : ''}`
-            }))}
-          />
-        </div>
-      )}
-
-      {/* Description */}
-      <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1">Descrição (Opcional)</label>
-        <input 
-          type="text" 
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-          placeholder={mode === 'transfer' ? "Ex: Reserva de emergência" : "Ex: Supermercado semanal"}
-        />
-      </div>
-
-      {error && <p className="text-red-400 text-sm animate-pulse">{error}</p>}
-      </form>
+          {error && <p className="text-red-400 text-xs font-medium ml-1 animate-pulse">{error}</p>}
+        </form>
+      </ModalBody>
 
       <ModalFooter>
-        <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" form="transaction-form" variant="primary">
+        <GlassButton type="button" variant="ghost" onClick={onCancel}>Cancelar</GlassButton>
+        <GlassButton type="submit" form="transaction-form" variant="primary">
           {initialData?.id ? 'Salvar Alterações' : (mode === 'transfer' ? 'Confirmar Transferência' : 'Adicionar Transação')}
-        </Button>
+        </GlassButton>
       </ModalFooter>
     </>
   );

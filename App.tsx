@@ -12,6 +12,7 @@ import { ForecastView } from './components/ForecastView';
 import { BudgetManager } from './components/BudgetManager';
 import { SettingsView } from './components/SettingsView';
 import { GoalManager } from './components/GoalManager';
+import { ReportView } from './components/ReportView';
 import { Sidebar } from './components/Sidebar';
 import { ModalShell, ModalBody, ModalFooter } from './components/ui/ModalShell';
 import { GlassButton } from './components/ui/GlassButton';
@@ -26,10 +27,10 @@ import { MobileFab } from './components/ui/MobileFab';
 import { Toaster } from 'sonner';
 
 // Define valid tabs for type safety
-type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals';
+type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals' | 'reports';
 
 const VALID_TABS: AppTab[] = [
-  'dashboard', 'list', 'accounts', 'cards', 'recurring', 'forecast', 'budgets', 'settings', 'goals'
+  'dashboard', 'list', 'accounts', 'cards', 'recurring', 'forecast', 'budgets', 'settings', 'goals', 'reports'
 ];
 
 const App: React.FC = () => {
@@ -41,6 +42,7 @@ const App: React.FC = () => {
     accounts,
     creditCards,
     creditCardTransactions, // Added to props
+    transfers,
     recurringRules,
     budgets,
     investmentAccounts,
@@ -482,6 +484,19 @@ const App: React.FC = () => {
                 />
               )}
 
+              {activeTab === 'reports' && (
+                <ReportView 
+                  transactions={transactions}
+                  categories={categories}
+                  accounts={accounts}
+                  creditCardTransactions={creditCardTransactions}
+                  transfers={transfers}
+                  filters={filters}
+                  onMonthChange={(m) => setFilters(prev => ({ ...prev, month: m }))}
+                  onYearChange={(y) => setFilters(prev => ({ ...prev, year: y }))}
+                />
+              )}
+
               {activeTab === 'settings' && (
                 <SettingsView />
               )}
@@ -496,18 +511,16 @@ const App: React.FC = () => {
         onClose={handleCloseModal} 
         title={editingItem?.id ? "Editar Movimentação" : "Nova Movimentação"}
       >
-        <ModalBody>
-          <TransactionForm 
-            initialData={editingItem} 
-            categories={categories} 
-            accounts={accounts}
-            creditCards={creditCards}
-            onSubmit={handleSubmitForm}
-            onCancel={handleCloseModal}
-            currentMonth={filters.month}
-            currentYear={filters.year}
-          />
-        </ModalBody>
+        <TransactionForm 
+          initialData={editingItem} 
+          categories={categories} 
+          accounts={accounts}
+          creditCards={creditCards}
+          onSubmit={handleSubmitForm}
+          onCancel={handleCloseModal}
+          currentMonth={filters.month}
+          currentYear={filters.year}
+        />
       </ModalShell>
 
       <MobileFab

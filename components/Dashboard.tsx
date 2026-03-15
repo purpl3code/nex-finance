@@ -163,40 +163,45 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
             </div>
             
             {comprehensiveChartData.length > 0 ? (
-              <div className="h-64 w-full">
+              <div className="h-64 sm:h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <RePieChart>
                     <Pie
                       data={comprehensiveChartData}
                       cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
+                      cy="45%"
+                      innerRadius="55%"
+                      outerRadius="75%"
                       paddingAngle={5}
+                      minAngle={5}
                       dataKey="value"
                       stroke="none"
+                      activeShape={false}
                     >
                       {comprehensiveChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell key={`cell-${index}`} fill={entry.color} style={{ outline: 'none' }} />
                       ))}
                     </Pie>
                     <Tooltip 
                       formatter={(value: number) => formatCurrency(value)}
-                      contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', borderColor: 'rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '12px', backdropFilter: 'blur(8px)' }}
+                      contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderColor: 'rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '12px', backdropFilter: 'blur(8px)' }}
                       itemStyle={{ color: '#f8fafc' }}
                     />
                     <Legend 
-                      layout="vertical" 
-                      verticalAlign="middle" 
-                      align="right"
+                      verticalAlign="bottom" 
+                      align="center"
                       iconType="circle"
-                      wrapperStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                      wrapperStyle={{ 
+                        color: '#94a3b8', 
+                        fontSize: '11px',
+                        paddingTop: '10px'
+                      }}
                     />
                   </RePieChart>
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-64 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-lg">
+              <div className="h-[300px] sm:h-[350px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-xl">
                 <Wallet size={48} className="mb-2 opacity-20" />
                 <p>Nenhuma despesa registrada.</p>
               </div>
