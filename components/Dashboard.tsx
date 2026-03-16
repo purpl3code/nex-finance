@@ -42,6 +42,7 @@ interface DashboardProps {
   getCardTotalUsedLimit?: (cardId: string) => number;
   month: number;
   year: number;
+  onCardClick?: (cardId: string) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = React.memo(({ 
@@ -56,7 +57,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   getCardInvoiceInfo,
   getCardTotalUsedLimit,
   month,
-  year
+  year,
+  onCardClick
 }) => {
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -224,6 +226,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                     card={card} 
                     usedAmount={totalUsed} 
                     usedPercentage={usedPct} 
+                    onClick={() => onCardClick?.(card.id)}
                   />
                 );
               })

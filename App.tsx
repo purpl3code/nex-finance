@@ -102,11 +102,15 @@ const App: React.FC = () => {
 
   const [activeTab, setActiveTabState] = useState<AppTab>(getTabFromHash());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   useEffect(() => {
     const handleHashChange = () => {
       const newTab = getTabFromHash();
       setActiveTabState(newTab);
+      if (newTab !== 'cards') {
+        setSelectedCardId(null);
+      }
     };
 
     window.addEventListener('hashchange', handleHashChange);
@@ -121,7 +125,15 @@ const App: React.FC = () => {
   const setActiveTab = (tab: AppTab) => {
     window.location.hash = tab;
     setActiveTabState(tab);
+    if (tab !== 'cards') {
+      setSelectedCardId(null);
+    }
     window.scrollTo(0,0);
+  };
+
+  const handleCardClick = (cardId: string) => {
+    setSelectedCardId(cardId);
+    setActiveTab('cards');
   };
 
   const currentDate = new Date();
@@ -346,6 +358,7 @@ const App: React.FC = () => {
                     getCardTotalUsedLimit={getCardTotalUsedLimit}
                     month={filters.month}
                     year={filters.year}
+                    onCardClick={handleCardClick}
                   />
                 </PageShell>
               )}
@@ -433,6 +446,7 @@ const App: React.FC = () => {
                   onAddRefund={addCreditCardRefund}
                   onPayInvoice={payInvoice}
                   getInvoiceInfo={getCardInvoiceInfo}
+                  initialCardId={selectedCardId}
                 />
               )}
 

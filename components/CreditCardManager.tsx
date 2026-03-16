@@ -39,6 +39,7 @@ interface CreditCardManagerProps {
   onPayInvoice: (invoice: CreditCardInvoice, accountId: string) => void;
   getInvoiceInfo: (cardId: string, month: number, year: number) => any;
   onEditCard?: (id: string, updates: any) => void;
+  initialCardId?: string | null;
 }
 
 export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
@@ -53,11 +54,20 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   onAddRefund,
   onPayInvoice,
   getInvoiceInfo,
-  onEditCard
+  onEditCard,
+  initialCardId
 }) => {
   const [view, setView] = useState<'list' | 'details'>('list');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date()); 
+  
+  // Handle initialCardId
+  React.useEffect(() => {
+    if (initialCardId) {
+      setSelectedCardId(initialCardId);
+      setView('details');
+    }
+  }, [initialCardId]);
   
   // Modals
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);

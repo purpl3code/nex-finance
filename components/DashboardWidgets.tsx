@@ -201,9 +201,12 @@ export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) =>
 };
 
 // --- 6. ENHANCED CARD ITEM ---
-export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, usedAmount: number, usedPercentage: number }> = ({ card, usedAmount, usedPercentage }) => {
+export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, usedAmount: number, usedPercentage: number, onClick?: () => void }> = ({ card, usedAmount, usedPercentage, onClick }) => {
   return (
-    <div className="bg-white/5 border border-white/5 p-4 rounded-xl flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer group">
+    <div 
+      className="bg-white/5 border border-white/5 p-4 rounded-xl flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer group"
+      onClick={onClick}
+    >
       <div className="flex items-center gap-3">
         <div 
           className="p-2.5 rounded-lg text-white transition-colors shadow-sm"
