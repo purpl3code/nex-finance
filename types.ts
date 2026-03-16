@@ -243,39 +243,3 @@ export interface FilterState {
   categoryId: string | 'all';
   accountId: string | 'all';
 }
-
-// --- DATA HEALTH TYPES ---
-
-export interface HealthIssue {
-  id: string;
-  severity: 'warning' | 'error';
-  type: string; // e.g., 'TX_MISSING_ACCOUNT'
-  title: string;
-  description: string;
-  canAutoFix: boolean;
-  affectedCount: number;
-  affectedIds: string[]; // Store IDs for processing
-  examples: {
-    id: string;
-    label: string;
-    info?: string;
-  }[];
-}
-
-export interface DataHealthReport {
-  generatedAt: string;
-  summary: {
-    okCount: number;
-    warningCount: number;
-    errorCount: number;
-  };
-  issues: HealthIssue[];
-}
-
-export interface FixLogEntry {
-  id: string;
-  dateISO: string;
-  action: string;
-  details: string;
-  affectedCount: number;
-}

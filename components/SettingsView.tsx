@@ -2,12 +2,11 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { BackupService } from '../services/backupService';
 import { StorageService } from '../services/storageService';
-import { DataHealthService } from '../services/dataHealthService';
 import { ThemeService, AppTheme } from '../services/themeService';
 import { SyncService } from '../services/syncService';
 import { supabase, isDemoMode, disableDemoMode } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { BackupFile, DataHealthReport, FixLogEntry } from '../types';
+import { BackupFile } from '../types';
 import { useFinance } from '../hooks/useFinance';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { GlassButton } from './ui/GlassButton';
@@ -20,9 +19,9 @@ import { PageHeader } from './ui/PageHeader';
 import { ThemeSelector } from './ThemeSelector';
 import { CategoryManager } from './CategoryManager';
 import { 
-  Download, Upload, HardDrive, AlertTriangle, FileText, 
-  Trash2, Database, Server, RefreshCw, ShieldAlert, History,
-  Activity, CheckCircle, Stethoscope, ChevronDown, ChevronUp, User, Camera, Palette, Cloud, LogOut, Tag
+  Download, Upload, AlertTriangle, 
+  Trash2, ShieldAlert, History,
+  User, Camera, Palette, Cloud, LogOut, Tag
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -48,8 +47,7 @@ const SectionCard = ({ title, description, icon, children, danger = false }: any
 export const SettingsView: React.FC = () => {
   const { session } = useAuth();
   const { 
-    transactions, accounts, creditCards, recurringRules, 
-    investmentAccounts, assets, investmentMovements,
+    transactions,
     categories, creditCardTransactions,
     addCategory, editCategory, archiveCategory, reassignCategory
   } = useFinance();
@@ -82,16 +80,9 @@ export const SettingsView: React.FC = () => {
   // Danger Zone State
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
-  // Data Health State
-  const [healthReport, setHealthReport] = useState<DataHealthReport | null>(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const [fixLogs, setFixLogs] = useState<FixLogEntry[]>([]);
-  const [expandedIssue, setExpandedIssue] = useState<string | null>(null);
-
   useEffect(() => {
     const dateStr = BackupService.getLastBackupDate();
     setLastBackup(dateStr);
-    setFixLogs(DataHealthService.getFixLogs());
     setProfileName(profile.displayName);
     setCurrentTheme(ThemeService.getTheme());
   }, [profile.displayName]);
@@ -210,34 +201,6 @@ export const SettingsView: React.FC = () => {
   const handleClearAllData = () => {
     localStorage.clear();
     window.location.reload();
-  };
-
-  // --- HEALTH ACTIONS ---
-  const runHealthScan = () => {
-     setIsScanning(true);
-     setTimeout(() => {
-        const fullData = StorageService.load();
-        const report = DataHealthService.scan(fullData);
-        setHealthReport(report);
-        setIsScanning(false);
-     }, 600);
-  };
-
-  const runAutoFix = () => {
-     if (!healthReport) return;
-     const fixableIssues = healthReport.issues.filter(i => i.canAutoFix);
-     if (fixableIssues.length === 0) return;
-
-     if (confirm(`Isso aplicará correções automáticas para ${fixableIssues.length} tipos de problemas. Deseja continuar?`)) {
-        const fullData = StorageService.load();
-        DataHealthService.applySafeFixes(fullData, healthReport);
-     }
-  };
-
-  const exportOrphans = () => {
-     if (!healthReport) return;
-     const fullData = StorageService.load();
-     DataHealthService.exportOrphans(healthReport, fullData);
   };
 
   return (

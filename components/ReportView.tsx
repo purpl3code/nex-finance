@@ -17,9 +17,9 @@ import { PageHeader } from './ui/PageHeader';
 import { 
   TrendingUp, TrendingDown, Wallet, PieChart as PieChartIcon, 
   BarChart3, Calendar, ArrowUpRight, ArrowDownRight, 
-  DollarSign, Activity, Target, Printer, Filter
+  DollarSign, Activity, Target, Printer
 } from 'lucide-react';
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface ReportViewProps {
@@ -175,8 +175,6 @@ export const ReportView: React.FC<ReportViewProps> = ({
   // Comparison with previous month
   const prevMonthStats = useMemo(() => {
     const prevDate = subMonths(new Date(year, month), 1);
-    const pMonth = prevDate.getMonth();
-    const pYear = prevDate.getFullYear();
     const start = startOfMonth(prevDate);
     const end = endOfMonth(prevDate);
 

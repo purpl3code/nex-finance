@@ -201,7 +201,7 @@ export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) =>
 };
 
 // --- 6. ENHANCED CARD ITEM ---
-export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, invoiceAmount: number, usedPercentage: number }> = ({ card, invoiceAmount, usedPercentage }) => {
+export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, usedAmount: number, usedPercentage: number }> = ({ card, usedAmount, usedPercentage }) => {
   return (
     <div className="bg-white/5 border border-white/5 p-4 rounded-xl flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer group">
       <div className="flex items-center gap-3">
@@ -221,8 +221,9 @@ export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, invoiceAmou
       </div>
       
       <div className="text-right">
-        <p className="text-sm font-bold text-white">{formatCurrency(invoiceAmount)}</p>
-        <div className="flex items-center justify-end gap-2">
+        <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Utilizado</p>
+        <p className="text-sm font-bold text-white">{formatCurrency(usedAmount)}</p>
+        <div className="flex items-center justify-end gap-2 mt-1">
           <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div 
               className={`h-full rounded-full ${usedPercentage > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 

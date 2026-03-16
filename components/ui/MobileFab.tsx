@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
-export interface MobileFabAction {
+interface MobileFabAction {
   id: string;
   label: string;
   icon: React.ReactNode;

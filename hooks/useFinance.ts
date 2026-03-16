@@ -4,10 +4,8 @@ import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataP
 import { StorageService } from '../services/storageService';
 import { SyncService } from '../services/syncService';
 import { useAuth } from './useAuth';
-import { COLORS } from '../constants';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
 import { addMonths, isAfter, endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 export const useFinance = () => {
   const { session } = useAuth();
@@ -693,6 +691,18 @@ export const useFinance = () => {
     return { totalLimit, usedLimit, availableLimit: totalLimit - usedLimit };
   }, [creditCards, creditCardTransactions, creditCardInvoices]);
 
+  const getCardTotalUsedLimit = useCallback((cardId: string) => {
+    const totalPurchases = creditCardTransactions
+      .filter(t => t.cardId === cardId)
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalPaid = creditCardInvoices
+      .filter(i => i.cardId === cardId && i.isPaid)
+      .reduce((sum, i) => sum + i.amount, 0);
+      
+    return totalPurchases - totalPaid;
+  }, [creditCardTransactions, creditCardInvoices]);
+
   // --- FORECAST (CACHED) ---
   const forecastCache = useRef<Record<string, any>>({});
   
@@ -883,7 +893,7 @@ export const useFinance = () => {
     }, { income: 0, expense: 0, balance: 0 });
   }, []);
 
-  const getChartData = useCallback((unifiedList: any[]): ChartDataPoint[] => {
+  const getChartData = useCallback((): ChartDataPoint[] => {
     return []; // Deprecated in favor of Dashboard building it from spendingMap
   }, []);
 
@@ -918,6 +928,7 @@ export const useFinance = () => {
     getCategorySpending,
     getRecurringPreview,
     getCardInvoiceInfo,
+    getCardTotalUsedLimit,
     getCreditCardStats,
     getUnifiedList,
     getStats,

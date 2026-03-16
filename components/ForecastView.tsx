@@ -5,7 +5,7 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
-import { TrendingUp, Calendar, ArrowRight, CreditCard, Repeat } from 'lucide-react';
+import { Calendar, ArrowRight, CreditCard, Repeat } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -15,7 +15,7 @@ interface ForecastViewProps {
 }
 
 export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForecast }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate] = useState(new Date());
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Goal } from '../types';
 import { computeGoalStats, formatCurrency } from '../utils/goalHelpers';
-import { Edit2, Plus, Archive, Calendar, Target, Clock, AlertTriangle, Trash2 } from 'lucide-react';
+import { Edit2, Plus, Archive, Target, Clock, AlertTriangle, Trash2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

@@ -1,5 +1,5 @@
 
-import { Transaction, Account, Transfer, Category, Budget, CreditCardTransaction } from '../types';
+import { Transaction, Account, Transfer, CreditCardTransaction } from '../types';
 
 // --- BALANCES ---
 
@@ -83,31 +83,4 @@ export const calculateSpendingMap = (
   });
 
   return map;
-};
-
-// --- BUDGETS STATUS ---
-
-export const calculateBudgetsStatus = (
-  budgets: Budget[],
-  spendingMap: Record<string, number>,
-  month: number,
-  year: number
-) => {
-  let ok = 0;
-  let warning = 0;
-  let danger = 0;
-
-  const currentBudgets = budgets.filter(b => b.month === month && b.year === year);
-
-  currentBudgets.forEach(b => {
-    const key = `${b.categoryId}_${month}_${year}`;
-    const spent = spendingMap[key] || 0;
-    const pct = (spent / b.amountLimit) * 100;
-
-    if (pct >= 100) danger++;
-    else if (pct >= b.alertAtPercent) warning++;
-    else ok++;
-  });
-
-  return { ok, warning, danger };
 };

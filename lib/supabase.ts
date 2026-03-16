@@ -28,10 +28,6 @@ export const isDemoMode = () => {
   return !isSupabaseConfigured || localStorage.getItem(DEMO_KEY) === 'true';
 };
 
-export const enableDemoMode = () => {
-  localStorage.setItem(DEMO_KEY, 'true');
-};
-
 export const disableDemoMode = () => {
   localStorage.removeItem(DEMO_KEY);
 };

@@ -39,15 +39,14 @@ interface DashboardProps {
   creditCards?: CreditCard[];
   recurringRules?: RecurringRule[];
   getCardInvoiceInfo?: (cardId: string, month: number, year: number) => any;
+  getCardTotalUsedLimit?: (cardId: string) => number;
   month: number;
   year: number;
 }
 
 export const Dashboard: React.FC<DashboardProps> = React.memo(({ 
-  currentMonthName,
   totalBalance,
   accounts,
-  getAccountBalance,
   getCategorySpending,
   categories = [],
   transactions = [],
@@ -55,6 +54,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   creditCards = [],
   recurringRules = [],
   getCardInvoiceInfo,
+  getCardTotalUsedLimit,
   month,
   year
 }) => {
@@ -80,8 +80,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   }, [creditCards, getCardInvoiceInfo, month, year]);
 
   const forecast = useMemo(() => 
-    getFinancialForecast(accounts, recurringRules, invoicesForForecast, month, year),
-  [accounts, recurringRules, invoicesForForecast, month, year]);
+    getFinancialForecast(recurringRules, invoicesForForecast, month, year),
+  [recurringRules, invoicesForForecast, month, year]);
 
   // Updated to pass month/year filter
   const recentActivity = useMemo(() => 
@@ -93,8 +93,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   [accounts, transactions, month, year]);
 
   const insights = useMemo(() => 
-    generateInsights(monthlySummary, transactions, creditCardTransactions, categories, creditCards, month, year),
-  [monthlySummary, transactions, creditCardTransactions, categories, creditCards, month, year]);
+    generateInsights(monthlySummary, transactions, creditCardTransactions, categories, creditCards, month),
+  [monthlySummary, transactions, creditCardTransactions, categories, creditCards, month]);
 
   // Chart Data (Existing Logic)
   const comprehensiveChartData = useMemo(() => {
@@ -216,13 +216,13 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Resumo dos Cartões</h3>
             {creditCards.length > 0 ? (
               creditCards.map(card => {
-                const info = getCardInvoiceInfo ? getCardInvoiceInfo(card.id, month, year) : null;
-                const usedPct = Math.round(((info?.amount || 0) / card.limit) * 100);
+                const totalUsed = getCardTotalUsedLimit ? getCardTotalUsedLimit(card.id) : 0;
+                const usedPct = Math.round((totalUsed / card.limit) * 100);
                 return (
                   <CreditCardSummaryItem 
                     key={card.id} 
                     card={card} 
-                    invoiceAmount={info?.amount || 0} 
+                    usedAmount={totalUsed} 
                     usedPercentage={usedPct} 
                   />
                 );

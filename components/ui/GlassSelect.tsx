@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown, X } from 'lucide-react';
 
-export interface SelectOption {
+interface SelectOption {
   value: string | number;
   label: string;
   disabled?: boolean;
   color?: string;
 }
 
-export interface SelectGroup {
+interface SelectGroup {
   label: string;
   options: SelectOption[];
 }
@@ -31,8 +31,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
   value,
   onChange,
   disabled,
-  placeholder = "Selecione...",
-  ...props 
+  placeholder = "Selecione..."
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);

@@ -2,7 +2,7 @@
  * Interface for storage operations.
  * Allows switching between LocalStorage, IndexedDB, or Cloud in the future.
  */
-export interface IStorageAdapter {
+interface IStorageAdapter {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;

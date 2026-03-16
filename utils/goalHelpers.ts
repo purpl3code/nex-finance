@@ -1,7 +1,7 @@
 import { Goal } from '../types';
-import { addMonths, differenceInMonths, parseISO, isAfter } from 'date-fns';
+import { addMonths, differenceInMonths, parseISO } from 'date-fns';
 
-export interface GoalStats {
+interface GoalStats {
   remaining: number;
   progressPercent: number;
   monthsToGoal: number | null;

@@ -1,6 +1,6 @@
 
-import { Transaction, CreditCardTransaction, RecurringRule, Account, Category, CreditCard, CreditCardInvoice } from '../types';
-import { isSameMonth, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, format, isAfter, isBefore, addMonths, subMonths } from 'date-fns';
+import { Transaction, CreditCardTransaction, RecurringRule, Account, Category, CreditCard } from '../types';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns';
 
 // --- TYPES ---
 
@@ -81,7 +81,6 @@ export const getMonthlySummary = (
 };
 
 export const getFinancialForecast = (
-  accounts: Account[],
   recurringRules: RecurringRule[],
   cardInvoices: { amount: number, isPaid: boolean, dueDate: string }[], // Pre-calculated invoice objects
   month: number,
@@ -91,11 +90,9 @@ export const getFinancialForecast = (
   const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
 
   // 1. Current Balance (Real time)
-  const currentBalance = accounts.reduce((sum, acc) => sum + acc.initialBalance, 0) + 
-    // Note: Ideally we should use calculateAllBalances here, but we'll assume the caller passes the sum or we recalculate.
-    // For simplicity, let's assume the caller passes the *current calculated balance* of all accounts.
-    // We will refine this signature to take `totalCurrentBalance` directly.
-    0; 
+  // Note: Ideally we should use calculateAllBalances here, but we'll assume the caller passes the sum or we recalculate.
+  // For simplicity, let's assume the caller passes the *current calculated balance* of all accounts.
+  // We will refine this signature to take `totalCurrentBalance` directly.
 
   // However, since we need to be pure, let's just process pending items.
   // We will return the *adjustments* needed, and the UI adds them to the live balance.
@@ -239,8 +236,7 @@ export const generateInsights = (
   cardTransactions: CreditCardTransaction[],
   categories: Category[],
   cards: CreditCard[],
-  month: number,
-  year: number
+  month: number
 ): Insight[] => {
   const insights: Insight[] = [];
 

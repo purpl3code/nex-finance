@@ -14,7 +14,7 @@ import { SettingsView } from './components/SettingsView';
 import { GoalManager } from './components/GoalManager';
 import { ReportView } from './components/ReportView';
 import { Sidebar } from './components/Sidebar';
-import { ModalShell, ModalBody, ModalFooter } from './components/ui/ModalShell';
+import { ModalShell } from './components/ui/ModalShell';
 import { GlassButton } from './components/ui/GlassButton';
 import { GlassSelect } from './components/ui/GlassSelect';
 import { PageShell } from './components/ui/PageShell';
@@ -45,10 +45,6 @@ const App: React.FC = () => {
     transfers,
     recurringRules,
     budgets,
-    investmentAccounts,
-    assets,
-    positions,
-    investmentMovements,
     goals,
     addTransaction, 
     editTransaction, 
@@ -80,6 +76,7 @@ const App: React.FC = () => {
     getAccountBalance,
     getTotalBalance,
     getCardInvoiceInfo,
+    getCardTotalUsedLimit,
     getCreditCardStats,
     getUnifiedList, 
     getStats,
@@ -148,8 +145,8 @@ const App: React.FC = () => {
 
   // chartData from hook is now deprecated/empty as Dashboard builds it via selector
   const chartData = useMemo(() => 
-    getChartData(unifiedList),
-    [getChartData, unifiedList]
+    getChartData(),
+    [getChartData]
   );
 
   const totalBalance = getTotalBalance();
@@ -346,6 +343,7 @@ const App: React.FC = () => {
                     creditCards={creditCards}
                     recurringRules={recurringRules}
                     getCardInvoiceInfo={getCardInvoiceInfo}
+                    getCardTotalUsedLimit={getCardTotalUsedLimit}
                     month={filters.month}
                     year={filters.year}
                   />
