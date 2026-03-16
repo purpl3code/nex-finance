@@ -108,7 +108,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
              data.push({
                 name: cat.name,
                 value: val,
-                color: '' 
+                color: cat.color || '' 
              });
           }
        }
@@ -116,7 +116,10 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
     
     return data
       .sort((a, b) => b.value - a.value)
-      .map((item, idx) => ({ ...item, color: COLORS[idx % COLORS.length] }));
+      .map((item, idx) => ({ 
+        ...item, 
+        color: item.color || COLORS[idx % COLORS.length] 
+      }));
 
   }, [getCategorySpending, categories, month, year]);
 

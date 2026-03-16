@@ -8,6 +8,7 @@ import {
 import { 
   Transaction, Category, Account, FilterState, CreditCardTransaction, Transfer 
 } from '../types';
+import { COLORS } from '../constants';
 import { GlassCard } from './ui/GlassCard';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassButton } from './ui/GlassButton';
@@ -136,10 +137,14 @@ export const ReportView: React.FC<ReportViewProps> = ({
         return {
           name: cat ? `${cat.emoji} ${cat.name}` : 'Outros',
           value,
-          color: cat?.color || '#94a3b8'
+          color: cat?.color || '' // Temporary empty color
         };
       })
-      .sort((a, b) => b.value - a.value);
+      .sort((a, b) => b.value - a.value)
+      .map((item, idx) => ({
+        ...item,
+        color: item.color || COLORS[idx % COLORS.length]
+      }));
   }, [monthData, categories]);
 
   // Daily Trend
@@ -237,10 +242,6 @@ export const ReportView: React.FC<ReportViewProps> = ({
         }
         controls={
           <div className="flex flex-wrap items-center gap-3 print:hidden">
-            <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
-              <Filter size={14} className="text-slate-400" />
-              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Filtros:</span>
-            </div>
             <div className="w-40">
               <GlassSelect 
                 value={month}
