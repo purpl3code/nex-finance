@@ -128,7 +128,7 @@ const App: React.FC = () => {
     if (tab !== 'cards') {
       setSelectedCardId(null);
     }
-    window.scrollTo(0,0);
+    setTimeout(() => window.scrollTo(0, 0), 0);
   };
 
   const handleCardClick = (cardId: string) => {

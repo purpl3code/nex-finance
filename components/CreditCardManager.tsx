@@ -61,11 +61,48 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date()); 
   
+  const getOpenInvoiceDate = (cardId: string) => {
+    let checkDate = new Date();
+    let currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
+    
+    if (!currentMonthInfo) return checkDate;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let closingDate = new Date(currentMonthInfo.closingDate + 'T12:00:00');
+    closingDate.setHours(0, 0, 0, 0);
+
+    // If today is strictly after the closing date, the current open invoice is the NEXT month's invoice
+    // We use a while loop in case the due day is early in the month and the closing day is late in the previous month
+    let loops = 0;
+    while (today > closingDate && loops < 12) {
+      checkDate.setMonth(checkDate.getMonth() + 1);
+      currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
+      if (!currentMonthInfo) break;
+      closingDate = new Date(currentMonthInfo.closingDate + 'T12:00:00');
+      closingDate.setHours(0, 0, 0, 0);
+      loops++;
+    }
+
+    // If the invoice is already paid, skip to the next unpaid one
+    let attempts = 0;
+    while (currentMonthInfo?.isPaid && attempts < 12) {
+      checkDate.setMonth(checkDate.getMonth() + 1);
+      currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
+      attempts++;
+    }
+    
+    return checkDate;
+  };
+
   // Handle initialCardId
   React.useEffect(() => {
     if (initialCardId) {
+      setCurrentDate(getOpenInvoiceDate(initialCardId));
       setSelectedCardId(initialCardId);
       setView('details');
+      setTimeout(() => window.scrollTo(0, 0), 0);
     }
   }, [initialCardId]);
   
@@ -192,19 +229,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   };
 
   const handleSelectCard = (cardId: string) => {
-    let checkDate = new Date();
-    let currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
-    
-    let attempts = 0;
-    while (currentMonthInfo?.isPaid && attempts < 12) {
-      checkDate.setMonth(checkDate.getMonth() + 1);
-      currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
-      attempts++;
-    }
-    
-    setCurrentDate(checkDate);
+    setCurrentDate(getOpenInvoiceDate(cardId));
     setSelectedCardId(cardId);
     setView('details');
+    setTimeout(() => window.scrollTo(0, 0), 0);
   };
 
   const openRefundModal = (tx: CreditCardTransaction) => {
