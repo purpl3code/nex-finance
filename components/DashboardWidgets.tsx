@@ -42,8 +42,8 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
 };
 
 // --- 2. FORECAST CARD ---
-export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBalance: number }> = ({ summary, totalCurrentBalance }) => {
-  const predicted = totalCurrentBalance - summary.pendingRecurring - summary.pendingInvoices;
+export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBalance: number, creditCardUsedLimit: number }> = ({ summary, totalCurrentBalance, creditCardUsedLimit }) => {
+  const predicted = totalCurrentBalance - summary.pendingRecurring - creditCardUsedLimit;
   const isPositive = predicted >= 0;
 
   return (
@@ -55,7 +55,7 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
       </div>
 
       <div className="relative z-10">
-        <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Previsão (Fim do Mês)</h3>
+        <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Total disponível</h3>
         <div className={`text-3xl font-bold mb-4 ${isPositive ? 'text-blue-400' : 'text-amber-400'}`}>
           {formatCurrency(predicted)}
         </div>
@@ -66,8 +66,8 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
             <span className="text-white font-medium">{formatCurrency(totalCurrentBalance)}</span>
           </div>
           <div className="flex justify-between text-xs bg-red-500/5 p-2 rounded-lg border border-red-500/10">
-            <span className="text-slate-400">Compromissos Restantes</span>
-            <span className="text-red-400 font-medium">- {formatCurrency(summary.pendingRecurring + summary.pendingInvoices)}</span>
+            <span className="text-slate-400">Dívidas e Cartões</span>
+            <span className="text-red-400 font-medium">- {formatCurrency(summary.pendingRecurring + creditCardUsedLimit)}</span>
           </div>
         </div>
       </div>

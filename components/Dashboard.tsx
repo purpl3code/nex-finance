@@ -58,7 +58,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   getCardTotalUsedLimit,
   month,
   year,
-  onCardClick
+  onCardClick,
+  creditCardStats
 }) => {
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -131,7 +132,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
       {/* 1. PREMIUM HEADER: MAIN CARDS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RemainingBalanceCard summary={monthlySummary} />
-        <ForecastCard summary={forecast} totalCurrentBalance={totalBalance} />
+        <ForecastCard summary={forecast} totalCurrentBalance={totalBalance} creditCardUsedLimit={creditCardStats.usedLimit} />
       </div>
 
       {/* 2. MIDDLE SECTION: GRAPH & INSIGHTS */}
