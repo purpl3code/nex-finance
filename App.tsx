@@ -302,12 +302,12 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         
         {/* Mobile Header (Hidden on Desktop) */}
-        <header className="md:hidden flex items-center justify-between p-4 glass-sm border-b border-white/5 z-20">
+        <header className="md:hidden flex items-center justify-between py-2.5 px-4 glass-sm bg-black/10 backdrop-blur-md border-b border-white/5 z-20">
           <div className="flex items-center gap-3">
              <button onClick={() => setIsMobileSidebarOpen(true)} className="p-2 -ml-2 text-slate-400 hover:text-white">
                 <Menu size={24} />
              </button>
-             <h1 className="font-bold text-lg">{getPageTitle()}</h1>
+             <h1 className="font-bold text-base">{getPageTitle()}</h1>
           </div>
           {activeTab === 'dashboard' && (
             <GlassButton 
@@ -322,7 +322,7 @@ const App: React.FC = () => {
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto bg-transparent">
+        <div id="main-scroll-container" className="flex-1 overflow-y-auto bg-transparent">
            <div className="animate-in fade-in duration-300 min-h-full">
               
               {/* DASHBOARD TAB */}

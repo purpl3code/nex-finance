@@ -63,10 +63,15 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 }) => {
   const [view, setView] = useState<'list' | 'details'>('list');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [currentDate, setCurrentDate] = useState(new Date()); 
+  const [currentDate, setCurrentDate] = useState(() => {
+    if (initialYear !== undefined && initialMonth !== undefined) {
+      return new Date(initialYear, initialMonth, 1);
+    }
+    return new Date();
+  }); 
   
-  const getOpenInvoiceDate = (cardId: string) => {
-    let checkDate = new Date();
+  const getOpenInvoiceDate = (cardId: string, startDate?: Date) => {
+    let checkDate = startDate ? new Date(startDate) : new Date();
     let currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
     
     if (!currentMonthInfo) return checkDate;
@@ -103,7 +108,11 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   // Handle initialCardId
   React.useEffect(() => {
     if (initialCardId) {
-      setCurrentDate(getOpenInvoiceDate(initialCardId));
+      if (initialYear !== undefined && initialMonth !== undefined) {
+        setCurrentDate(getOpenInvoiceDate(initialCardId, new Date(initialYear, initialMonth, 1)));
+      } else {
+        setCurrentDate(getOpenInvoiceDate(initialCardId));
+      }
       setSelectedCardId(initialCardId);
       setView('details');
       setTimeout(() => {
@@ -115,7 +124,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         }
       }, 50);
     }
-  }, [initialCardId]);
+  }, [initialCardId, initialMonth, initialYear]);
   
   // Modals
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -304,6 +313,29 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + delta);
     setCurrentDate(newDate);
+    
+    // Scroll to top when changing month to see new invoice summary
+    setTimeout(() => {
+      const scrollContainer = document.getElementById('main-scroll-container');
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 50);
+  };
+
+  const handleBack = () => {
+    setView('list');
+    setSelectedCardId(null);
+    setTimeout(() => {
+      const scrollContainer = document.getElementById('main-scroll-container');
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   const monthName = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -312,7 +344,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   if (view === 'details' && selectedCard) {
     return (
       <PageShell>
-        <button onClick={() => setView('list')} className="flex items-center text-slate-400 hover:text-white mb-4 transition-colors">
+        <button onClick={handleBack} className="flex items-center text-slate-400 hover:text-white mb-4 transition-colors">
           <ChevronLeft size={16} className="mr-1" /> Voltar para Cartões
         </button>
 
@@ -356,9 +388,9 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         {/* Invoice Summary */}
         <GlassCard className="p-0 overflow-hidden">
            <div className="p-6 border-b border-white/5 bg-white/5">
-             <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-               <div>
-                 <p className="text-slate-400 text-sm font-medium mb-2">Vencimento em {new Date(invoiceInfo?.dueDate).toLocaleDateString('pt-BR')}</p>
+             <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6">
+               <div className="text-center md:text-left">
+                 <p className="text-slate-400 text-sm font-medium mb-2">Vencimento em {invoiceInfo?.dueDate ? new Date(invoiceInfo.dueDate).toLocaleDateString('pt-BR') : '---'}</p>
                  <div className="text-4xl font-bold text-white">
                    {formatCurrency(invoiceInfo?.amount || 0)}
                  </div>
@@ -370,7 +402,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  <GlassButton onClick={() => {
                    setPayAccount(selectedCard.defaultPaymentAccountId || '');
                    setIsPayModalOpen(true);
-                 }} variant="primary" size="lg" className="hidden md:flex">Pagar Fatura</GlassButton>
+                 }} variant="primary" size="lg" className="w-full md:w-auto">Pagar Fatura</GlassButton>
                )}
              </div>
            </div>
