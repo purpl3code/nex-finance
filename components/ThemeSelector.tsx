@@ -42,6 +42,16 @@ const THEMES: ThemeOption[] = [
     id: 'forest', 
     name: 'Forest', 
     colors: { bg: '#064e3b', primary: '#14b8a6' } // Emerald-900 / Teal-500
+  },
+  { 
+    id: 'pure-black', 
+    name: 'Pure Black', 
+    colors: { bg: '#000000', primary: '#ffffff' } // Black / White
+  },
+  { 
+    id: 'pure-white', 
+    name: 'Pure White', 
+    colors: { bg: '#ffffff', primary: '#000000' } // White / Black
   }
 ];
 
@@ -89,7 +99,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
             </span>
 
             {currentTheme === theme.id && (
-              <div className="absolute top-2 right-2 bg-blue-500 text-white p-1 rounded-full shadow-lg shadow-blue-500/20">
+              <div className="absolute top-2 right-2 bg-blue-500 text-blue-foreground p-1 rounded-full shadow-lg">
                 <Check size={10} strokeWidth={3} />
               </div>
             )}

@@ -40,6 +40,8 @@ interface CreditCardManagerProps {
   getInvoiceInfo: (cardId: string, month: number, year: number) => any;
   onEditCard?: (id: string, updates: any) => void;
   initialCardId?: string | null;
+  initialMonth?: number;
+  initialYear?: number;
 }
 
 export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
@@ -55,7 +57,9 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   onPayInvoice,
   getInvoiceInfo,
   onEditCard,
-  initialCardId
+  initialCardId,
+  initialMonth,
+  initialYear
 }) => {
   const [view, setView] = useState<'list' | 'details'>('list');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -102,7 +106,14 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       setCurrentDate(getOpenInvoiceDate(initialCardId));
       setSelectedCardId(initialCardId);
       setView('details');
-      setTimeout(() => window.scrollTo(0, 0), 0);
+      setTimeout(() => {
+        const scrollContainer = document.getElementById('main-scroll-container');
+        if (scrollContainer) {
+          scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 50);
     }
   }, [initialCardId]);
   
@@ -232,7 +243,14 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     setCurrentDate(getOpenInvoiceDate(cardId));
     setSelectedCardId(cardId);
     setView('details');
-    setTimeout(() => window.scrollTo(0, 0), 0);
+    setTimeout(() => {
+      const scrollContainer = document.getElementById('main-scroll-container');
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   const openRefundModal = (tx: CreditCardTransaction) => {

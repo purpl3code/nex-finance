@@ -190,15 +190,15 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                     </Pie>
                     <Tooltip 
                       formatter={(value: number) => formatCurrency(value)}
-                      contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderColor: 'rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '12px', backdropFilter: 'blur(8px)' }}
-                      itemStyle={{ color: '#f8fafc' }}
+                      contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900) / 0.9)', borderColor: 'rgb(var(--c-text-100) / 0.1)', color: 'rgb(var(--c-text-100))', borderRadius: '12px', backdropFilter: 'blur(8px)' }}
+                      itemStyle={{ color: 'rgb(var(--c-text-100))' }}
                     />
                     <Legend 
                       verticalAlign="bottom" 
                       align="center"
                       iconType="circle"
                       wrapperStyle={{ 
-                        color: '#94a3b8', 
+                        color: 'rgb(var(--c-text-400))', 
                         fontSize: '11px',
                         paddingTop: '10px'
                       }}

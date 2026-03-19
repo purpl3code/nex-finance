@@ -145,8 +145,8 @@ export const BalanceChart: React.FC<{ data: DailyBalance[] }> = ({ data }) => {
               minTickGap={15}
             />
             <Tooltip 
-              contentStyle={{backgroundColor: 'rgba(15, 23, 42, 0.8)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', backdropFilter: 'blur(8px)'}}
-              itemStyle={{color: '#fff'}}
+              contentStyle={{backgroundColor: 'rgb(var(--c-bg-900) / 0.8)', borderColor: 'rgb(var(--c-text-100) / 0.1)', borderRadius: '12px', fontSize: '12px', backdropFilter: 'blur(8px)'}}
+              itemStyle={{color: 'rgb(var(--c-text-100))'}}
               formatter={(val: number) => formatCurrency(val)}
               labelFormatter={(label) => `Dia ${label}`}
             />

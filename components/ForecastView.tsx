@@ -125,10 +125,10 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                    tickFormatter={(val) => `R$${val/1000}k`}
                  />
                  <Tooltip 
-                   contentStyle={{backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', borderColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px'}}
-                   itemStyle={{color: '#fff'}}
+                   contentStyle={{backgroundColor: 'rgb(var(--c-bg-900) / 0.8)', backdropFilter: 'blur(8px)', borderColor: 'rgb(var(--c-text-100) / 0.1)', borderRadius: '12px'}}
+                   itemStyle={{color: 'rgb(var(--c-text-100))'}}
                    formatter={(val: number) => formatCurrency(val)}
-                   labelStyle={{color: '#94a3b8', marginBottom: '0.5rem'}}
+                   labelStyle={{color: 'rgb(var(--c-text-400))', marginBottom: '0.5rem'}}
                  />
                  <Area 
                    type="monotone" 

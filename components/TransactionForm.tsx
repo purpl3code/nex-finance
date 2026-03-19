@@ -180,7 +180,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               onClick={() => setMode('income')}
               className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
                 mode === 'income' 
-                  ? 'bg-emerald-600 text-white shadow-lg' 
+                  ? 'bg-emerald-600 text-[#ffffff] shadow-lg' 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -192,7 +192,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               onClick={() => setMode('expense')}
               className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
                 mode === 'expense' 
-                  ? 'bg-red-600 text-white shadow-lg' 
+                  ? 'bg-red-600 text-[#ffffff] shadow-lg' 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -204,7 +204,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               onClick={() => setMode('transfer')}
               className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 rounded-md font-medium text-xs md:text-sm transition-all ${
                 mode === 'transfer' 
-                  ? 'bg-blue-600 text-white shadow-lg' 
+                  ? 'bg-blue-600 text-blue-foreground shadow-lg' 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >

@@ -441,7 +441,7 @@ export const SettingsView: React.FC = () => {
                            <p className="text-[10px] text-slate-500 text-center mt-1">Mantém atuais, adiciona novos.</p>
                         </div>
                         <div className="flex-1">
-                           <GlassButton onClick={handleReplace} className="w-full bg-red-600 hover:bg-red-700">Substituir</GlassButton>
+                           <GlassButton onClick={handleReplace} variant="danger" className="w-full">Substituir</GlassButton>
                            <p className="text-[10px] text-slate-500 text-center mt-1">Apaga tudo e restaura.</p>
                         </div>
                     </div>

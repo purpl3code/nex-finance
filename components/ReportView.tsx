@@ -390,8 +390,8 @@ export const ReportView: React.FC<ReportViewProps> = ({
                       ))}
                     </Pie>
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                      itemStyle={{ color: '#fff' }}
+                      contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900))', border: '1px solid rgb(var(--c-text-100) / 0.1)', borderRadius: '8px' }}
+                      itemStyle={{ color: 'rgb(var(--c-text-100))' }}
                       formatter={(value: number) => formatCurrency(value)}
                     />
                     <Legend 
@@ -430,9 +430,9 @@ export const ReportView: React.FC<ReportViewProps> = ({
                   <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
                   <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(value) => `R$ ${value}`} />
                   <Tooltip 
-                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                    itemStyle={{ color: '#fff' }}
+                    cursor={{ fill: 'rgb(var(--c-text-100) / 0.05)' }}
+                    contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900))', border: '1px solid rgb(var(--c-text-100) / 0.1)', borderRadius: '8px' }}
+                    itemStyle={{ color: 'rgb(var(--c-text-100))' }}
                     formatter={(value: number) => formatCurrency(value)}
                   />
                   <Bar dataKey="value" radius={[4, 4, 0, 0]} />
@@ -461,8 +461,8 @@ export const ReportView: React.FC<ReportViewProps> = ({
                 <XAxis dataKey="day" stroke="#94a3b8" fontSize={10} />
                 <YAxis stroke="#94a3b8" fontSize={10} tickFormatter={(value) => `R$ ${value}`} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900))', border: '1px solid rgb(var(--c-text-100) / 0.1)', borderRadius: '8px' }}
+                  itemStyle={{ color: 'rgb(var(--c-text-100))' }}
                   formatter={(value: number) => formatCurrency(value)}
                 />
                 <Area 

@@ -54,10 +54,10 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
   const getVariantColor = (variant?: string) => {
     switch (variant) {
       case 'secondary': return 'bg-white/10 text-white hover:bg-white/20';
-      case 'danger': return 'bg-red-500 text-white hover:bg-red-600';
-      case 'success': return 'bg-emerald-500 text-white hover:bg-emerald-600';
-      case 'warning': return 'bg-amber-500 text-white hover:bg-amber-600';
-      default: return 'bg-blue-600 text-white hover:bg-blue-700';
+      case 'danger': return 'bg-red-500 text-[#ffffff] hover:bg-red-600';
+      case 'success': return 'bg-emerald-500 text-[#ffffff] hover:bg-emerald-600';
+      case 'warning': return 'bg-amber-500 text-[#ffffff] hover:bg-amber-600';
+      default: return 'bg-blue-600 text-blue-foreground hover:bg-blue-700';
     }
   };
 
@@ -94,7 +94,7 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
         {/* Main FAB Button */}
         <button
           onClick={handleMainClick}
-          className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 pointer-events-auto active:scale-90 border border-white/20 text-white ${isOpen ? 'bg-white/10 rotate-45' : 'bg-blue-600'}`}
+          className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 pointer-events-auto active:scale-90 border border-white/20 text-blue-foreground ${isOpen ? 'bg-white/10 rotate-45' : 'bg-blue-600'}`}
           aria-label={actions.length > 1 && isOpen ? "Fechar menu" : "Adicionar"}
         >
           {actions.length === 1 ? (

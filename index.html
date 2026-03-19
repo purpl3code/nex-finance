@@ -36,6 +36,7 @@
         --c-primary-300: 147 197 253;
         --c-primary-400: 96 165 250;
         --c-primary-500: 59 130 246;
+        --c-primary-foreground: 255 255 255;
         --c-primary-600: 37 99 235;
         --c-primary-700: 29 78 216;
         --c-primary-800: 30 64 175;
@@ -63,6 +64,7 @@
         --c-primary-300: 125 211 252;
         --c-primary-400: 56 189 248;
         --c-primary-500: 14 165 233;
+        --c-primary-foreground: 255 255 255;
         --c-primary-600: 2 132 199;
         --c-primary-700: 3 105 161;
         --c-primary-800: 7 89 133;
@@ -90,6 +92,7 @@
         --c-primary-300: 110 231 183;
         --c-primary-400: 52 211 153;
         --c-primary-500: 16 185 129;
+        --c-primary-foreground: 255 255 255;
         --c-primary-600: 5 150 105;
         --c-primary-700: 4 120 87;
         --c-primary-800: 6 95 70;
@@ -117,6 +120,7 @@
         --c-primary-300: 196 181 253;
         --c-primary-400: 167 139 250;
         --c-primary-500: 139 92 246;
+        --c-primary-foreground: 255 255 255;
         --c-primary-600: 124 58 237;
         --c-primary-700: 109 40 217;
         --c-primary-800: 91 33 182;
@@ -144,6 +148,7 @@
         --c-primary-300: 253 186 116;
         --c-primary-400: 251 146 60;
         --c-primary-500: 249 115 22;
+        --c-primary-foreground: 255 255 255;
         --c-primary-600: 234 88 12;
         --c-primary-700: 194 65 12;
         --c-primary-800: 154 52 18;
@@ -171,11 +176,72 @@
         --c-primary-300: 94 234 212;
         --c-primary-400: 45 212 191;
         --c-primary-500: 20 184 166;
+        --c-primary-foreground: 255 255 255;
         --c-primary-600: 13 148 136;
         --c-primary-700: 15 118 110;
         --c-primary-800: 17 94 89;
         --c-primary-900: 19 78 74;
         --c-primary-950: 4 47 46;
+      }
+
+      /* PURE BLACK */
+      [data-theme="pure-black"] {
+        --c-bg-950: 0 0 0;
+        --c-bg-900: 0 0 0;
+        --c-bg-800: 15 15 15;
+        --c-bg-700: 30 30 30;
+        --c-bg-600: 45 45 45;
+        --c-text-500: 115 115 115;
+        --c-text-400: 163 163 163;
+        --c-text-300: 212 212 212;
+        --c-text-200: 229 229 229;
+        --c-text-100: 255 255 255;
+
+        /* Primary (White/Gray) */
+        --c-primary-50: 255 255 255;
+        --c-primary-100: 245 245 245;
+        --c-primary-200: 229 229 229;
+        --c-primary-300: 212 212 212;
+        --c-primary-400: 163 163 163;
+        --c-primary-500: 255 255 255;
+        --c-primary-foreground: 0 0 0;
+        --c-primary-600: 200 200 200;
+        --c-primary-700: 115 115 115;
+        --c-primary-800: 82 82 82;
+        --c-primary-900: 38 38 38;
+        --c-primary-950: 23 23 23;
+
+        --gradient-bg: none;
+      }
+
+      /* PURE WHITE */
+      [data-theme="pure-white"] {
+        --c-bg-950: 255 255 255;
+        --c-bg-900: 250 250 250;
+        --c-bg-800: 240 240 240;
+        --c-bg-700: 220 220 220;
+        --c-bg-600: 200 200 200;
+        --c-text-500: 115 115 115;
+        --c-text-400: 82 82 82;
+        --c-text-300: 64 64 64;
+        --c-text-200: 38 38 38;
+        --c-text-100: 0 0 0;
+
+        /* Primary (Black/Gray) */
+        --c-primary-50: 245 245 245;
+        --c-primary-100: 229 229 229;
+        --c-primary-200: 212 212 212;
+        --c-primary-300: 163 163 163;
+        --c-primary-400: 115 115 115;
+        --c-primary-500: 0 0 0;
+        --c-primary-foreground: 255 255 255;
+        --c-primary-600: 38 38 38;
+        --c-primary-700: 64 64 64;
+        --c-primary-800: 82 82 82;
+        --c-primary-900: 115 115 115;
+        --c-primary-950: 163 163 163;
+
+        --gradient-bg: none;
       }
 
       body {
@@ -207,6 +273,9 @@
               sans: ['Inter', 'sans-serif'],
             },
             colors: {
+              // Override 'white' and 'black' to adapt to light/dark themes
+              white: 'rgb(var(--c-text-100) / <alpha-value>)',
+              black: 'rgb(var(--c-bg-900) / <alpha-value>)',
               // Override 'slate' to use our theme variables
               // This allows switching backgrounds/borders without changing class names in components
               slate: {
@@ -235,6 +304,7 @@
                 800: 'rgb(var(--c-primary-800) / <alpha-value>)',
                 900: 'rgb(var(--c-primary-900) / <alpha-value>)',
                 950: 'rgb(var(--c-primary-950) / <alpha-value>)',
+                foreground: 'rgb(var(--c-primary-foreground) / <alpha-value>)',
               },
               // Static aliases for readability
               background: 'rgb(var(--c-bg-900) / <alpha-value>)',

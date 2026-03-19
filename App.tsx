@@ -128,7 +128,14 @@ const App: React.FC = () => {
     if (tab !== 'cards') {
       setSelectedCardId(null);
     }
-    setTimeout(() => window.scrollTo(0, 0), 0);
+    setTimeout(() => {
+      const scrollContainer = document.getElementById('main-scroll-container');
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   const handleCardClick = (cardId: string) => {
@@ -447,6 +454,8 @@ const App: React.FC = () => {
                   onPayInvoice={payInvoice}
                   getInvoiceInfo={getCardInvoiceInfo}
                   initialCardId={selectedCardId}
+                  initialMonth={filters.month}
+                  initialYear={filters.year}
                 />
               )}
 
