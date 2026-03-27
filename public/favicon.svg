@@ -1,7 +1,10 @@
 
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" rx="128" fill="url(#grad)"/>
-  <text x="50%" y="50%" font-family="sans-serif" font-weight="bold" font-size="320" fill="white" text-anchor="middle" dominant-baseline="central">N</text>
+  <g transform="translate(128, 128) scale(10.666)" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.27 7H6a2 2 0 0 1-2-2V7.5a2 2 0 0 1 2-2h11"/>
+    <path d="M21 12v4h-3a2 2 0 0 1 0-4h3z"/>
+  </g>
   <defs>
     <linearGradient id="grad" x1="0" y1="512" x2="512" y2="0" gradientUnits="userSpaceOnUse">
       <stop stop-color="#000000"/>

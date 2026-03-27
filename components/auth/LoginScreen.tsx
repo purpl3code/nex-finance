@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { supabase, setRememberMe, isSupabaseConfigured } from '../../lib/supabase';
 import { Button } from '../ui/Button';
-import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
+import { Lock, Mail, Loader2, AlertCircle, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const LoginScreen: React.FC = () => {
@@ -59,7 +59,7 @@ export const LoginScreen: React.FC = () => {
         
         <div className="text-center mb-8">
           <div className="h-12 w-12 bg-gradient-to-tr from-blue-500 to-blue-600 rounded-xl border border-white/10 flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto mb-4">
-            <span className="font-bold text-[#ffffff] text-2xl leading-none mt-1">N</span>
+            <Wallet className="text-white" size={24} strokeWidth={2.5} />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Nex Finance</h1>
           <p className="text-slate-400 text-sm mt-2">Suas finanças em qualquer lugar.</p>
