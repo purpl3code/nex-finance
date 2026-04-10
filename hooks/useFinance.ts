@@ -383,25 +383,73 @@ export const useFinance = () => {
     touchData();
   }, [touchData]);
 
-  const payInvoice = useCallback((invoice: CreditCardInvoice, accountId: string) => {
-    const newTx: Transaction = {
-      id: crypto.randomUUID(),
-      type: 'expense',
-      amount: invoice.amount,
-      date: format(new Date(), 'yyyy-MM-dd'),
-      categoryId: 'cat_invoice_payment', 
-      accountId: accountId,
-      description: `Fatura Cartão - Venc ${format(parseISO(invoice.dueDate), 'dd/MM/yyyy')}`,
-      createdAt: Date.now(),
-      linkedInvoiceId: invoice.id
-    };
+  const payInvoice = useCallback((invoice: CreditCardInvoice, accountId: string, amountFromAccount: number = invoice.amount, amountFromPositiveBalance: number = 0) => {
+    if (amountFromAccount > 0) {
+      const newTx: Transaction = {
+        id: crypto.randomUUID(),
+        type: 'expense',
+        amount: amountFromAccount,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        categoryId: 'cat_invoice_payment', 
+        accountId: accountId,
+        description: `Fatura Cartão - Venc ${format(parseISO(invoice.dueDate), 'dd/MM/yyyy')}`,
+        createdAt: Date.now(),
+        linkedInvoiceId: invoice.id
+      };
+      setTransactions(prev => [newTx, ...prev]);
+    }
+
+    if (amountFromPositiveBalance > 0) {
+      setCreditCards(prev => prev.map(c => 
+        c.id === invoice.cardId 
+          ? { ...c, positiveBalance: Math.max(0, (c.positiveBalance || 0) - amountFromPositiveBalance) } 
+          : c
+      ));
+    }
+
     const paidInvoice: CreditCardInvoice = { ...invoice, isPaid: true, paidAt: Date.now() };
     
-    setTransactions(prev => [newTx, ...prev]);
     setCreditCardInvoices(prev => {
       const filtered = prev.filter(i => i.id !== invoice.id);
       return [...filtered, paidInvoice];
     });
+    touchData();
+  }, [touchData]);
+
+  const anticipatePayment = useCallback((cardId: string, amount: number, accountId: string, discount: number = 0, behavior: 'credit' | 'discount' = 'credit') => {
+    const newTx: Transaction = {
+      id: crypto.randomUUID(),
+      type: 'expense',
+      amount: amount,
+      date: format(new Date(), 'yyyy-MM-dd'),
+      categoryId: 'cat_invoice_payment', 
+      accountId: accountId,
+      description: `Antecipação de Pagamento - Cartão`,
+      createdAt: Date.now()
+    };
+    setTransactions(prev => [newTx, ...prev]);
+
+    if (behavior === 'credit') {
+      setCreditCards(prev => prev.map(c => 
+        c.id === cardId 
+          ? { ...c, positiveBalance: (c.positiveBalance || 0) + amount } 
+          : c
+      ));
+    } else if (behavior === 'discount') {
+      const cardTx: CreditCardTransaction = {
+        id: crypto.randomUUID(),
+        cardId: cardId,
+        amount: -(amount + discount),
+        date: format(new Date(), 'yyyy-MM-dd'),
+        categoryId: 'cat_invoice_payment',
+        description: `Antecipação de Pagamento${discount > 0 ? ' (com desconto)' : ''}`,
+        installment: { current: 1, total: 1 },
+        type: 'refund',
+        createdAt: Date.now()
+      };
+      setCreditCardTransactions(prev => [cardTx, ...prev]);
+    }
+
     touchData();
   }, [touchData]);
 
@@ -912,7 +960,7 @@ export const useFinance = () => {
     addAccount, editAccount, deleteAccount,
     addCreditCard, editCreditCard, deleteCreditCard,
     addCreditCardTransaction, editCreditCardTransaction, deleteCreditCardTransaction, addCreditCardRefund,
-    payInvoice,
+    payInvoice, anticipatePayment,
     addInvestmentAccount, deleteInvestmentAccount, addAsset, addInvestmentMovement,
     commitRecurringTransactions,
     

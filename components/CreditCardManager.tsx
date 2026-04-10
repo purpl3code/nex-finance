@@ -36,7 +36,8 @@ interface CreditCardManagerProps {
   onEditTransaction?: (id: string, updates: any) => void;
   onDeleteTransaction?: (id: string) => void;
   onAddRefund?: (originalTx: CreditCardTransaction, amount: number, date: string, desc: string) => void;
-  onPayInvoice: (invoice: CreditCardInvoice, accountId: string) => void;
+  onPayInvoice: (invoice: CreditCardInvoice, accountId: string, amountFromAccount?: number, amountFromPositiveBalance?: number) => void;
+  onAnticipatePayment: (cardId: string, amount: number, accountId: string, discount?: number, behavior?: 'credit' | 'discount') => void;
   getInvoiceInfo: (cardId: string, month: number, year: number) => any;
   onEditCard?: (id: string, updates: any) => void;
   initialCardId?: string | null;
@@ -55,6 +56,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   onDeleteTransaction,
   onAddRefund,
   onPayInvoice,
+  onAnticipatePayment,
   getInvoiceInfo,
   onEditCard,
   initialCardId,
@@ -130,6 +132,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [isAnticipateModalOpen, setIsAnticipateModalOpen] = useState(false);
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
   const [deletingTxId, setDeletingTxId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
@@ -140,9 +143,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [refundingTx, setRefundingTx] = useState<CreditCardTransaction | null>(null);
 
   // Form States
-  const [cardForm, setCardForm] = useState({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '', color: '#3b82f6' });
+  const [cardForm, setCardForm] = useState<{
+    name: string; limit: string; closingDay: string; dueDay: string; defaultPaymentAccountId: string; color: string; anticipationBehavior: 'credit' | 'discount';
+  }>({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '', color: '#3b82f6', anticipationBehavior: 'credit' });
   const [txForm, setTxForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], categoryId: '', description: '', installments: '1' });
   const [refundForm, setRefundForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], description: '' });
+  const [anticipateForm, setAnticipateForm] = useState({ amount: '', discount: '0' });
   const [payAccount, setPayAccount] = useState('');
 
   const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -156,11 +162,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         closingDay: card.closingDay.toString(),
         dueDay: card.dueDay.toString(),
         defaultPaymentAccountId: card.defaultPaymentAccountId || '',
-        color: card.color || '#3b82f6'
+        color: card.color || '#3b82f6',
+        anticipationBehavior: card.anticipationBehavior || 'credit'
       });
     } else {
       setEditingCard(null);
-      setCardForm({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '', color: '#3b82f6' });
+      setCardForm({ name: '', limit: '', closingDay: '1', dueDay: '10', defaultPaymentAccountId: '', color: '#3b82f6', anticipationBehavior: 'credit' });
     }
     setIsCardModalOpen(true);
   };
@@ -173,7 +180,9 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       closingDay: parseInt(cardForm.closingDay),
       dueDay: parseInt(cardForm.dueDay),
       defaultPaymentAccountId: cardForm.defaultPaymentAccountId || undefined,
-      color: cardForm.color
+      color: cardForm.color,
+      anticipationBehavior: cardForm.anticipationBehavior,
+      positiveBalance: editingCard?.positiveBalance || 0
     };
 
     if (editingCard && onEditCard) {
@@ -285,10 +294,36 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     }
   };
 
+  const handleAnticipateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCardId || !payAccount || !selectedCard) return;
+    const amount = parseFloat(anticipateForm.amount);
+    const discount = parseFloat(anticipateForm.discount) || 0;
+    if (isNaN(amount) || amount <= 0) return;
+
+    onAnticipatePayment(selectedCardId, amount, payAccount, discount, selectedCard.anticipationBehavior || 'credit');
+    setIsAnticipateModalOpen(false);
+    setAnticipateForm({ amount: '', discount: '0' });
+  };
+
   const handlePaySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!invoiceInfo || !payAccount || !selectedCardId) return;
-    onPayInvoice(invoiceInfo, payAccount);
+    if (!invoiceInfo || !selectedCardId || !selectedCard) return;
+    
+    const totalAmount = invoiceInfo.amount;
+    const positiveBalance = selectedCard.positiveBalance || 0;
+    
+    let amountFromPositiveBalance = 0;
+    let amountFromAccount = totalAmount;
+
+    if (positiveBalance > 0) {
+      amountFromPositiveBalance = Math.min(totalAmount, positiveBalance);
+      amountFromAccount = totalAmount - amountFromPositiveBalance;
+    }
+
+    if (amountFromAccount > 0 && !payAccount) return;
+
+    onPayInvoice(invoiceInfo, payAccount, amountFromAccount, amountFromPositiveBalance);
     setIsPayModalOpen(false);
     
     // Advance to next unpaid month automatically after paying
@@ -398,13 +433,30 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    {invoiceInfo?.isPaid ? 'Fatura Paga' : 'Fatura Aberta'}
                  </p>
                </div>
-               {!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 && (
+               <div className="flex flex-col md:flex-row gap-3">
+                 {!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 && (
+                   <GlassButton onClick={() => {
+                     setPayAccount(selectedCard.defaultPaymentAccountId || '');
+                     setIsPayModalOpen(true);
+                   }} variant="primary" size="lg" className="w-full md:w-auto">Pagar Fatura</GlassButton>
+                 )}
                  <GlassButton onClick={() => {
                    setPayAccount(selectedCard.defaultPaymentAccountId || '');
-                   setIsPayModalOpen(true);
-                 }} variant="primary" size="lg" className="w-full md:w-auto">Pagar Fatura</GlassButton>
-               )}
+                   setIsAnticipateModalOpen(true);
+                 }} variant="ghost" size="lg" className="w-full md:w-auto">Antecipar</GlassButton>
+               </div>
              </div>
+             {(selectedCard?.positiveBalance || 0) > 0 && (
+               <div className="mt-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-lg flex items-center justify-between">
+                 <div>
+                   <p className="text-xs font-bold uppercase tracking-wider">Saldo Positivo</p>
+                   <p className="text-lg font-bold">{formatCurrency(selectedCard.positiveBalance || 0)}</p>
+                 </div>
+                 <p className="text-xs opacity-80 max-w-[200px] text-right">
+                   Este valor será abatido automaticamente no pagamento da próxima fatura.
+                 </p>
+               </div>
+             )}
            </div>
 
            {/* Transaction List */}
@@ -564,13 +616,33 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
            </ModalFooter>
         </ModalShell>
 
-        <ModalShell isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title="Pagar Fatura">
+        <ModalShell isOpen={isAnticipateModalOpen} onClose={() => setIsAnticipateModalOpen(false)} title="Antecipar Pagamento">
           <ModalBody>
-            <form id="pay-form" onSubmit={handlePaySubmit} className="space-y-4">
-              <div className="bg-white/5 p-6 rounded-xl border border-white/5 text-center">
-                <p className="text-slate-400 text-sm mb-1">Valor Total</p>
-                <p className="text-3xl font-bold text-white">{formatCurrency(invoiceInfo?.amount || 0)}</p>
+            <form id="anticipate-form" onSubmit={handleAnticipateSubmit} className="space-y-4">
+              <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                <p className="text-sm text-slate-300 mb-2">
+                  {selectedCard?.anticipationBehavior === 'discount' 
+                    ? 'Ao antecipar, você pode receber um desconto. O valor pago + desconto será abatido da sua fatura atual.' 
+                    : 'O valor pago será adicionado como Saldo Positivo no cartão e abaterá automaticamente as próximas faturas.'}
+                </p>
               </div>
+              <GlassInput 
+                 label="Valor a Pagar"
+                 type="number" 
+                 step="0.01" 
+                 value={anticipateForm.amount} 
+                 onChange={e => setAnticipateForm({...anticipateForm, amount: e.target.value})} 
+                 required 
+              />
+              {selectedCard?.anticipationBehavior === 'discount' && (
+                <GlassInput 
+                   label="Desconto Recebido (Opcional)"
+                   type="number" 
+                   step="0.01" 
+                   value={anticipateForm.discount} 
+                   onChange={e => setAnticipateForm({...anticipateForm, discount: e.target.value})} 
+                />
+              )}
               <GlassSelect
                  label="Pagar com a conta:"
                  value={payAccount}
@@ -581,6 +653,48 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  ]}
                  required
               />
+            </form>
+          </ModalBody>
+          <ModalFooter>
+             <GlassButton type="button" variant="ghost" onClick={() => setIsAnticipateModalOpen(false)}>Cancelar</GlassButton>
+             <GlassButton type="submit" form="anticipate-form">Confirmar Antecipação</GlassButton>
+          </ModalFooter>
+        </ModalShell>
+
+        <ModalShell isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title="Pagar Fatura">
+          <ModalBody>
+            <form id="pay-form" onSubmit={handlePaySubmit} className="space-y-4">
+              <div className="bg-white/5 p-6 rounded-xl border border-white/5 text-center">
+                <p className="text-slate-400 text-sm mb-1">Valor da Fatura</p>
+                <p className="text-2xl font-bold text-white">{formatCurrency(invoiceInfo?.amount || 0)}</p>
+                
+                {(selectedCard?.positiveBalance || 0) > 0 && (
+                  <>
+                    <div className="flex justify-between items-center mt-4 text-emerald-400">
+                      <span className="text-sm">Saldo Positivo Utilizado</span>
+                      <span className="font-bold">-{formatCurrency(Math.min(invoiceInfo?.amount || 0, selectedCard?.positiveBalance || 0))}</span>
+                    </div>
+                    <div className="border-t border-white/10 my-3"></div>
+                    <div className="flex justify-between items-center text-white">
+                      <span className="text-sm font-bold">Total a Pagar</span>
+                      <span className="text-3xl font-bold">{formatCurrency(Math.max(0, (invoiceInfo?.amount || 0) - (selectedCard?.positiveBalance || 0)))}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              {((invoiceInfo?.amount || 0) - (selectedCard?.positiveBalance || 0)) > 0 && (
+                <GlassSelect
+                   label="Pagar com a conta:"
+                   value={payAccount}
+                   onChange={e => setPayAccount(e.target.value)}
+                   options={[
+                     { value: "", label: "Selecione..." },
+                     ...accounts.map(a => ({ value: a.id, label: a.name }))
+                   ]}
+                   required
+                />
+              )}
             </form>
           </ModalBody>
           <ModalFooter>
@@ -679,6 +793,17 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
                   </div>
                   <div>
+                     <GlassSelect
+                        label="Comportamento de Antecipação"
+                        value={cardForm.anticipationBehavior}
+                        onChange={e => setCardForm({...cardForm, anticipationBehavior: e.target.value as 'credit' | 'discount'})}
+                        options={[
+                          { value: "credit", label: "Gerar Saldo Positivo (Ex: Mercado Pago)" },
+                          { value: "discount", label: "Desconto na Fatura (Ex: Nubank)" }
+                        ]}
+                     />
+                  </div>
+                  <div>
                     <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do Cartão</label>
                     <div className="flex flex-wrap gap-2 px-1">
                       {CARD_COLORS.map(color => (
@@ -710,6 +835,15 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               label: 'Nova Compra', 
               icon: <Plus size={24} />, 
               onClick: () => openTxModal() 
+            },
+            {
+              id: 'anticipate',
+              label: 'Antecipar',
+              icon: <Banknote size={24} />,
+              onClick: () => {
+                setPayAccount(selectedCard.defaultPaymentAccountId || '');
+                setIsAnticipateModalOpen(true);
+              }
             },
             ...(!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 ? [{
               id: 'pay-invoice',
@@ -837,6 +971,17 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                     ]}
                  />
                  <p className="text-xs text-slate-500 mt-1 ml-1">Usado para estimar o saldo futuro.</p>
+              </div>
+              <div>
+                 <GlassSelect
+                    label="Comportamento de Antecipação"
+                    value={cardForm.anticipationBehavior}
+                    onChange={e => setCardForm({...cardForm, anticipationBehavior: e.target.value as 'credit' | 'discount'})}
+                    options={[
+                      { value: "credit", label: "Gerar Saldo Positivo (Ex: Mercado Pago)" },
+                      { value: "discount", label: "Desconto na Fatura (Ex: Nubank)" }
+                    ]}
+                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do Cartão</label>

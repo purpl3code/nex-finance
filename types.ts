@@ -97,6 +97,11 @@ export interface CreditCard {
   dueDay: number; // 1-31
   color?: string;
   defaultPaymentAccountId?: string; // Account used for forecast deduction
+  
+  // Anticipation settings
+  anticipationBehavior?: 'credit' | 'discount';
+  positiveBalance?: number;
+
   createdAt: number;
 }
 

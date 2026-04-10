@@ -452,6 +452,7 @@ const App: React.FC = () => {
                   onDeleteTransaction={deleteCreditCardTransaction}
                   onAddRefund={addCreditCardRefund}
                   onPayInvoice={payInvoice}
+                  onAnticipatePayment={anticipatePayment}
                   getInvoiceInfo={getCardInvoiceInfo}
                   initialCardId={selectedCardId}
                   initialMonth={filters.month}
