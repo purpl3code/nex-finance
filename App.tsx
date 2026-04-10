@@ -63,6 +63,7 @@ const App: React.FC = () => {
     deleteCreditCardTransaction,
     addCreditCardRefund,
     payInvoice,
+    anticipatePayment,
     addRecurringRule,
     editRecurringRule,
     deleteRecurringRule,
