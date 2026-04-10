@@ -698,17 +698,29 @@ export const useFinance = () => {
     const dueDate = new Date(year, month, actualDueDay);
     
     let closingMonth = month;
+    let closingYear = year;
     if (card.dueDay < card.closingDay) {
       closingMonth = month - 1;
+      if (closingMonth < 0) {
+        closingMonth = 11;
+        closingYear = year - 1;
+      }
     }
     
-    const daysInClosingMonth = getDaysInMonth(new Date(year, closingMonth, 1));
+    const daysInClosingMonth = getDaysInMonth(new Date(closingYear, closingMonth, 1));
     const actualClosingDay = Math.min(card.closingDay, daysInClosingMonth);
-    const closingDate = new Date(year, closingMonth, actualClosingDay);
+    const closingDate = new Date(closingYear, closingMonth, actualClosingDay);
     
-    const daysInPrevClosingMonth = getDaysInMonth(new Date(year, closingMonth - 1, 1));
+    let prevClosingMonth = closingMonth - 1;
+    let prevClosingYear = closingYear;
+    if (prevClosingMonth < 0) {
+      prevClosingMonth = 11;
+      prevClosingYear = closingYear - 1;
+    }
+
+    const daysInPrevClosingMonth = getDaysInMonth(new Date(prevClosingYear, prevClosingMonth, 1));
     const actualPrevClosingDay = Math.min(card.closingDay, daysInPrevClosingMonth);
-    const prevMonthClosing = new Date(year, closingMonth - 1, actualPrevClosingDay);
+    const prevMonthClosing = new Date(prevClosingYear, prevClosingMonth, actualPrevClosingDay);
     
     // Updated: Now includes refunds and purchases
     const invoiceTxs = creditCardTransactions.filter(t => {

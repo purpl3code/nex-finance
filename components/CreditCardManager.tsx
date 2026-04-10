@@ -73,10 +73,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   }); 
   
   const getOpenInvoiceDate = (cardId: string, startDate?: Date) => {
-    let checkDate = startDate ? new Date(startDate) : new Date();
+    let checkDate = startDate ? new Date(startDate.getFullYear(), startDate.getMonth(), 1) : new Date();
     let currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
     
-    if (!currentMonthInfo) return checkDate;
+    if (!currentMonthInfo || !currentMonthInfo.closingDate) return checkDate;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -88,9 +88,9 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     // We use a while loop in case the due day is early in the month and the closing day is late in the previous month
     let loops = 0;
     while (today > closingDate && loops < 12) {
-      checkDate.setMonth(checkDate.getMonth() + 1);
+      checkDate = new Date(checkDate.getFullYear(), checkDate.getMonth() + 1, 1);
       currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
-      if (!currentMonthInfo) break;
+      if (!currentMonthInfo || !currentMonthInfo.closingDate) break;
       closingDate = new Date(currentMonthInfo.closingDate + 'T12:00:00');
       closingDate.setHours(0, 0, 0, 0);
       loops++;
@@ -99,7 +99,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     // If the invoice is already paid, skip to the next unpaid one
     let attempts = 0;
     while (currentMonthInfo?.isPaid && attempts < 12) {
-      checkDate.setMonth(checkDate.getMonth() + 1);
+      checkDate = new Date(checkDate.getFullYear(), checkDate.getMonth() + 1, 1);
       currentMonthInfo = getInvoiceInfo(cardId, checkDate.getMonth(), checkDate.getFullYear());
       attempts++;
     }
@@ -126,6 +126,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         }
       }, 50);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCardId, initialMonth, initialYear]);
   
   // Modals
@@ -258,7 +259,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   };
 
   const handleSelectCard = (cardId: string) => {
-    setCurrentDate(getOpenInvoiceDate(cardId));
+    const openDate = getOpenInvoiceDate(cardId);
+    if (openDate) {
+      setCurrentDate(openDate);
+    }
     setSelectedCardId(cardId);
     setView('details');
     setTimeout(() => {
@@ -328,12 +332,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     
     // Advance to next unpaid month automatically after paying
     let checkDate = new Date(currentDate);
-    checkDate.setMonth(checkDate.getMonth() + 1);
+    checkDate = new Date(checkDate.getFullYear(), checkDate.getMonth() + 1, 1);
     let nextMonthInfo = getInvoiceInfo(selectedCardId, checkDate.getMonth(), checkDate.getFullYear());
     
     let attempts = 0;
     while (nextMonthInfo?.isPaid && attempts < 12) {
-      checkDate.setMonth(checkDate.getMonth() + 1);
+      checkDate = new Date(checkDate.getFullYear(), checkDate.getMonth() + 1, 1);
       nextMonthInfo = getInvoiceInfo(selectedCardId, checkDate.getMonth(), checkDate.getFullYear());
       attempts++;
     }
@@ -345,8 +349,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const invoiceInfo = selectedCard ? getInvoiceInfo(selectedCard.id, currentDate.getMonth(), currentDate.getFullYear()) : null;
 
   const changeMonth = (delta: number) => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() + delta);
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1);
     setCurrentDate(newDate);
     
     // Scroll to top when changing month to see new invoice summary
