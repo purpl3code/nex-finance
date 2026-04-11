@@ -186,7 +186,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                     </div>
                  </div>
                  
-                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
+                 <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity pl-2">
                     {!cat.isArchived && (
                        <GlassButton variant="ghost" size="sm" onClick={() => handleOpenModal(cat)} disabled={cat.isSystem && false} title="Editar" icon={<Edit2 size={16} />} />
                     )}

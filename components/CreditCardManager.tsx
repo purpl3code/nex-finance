@@ -405,7 +405,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                 )}
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <GlassButton onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</GlassButton>
               <GlassButton onClick={() => setDeletingCardId(selectedCard.id)} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" icon={<Trash2 size={16}/>}>Excluir</GlassButton>
               <GlassButton onClick={() => openTxModal()} icon={<Plus size={16}/>} className="hidden md:flex">Nova Compra</GlassButton>
@@ -446,7 +446,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  <GlassButton onClick={() => {
                    setPayAccount(selectedCard.defaultPaymentAccountId || '');
                    setIsAnticipateModalOpen(true);
-                 }} variant="ghost" size="lg" className="w-full md:w-auto">Antecipar</GlassButton>
+                 }} variant="secondary" size="lg" className="w-full md:w-auto">Antecipar</GlassButton>
                </div>
              </div>
              {(selectedCard?.positiveBalance || 0) > 0 && (
@@ -846,7 +846,8 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               onClick: () => {
                 setPayAccount(selectedCard.defaultPaymentAccountId || '');
                 setIsAnticipateModalOpen(true);
-              }
+              },
+              variant: 'secondary' as const
             },
             ...(!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 ? [{
               id: 'pay-invoice',

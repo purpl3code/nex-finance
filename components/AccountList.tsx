@@ -111,7 +111,7 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                     <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">{acc.type === 'bank' ? 'Banco' : acc.type === 'cash' ? 'Dinheiro' : 'Carteira'}</span>
                   </div>
                 </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                    <button 
                      type="button"
                      onClick={(e) => { e.stopPropagation(); openModal(acc); }} 

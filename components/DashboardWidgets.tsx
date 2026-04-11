@@ -26,14 +26,14 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
           {formatCurrency(summary.remainingBalance)}
         </div>
         
-        <div className="flex gap-4 text-xs font-medium">
+        <div className="flex flex-wrap gap-2 sm:gap-4 text-xs font-medium">
           <div className="flex items-center gap-1.5 text-slate-300 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-            <ArrowUp size={12} className="text-emerald-400" />
-            <span>Renda: {formatCurrency(summary.income)}</span>
+            <ArrowUp size={12} className="text-emerald-400 shrink-0" />
+            <span className="truncate">Renda: {formatCurrency(summary.income)}</span>
           </div>
           <div className="flex items-center gap-1.5 text-slate-300 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">
-            <ArrowDown size={12} className="text-red-400" />
-            <span>Gastos: {formatCurrency(summary.totalSpent)}</span>
+            <ArrowDown size={12} className="text-red-400 shrink-0" />
+            <span className="truncate">Gastos: {formatCurrency(summary.totalSpent)}</span>
           </div>
         </div>
       </div>
@@ -92,25 +92,25 @@ export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities
           <div className="space-y-2">
             {activities.map(item => (
               <div key={`${item.source}-${item.id}`} className="p-3 rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors group border border-transparent hover:border-white/5">
-                <div className="flex items-center gap-3 overflow-hidden">
+                <div className="flex items-center gap-3 overflow-hidden flex-1 mr-2">
                   <div className="text-xl bg-white/5 p-2.5 rounded-xl shrink-0 border border-white/5 group-hover:border-white/10 transition-colors">
                     {item.category?.emoji || (item.isCard ? '💳' : '💰')}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">{item.description || item.category?.name || 'Sem descrição'}</p>
                     <div className="flex items-center gap-2 text-xs text-slate-500">
-                      <span>{new Date(item.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</span>
-                      <span>•</span>
-                      <div className="flex items-center gap-1.5">
+                      <span className="shrink-0">{new Date(item.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</span>
+                      <span className="shrink-0">•</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
                         {item.color && (
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                         )}
-                        <span className={`${item.isCard ? 'text-violet-400' : 'text-blue-400'}`}>{item.source}</span>
+                        <span className={`truncate ${item.isCard ? 'text-violet-400' : 'text-blue-400'}`}>{item.source}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className={`text-sm font-bold whitespace-nowrap ${item.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                <div className={`text-sm font-bold whitespace-nowrap shrink-0 ${item.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
                   {item.type === 'income' ? '+' : '-'} {formatCurrency(item.amount)}
                 </div>
               </div>
@@ -170,14 +170,14 @@ export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) =>
   if (insights.length === 0) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 pb-2">
       {insights.map(insight => (
-        <div key={insight.id} className={`p-4 rounded-xl border flex gap-3 backdrop-blur-sm transition-all hover:scale-[1.02] ${
-          insight.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20' :
-          insight.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20' :
-          'bg-blue-500/10 border-blue-500/20'
+        <div key={insight.id} className={`p-4 rounded-xl border flex gap-3 backdrop-blur-sm transition-colors ${
+          insight.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15' :
+          insight.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/15' :
+          'bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/15'
         }`}>
-          <div className={`mt-0.5 ${
+          <div className={`mt-0.5 shrink-0 ${
             insight.type === 'success' ? 'text-emerald-400' :
             insight.type === 'warning' ? 'text-amber-400' :
             'text-blue-400'
@@ -192,7 +192,7 @@ export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) =>
               insight.type === 'warning' ? 'text-amber-400' :
               'text-blue-200'
             }`}>{insight.title}</h4>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{insight.message}</p>
+            <p className="text-xs text-slate-300 mt-1 leading-relaxed">{insight.message}</p>
           </div>
         </div>
       ))}

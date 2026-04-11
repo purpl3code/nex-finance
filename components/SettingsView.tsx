@@ -29,13 +29,13 @@ const SectionCard = ({ title, description, icon, children, danger = false }: any
   <GlassCard 
     className={`overflow-hidden ${danger ? 'border-red-500/30 shadow-red-900/10' : ''}`}
   >
-    <div className="flex items-start gap-4 mb-4">
-      <div className={`p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
+    <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <div className={`shrink-0 p-2.5 sm:p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
         {icon}
       </div>
       <div>
-        <h3 className={`text-lg font-semibold ${danger ? 'text-red-400' : 'text-white'}`}>{title}</h3>
-        {description && <p className="text-sm text-white/50 mt-1">{description}</p>}
+        <h3 className={`text-base sm:text-lg font-semibold ${danger ? 'text-red-400' : 'text-white'}`}>{title}</h3>
+        {description && <p className="text-xs sm:text-sm text-white/50 mt-0.5 sm:mt-1 leading-relaxed">{description}</p>}
       </div>
     </div>
     <div>
@@ -302,12 +302,12 @@ export const SettingsView: React.FC = () => {
         description="Personalize, crie ou arquive categorias de entradas e saídas."
         icon={<Tag size={24} />}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
            <div>
-              <p className="text-slate-300 font-medium">{categories.length} categorias cadastradas</p>
+              <p className="text-slate-300 font-medium">Categorias cadastradas: {categories.length}</p>
               <p className="text-xs text-slate-500 mt-1">Gerencie ícones, cores e grupos.</p>
            </div>
-           <GlassButton onClick={() => setIsCatManagerOpen(true)}>Gerenciar Categorias</GlassButton>
+           <GlassButton onClick={() => setIsCatManagerOpen(true)} className="w-full sm:w-auto">Gerenciar Categorias</GlassButton>
         </div>
       </SectionCard>
 
@@ -319,11 +319,11 @@ export const SettingsView: React.FC = () => {
       >
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-4">
            <div className="flex items-center gap-3 text-sm text-slate-400 bg-white/5 px-4 py-3 rounded-xl border border-white/10 w-full md:w-auto">
-              <History size={16} />
+              <History size={16} className="shrink-0" />
               {lastBackup ? (
-                <span>Último export: <span className="text-slate-200 font-medium">{new Date(lastBackup).toLocaleDateString()} às {new Date(lastBackup).toLocaleTimeString().slice(0,5)}</span></span>
+                <span className="truncate">Último export: <span className="text-slate-200 font-medium">{new Date(lastBackup).toLocaleDateString()} às {new Date(lastBackup).toLocaleTimeString().slice(0,5)}</span></span>
               ) : (
-                <span>Nenhum backup exportado ainda.</span>
+                <span className="truncate">Nenhum backup exportado ainda.</span>
               )}
            </div>
         </div>
@@ -359,12 +359,12 @@ export const SettingsView: React.FC = () => {
         icon={<ShieldAlert size={24} />}
         danger={true}
       >
-         <div className="flex items-center justify-between">
+         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
                <p className="text-slate-300 font-medium">Limpar todos os dados</p>
                <p className="text-xs text-slate-500 mt-1">Remove todas as transações, contas e configurações.</p>
             </div>
-            <GlassButton variant="danger" onClick={() => setIsClearModalOpen(true)}>
+            <GlassButton variant="danger" onClick={() => setIsClearModalOpen(true)} className="w-full sm:w-auto">
                Apagar Tudo
             </GlassButton>
          </div>
