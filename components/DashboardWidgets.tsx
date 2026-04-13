@@ -5,6 +5,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip, CartesianGrid } f
 import { MonthlySummary, ForecastSummary, DailyBalance, Insight } from '../selectors/dashboard';
 import { CreditCard as CreditCardType } from '../types';
 import { GlassCard } from './ui/GlassCard';
+import { AnimatedNumber } from './ui/AnimatedNumber';
 
 const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
@@ -22,9 +23,11 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
       
       <div className="relative z-10">
         <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Saldo Restante no Mês</h3>
-        <div className={`text-3xl font-bold mb-4 ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
-          {formatCurrency(summary.remainingBalance)}
-        </div>
+        <AnimatedNumber 
+          value={summary.remainingBalance} 
+          format={formatCurrency} 
+          className={`block text-3xl font-bold mb-4 ${isPositive ? 'text-emerald-400' : 'text-red-400'}`} 
+        />
         
         <div className="flex flex-wrap gap-2 sm:gap-4 text-xs font-medium">
           <div className="flex items-center gap-1.5 text-slate-300 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
@@ -56,9 +59,11 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
 
       <div className="relative z-10">
         <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Total disponível</h3>
-        <div className={`text-3xl font-bold mb-4 ${isPositive ? 'text-blue-400' : 'text-amber-400'}`}>
-          {formatCurrency(predicted)}
-        </div>
+        <AnimatedNumber 
+          value={predicted} 
+          format={formatCurrency} 
+          className={`block text-3xl font-bold mb-4 ${isPositive ? 'text-blue-400' : 'text-amber-400'}`} 
+        />
 
         <div className="space-y-2">
           <div className="flex justify-between text-xs bg-white/5 p-2 rounded-lg border border-white/5">

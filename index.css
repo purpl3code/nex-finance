@@ -33,7 +33,7 @@ body {
   background-image: var(--gradient-bg);
   background-attachment: fixed;
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Outfit', sans-serif;
 }
 
 /* Glass Utilities */
@@ -42,6 +42,7 @@ body {
   border: 1px solid var(--glass-border);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .glass-base::before {
@@ -97,9 +98,19 @@ body {
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background-color: rgb(var(--c-bg-900) / 0.8) !important;
   border: 1px solid var(--glass-border) !important;
-  border-radius: 8px !important;
-  backdrop-filter: blur(8px) !important;
-  box-shadow: var(--shadow) !important;
+  border-top: 1px solid rgb(var(--c-text-100) / 0.15) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Modern Pulse Animation */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.98); }
+}
+.animate-soft-pulse {
+  animation: soft-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Print Styles */

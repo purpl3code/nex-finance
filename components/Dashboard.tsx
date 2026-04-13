@@ -1,6 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { motion } from 'framer-motion';
 import { DashboardStats, ChartDataPoint, Account, Budget, CreditCard, Transaction, CreditCardTransaction, RecurringRule, Category } from '../types';
 import { COLORS } from '../constants';
 import { 
@@ -126,17 +127,40 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
 
   }, [getCategorySpending, categories, month, year]);
 
+  // --- ANIMATION VARIANTS ---
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1, 
+      transition: { staggerChildren: 0.1 } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.5, ease: "easeOut" } 
+    }
+  };
+
   return (
-    <div className="space-y-4">
+    <motion.div 
+      className="space-y-4"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       
       {/* 1. PREMIUM HEADER: MAIN CARDS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RemainingBalanceCard summary={monthlySummary} />
         <ForecastCard summary={forecast} totalCurrentBalance={totalBalance} creditCardUsedLimit={creditCardStats.usedLimit} />
-      </div>
+      </motion.div>
 
       {/* 2. MIDDLE SECTION: GRAPH & INSIGHTS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-auto lg:h-80">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-auto lg:h-80">
         <div className="lg:col-span-2 h-full">
           <BalanceChart data={balanceHistory} />
         </div>
@@ -152,10 +176,10 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* 3. BOTTOM SECTION: SPENDING & ACTIVITY */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
         {/* Left: Expenses & Cards */}
         <div className="space-y-4">
@@ -207,10 +231,18 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-[300px] sm:h-[350px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-xl">
-                <Wallet size={48} className="mb-2 opacity-20" />
-                <p>Nenhuma despesa registrada.</p>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="h-[300px] sm:h-[350px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-xl bg-white/[0.02]"
+              >
+                <div className="relative w-24 h-24 mb-4">
+                  <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-soft-pulse"></div>
+                  <Wallet size={48} className="absolute inset-0 m-auto text-blue-400 opacity-80" />
+                </div>
+                <p className="font-semibold text-slate-300">Nenhuma despesa ainda!</p>
+                <p className="text-xs text-slate-400 mt-1 max-w-[200px] text-center">Que tal começar a registrar suas finanças neste mês?</p>
+              </motion.div>
             )}
           </GlassCard>
 
@@ -242,7 +274,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
           <RecentActivityList activities={recentActivity} />
         </div>
 
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 });
