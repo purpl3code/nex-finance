@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 interface MobileFabAction {
   id: string;
@@ -18,31 +19,32 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Close speed-dial when FAB becomes invisible
+  useEffect(() => {
+    if (!visible) setIsOpen(false);
+  }, [visible]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isOpen]);
 
-  if (!visible) return null;
-
   const handleMainClick = () => {
     if (actions.length === 1) {
       actions[0].onClick();
     } else {
-      setIsOpen(!isOpen);
+      setIsOpen(prev => !prev);
     }
   };
 
@@ -54,56 +56,105 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
   const getVariantColor = (variant?: string) => {
     switch (variant) {
       case 'secondary': return 'bg-white/10 text-white hover:bg-white/20';
-      case 'danger': return 'bg-red-500 text-[#ffffff] hover:bg-red-600';
-      case 'success': return 'bg-emerald-500 text-[#ffffff] hover:bg-emerald-600';
-      case 'warning': return 'bg-amber-500 text-[#ffffff] hover:bg-amber-600';
-      default: return 'bg-blue-600 text-blue-foreground hover:bg-blue-700';
+      case 'danger':    return 'bg-red-500    text-white hover:bg-red-600';
+      case 'success':   return 'bg-emerald-500 text-white hover:bg-emerald-600';
+      case 'warning':   return 'bg-amber-500   text-white hover:bg-amber-600';
+      default:          return 'bg-[var(--accent)] text-[rgb(var(--c-primary-foreground))] hover:brightness-110';
     }
   };
 
-  return (
+  // ─── Portal: renders directly on document.body ───────────────────────────
+  // This completely escapes any parent overflow, transform, backdrop-filter,
+  // or stacking-context that could misplace a position:fixed element.
+  const content = (
     <>
-      {/* Overlay for focus when menu is open */}
-      {isOpen && actions.length > 1 && (
-        <div 
-          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-200"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] md:hidden"
+        style={{
+          opacity:        isOpen ? 1 : 0,
+          pointerEvents:  isOpen ? 'auto' : 'none',
+          transition:     'opacity 200ms ease',
+        }}
+        onClick={() => setIsOpen(false)}
+      />
 
-      <div className="md:hidden fixed z-40 bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 flex flex-col items-end gap-3 pointer-events-none" ref={menuRef}>
-        
+      {/* FAB container — always fixed at bottom-right, never unmounted */}
+      <div
+        ref={menuRef}
+        className="fixed md:hidden z-[9999] flex flex-col items-end gap-3"
+        style={{
+          bottom:         'calc(1rem + env(safe-area-inset-bottom))',
+          right:          '1rem',
+          opacity:        visible ? 1 : 0,
+          transform:      visible ? 'translateY(0)' : 'translateY(16px)',
+          pointerEvents:  visible ? 'auto' : 'none',
+          transition:     'opacity 220ms ease, transform 220ms ease',
+        }}
+      >
         {/* Speed Dial Actions */}
-        <div className={`flex flex-col items-end gap-3 transition-all duration-300 mb-2 ${isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none absolute bottom-0 right-0'}`}>
-          {actions.map((action) => (
-            <button
+        <div
+          className="flex flex-col items-end gap-3 mb-2"
+          style={{
+            opacity:       isOpen ? 1 : 0,
+            pointerEvents: isOpen ? 'auto' : 'none',
+            transition:    'opacity 200ms ease',
+          }}
+        >
+          {actions.map((action, idx) => (
+            <div
               key={action.id}
-              onClick={() => handleActionClick(action)}
-              className="flex items-center gap-3 group"
+              style={{
+                transform:  isOpen ? 'translateY(0)'    : 'translateY(10px)',
+                opacity:    isOpen ? 1                  : 0,
+                transition: `transform 200ms ease ${idx * 45}ms, opacity 200ms ease ${idx * 45}ms`,
+              }}
             >
-              <span className="bg-white/10 text-white text-sm px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md border border-white/10 font-medium">
-                {action.label}
-              </span>
-              <div className={`w-10 h-10 rounded-full shadow-lg flex items-center justify-center border border-white/10 ${getVariantColor(action.variant)}`}>
-                {action.icon}
-              </div>
-            </button>
+              <button
+                onClick={() => handleActionClick(action)}
+                className="flex items-center gap-3 group"
+              >
+                <span className="glass-lg text-white text-sm px-3 py-1.5 rounded-xl shadow-lg border border-white/10 font-medium whitespace-nowrap">
+                  {action.label}
+                </span>
+                <div
+                  className={`w-11 h-11 rounded-full shadow-xl flex items-center justify-center border border-white/15 transition-transform duration-150 active:scale-90 ${getVariantColor(action.variant)}`}
+                >
+                  {action.icon}
+                </div>
+              </button>
+            </div>
           ))}
         </div>
 
         {/* Main FAB Button */}
         <button
           onClick={handleMainClick}
-          className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 pointer-events-auto active:scale-90 border border-white/20 text-blue-foreground ${isOpen ? 'bg-white/10 rotate-45' : 'bg-blue-600'}`}
-          aria-label={actions.length > 1 && isOpen ? "Fechar menu" : "Adicionar"}
+          aria-label={isOpen ? 'Fechar menu' : 'Adicionar'}
+          className={`
+            w-14 h-14 rounded-full shadow-2xl
+            flex items-center justify-center
+            active:scale-90
+            border border-white/20
+            transition-all duration-300
+            ${isOpen
+              ? 'bg-white/10 rotate-45 shadow-none'
+              : `${getVariantColor()} shadow-[0_0_20px_var(--accent-glow)]`}
+          `}
         >
           {actions.length === 1 ? (
-             actions[0].icon
+            actions[0].icon
           ) : (
-             <Plus size={28} strokeWidth={2.5} />
+            <Plus
+              size={26}
+              strokeWidth={2.5}
+              className={isOpen ? 'text-white' : 'text-[rgb(var(--c-primary-foreground))]'}
+            />
           )}
         </button>
       </div>
     </>
   );
+
+  return createPortal(content, document.body);
 };
