@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
-// Define the worker URL locally or from CDN.
-// For Vite, using cdnjs is often the most reliable way to avoid build/worker issues without ejecting configs.
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+// Define the worker URL using Vite's native url resolver
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export interface ParsedTransaction {
   id: string; // generated temporary id
