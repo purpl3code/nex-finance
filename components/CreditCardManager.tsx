@@ -169,9 +169,9 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             categoryId: ''
          })));
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error('Erro ao ler a fatura em PDF.');
+      toast.error(`Erro ao ler o PDF: ${err?.message || err?.name || 'Formato/senha inválida'}`, { duration: 6000 });
     } finally {
       setIsImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
