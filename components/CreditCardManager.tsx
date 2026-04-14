@@ -10,8 +10,9 @@ import { GlassCard } from './ui/GlassCard';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
-import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check } from 'lucide-react';
+import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check, UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
+import { extractTextFromPdf, parseNubankTransactions, ParsedTransaction } from '../utils/pdfParser';
 
 const CARD_COLORS = [
   '#3b82f6', // blue
@@ -142,6 +143,72 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
   const [editingTx, setEditingTx] = useState<CreditCardTransaction | null>(null);
   const [refundingTx, setRefundingTx] = useState<CreditCardTransaction | null>(null);
+
+  // File Upload States
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importedTransactions, setImportedTransactions] = useState<(ParsedTransaction & { selected: boolean, categoryId: string })[]>([]);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const lines = await extractTextFromPdf(file);
+      const parsed = parseNubankTransactions(lines, currentDate.getFullYear());
+      
+      if (parsed.length === 0) {
+         toast.error('Nenhuma compra encontrada ou o formato não é reconhecido.');
+      } else {
+         toast.success(`${parsed.length} compras detectadas na fatura.`);
+         setImportedTransactions(parsed.map(p => ({
+            ...p,
+            selected: true,
+            categoryId: ''
+         })));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao ler a fatura em PDF.');
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const confirmImport = () => {
+    if (!selectedCardId) return;
+    const toImport = importedTransactions.filter(t => t.selected);
+    if (toImport.length === 0) {
+      toast.error('Selecione pelo menos uma compra para importar.');
+      return;
+    }
+    
+    // Default to 1 installment for imported transactions to reflect the exact bill line
+    toImport.forEach(tx => {
+      onAddTransaction({
+         cardId: selectedCardId,
+         amount: tx.amount,
+         date: tx.date,
+         categoryId: tx.categoryId,
+         description: tx.description + (tx.installments ? ` (${tx.installments})` : '')
+      }, 1); 
+    });
+
+    toast.success(`${toImport.length} compras importadas!`);
+    setIsImportModalOpen(false);
+    setImportedTransactions([]);
+  };
+
+  const toggleImportRule = (id: string) => {
+    setImportedTransactions(prev => prev.map(t => t.id === id ? { ...t, selected: !t.selected } : t));
+  };
+  
+  const changeImportCategory = (id: string, catId: string) => {
+    setImportedTransactions(prev => prev.map(t => t.id === id ? { ...t, categoryId: catId } : t));
+  };
 
   // Form States
   const [cardForm, setCardForm] = useState<{
@@ -408,6 +475,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <GlassButton onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</GlassButton>
               <GlassButton onClick={() => setDeletingCardId(selectedCard.id)} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" icon={<Trash2 size={16}/>}>Excluir</GlassButton>
+              <GlassButton onClick={() => setIsImportModalOpen(true)} icon={<UploadCloud size={16}/>} variant="secondary">Importar Fatura</GlassButton>
               <GlassButton onClick={() => openTxModal()} icon={<Plus size={16}/>} className="hidden md:flex">Nova Compra</GlassButton>
             </div>
           </div>
@@ -523,6 +591,98 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
            </div>
         </GlassCard>
         
+         {/* Modals reused */}
+         {/* Import Modal */}
+         <ModalShell isOpen={isImportModalOpen} onClose={() => { setIsImportModalOpen(false); setImportedTransactions([]); }} title="Importar Fatura (Nubank)">
+           <ModalBody>
+              {!importedTransactions.length ? (
+                <div className="space-y-4">
+                  <div className="bg-blue-500/10 border border-blue-500/20 text-blue-400 p-4 rounded-xl text-sm flex gap-3">
+                    <UploadCloud size={24} className="shrink-0" />
+                    <div>
+                      <p className="font-bold mb-1">Importação Local Inteligente</p>
+                      <p className="opacity-90">Faça o upload do PDF da sua fatura Nubank. A leitura é feita 100% no seu navegador com IA local.</p>
+                    </div>
+                  </div>
+                  <div className="relative border-2 border-dashed border-white/20 hover:border-blue-400/50 transition-colors rounded-2xl p-10 text-center flex flex-col items-center justify-center bg-white/5 group">
+                    <input 
+                      type="file" 
+                      accept="application/pdf" 
+                      onChange={handleFileUpload} 
+                      ref={fileInputRef}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={isImporting}
+                    />
+                    {isImporting ? (
+                      <div className="animate-pulse flex flex-col items-center">
+                        <UploadCloud size={40} className="text-blue-400 mb-3" />
+                        <p className="text-slate-200 font-medium">Extraindo compras...</p>
+                        <p className="text-slate-400 text-xs mt-1">Pode levar alguns segundos.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <UploadCloud size={40} className="text-slate-400 group-hover:text-blue-400 transition-colors mb-3" />
+                        <p className="text-slate-200 font-medium">Clique ou arraste o PDF aqui</p>
+                        <p className="text-slate-400 text-xs mt-1">Formatos suportados: .pdf</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="flex items-center justify-between sticky top-0 bg-[#0f172a] py-2 z-10 border-b border-white/10 mb-2">
+                    <p className="text-sm font-semibold text-slate-200">{importedTransactions.filter(t => t.selected).length} de {importedTransactions.length} selecionadas</p>
+                    <GlassButton size="sm" variant="ghost" onClick={() => setImportedTransactions([])}>Cancelar Leitura</GlassButton>
+                  </div>
+                  <div className="space-y-2">
+                    {importedTransactions.map(tx => (
+                      <div key={tx.id} className={`flex flex-col gap-2 p-3 rounded-xl border transition-colors ${tx.selected ? 'border-blue-500/30 bg-blue-500/5' : 'border-white/5 bg-white/5 opacity-60'}`}>
+                        <div className="flex items-start gap-3">
+                          <input 
+                            type="checkbox" 
+                            checked={tx.selected} 
+                            onChange={() => toggleImportRule(tx.id)}
+                            className="mt-1 w-4 h-4 rounded border-white/20 bg-black/20 text-blue-500 focus:ring-blue-500/50"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <input 
+                              type="text" 
+                              value={tx.description}
+                              onChange={(e) => setImportedTransactions(prev => prev.map(t => t.id === tx.id ? { ...t, description: e.target.value } : t))}
+                              className="bg-transparent border-b border-dashed border-white/20 text-white font-medium text-sm focus:outline-none focus:border-blue-400 w-full"
+                            />
+                            <p className="text-slate-500 text-xs mt-1">{new Date(tx.date).toLocaleDateString('pt-BR')} {tx.installments ? `• Parc. ${tx.installments}` : ''}</p>
+                          </div>
+                          <span className="font-semibold text-white whitespace-nowrap">{formatCurrency(tx.amount)}</span>
+                        </div>
+                        {tx.selected && (
+                          <div className="pl-7 mt-1">
+                            <select
+                              value={tx.categoryId}
+                              onChange={e => changeImportCategory(tx.id, e.target.value)}
+                              className="w-full bg-black/20 border border-white/10 rounded-lg text-xs p-1.5 text-slate-300 focus:border-blue-400 focus:outline-none"
+                            >
+                              <option value="">Selecione a Categoria...</option>
+                              {categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => (
+                                <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+           </ModalBody>
+           <ModalFooter>
+              <GlassButton type="button" variant="ghost" onClick={() => setIsImportModalOpen(false)}>Cancelar</GlassButton>
+              {importedTransactions.length > 0 && (
+                <GlassButton type="button" onClick={confirmImport}>Salvar {importedTransactions.filter(t => t.selected).length} Compras</GlassButton>
+              )}
+           </ModalFooter>
+         </ModalShell>
+
         {/* Modals reused */}
         <ModalShell isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} title={editingTx ? "Editar Compra" : "Nova Compra"}>
           <ModalBody>
