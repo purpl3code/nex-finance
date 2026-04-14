@@ -106,12 +106,15 @@ export const SettingsView: React.FC = () => {
 
   const handleLogout = async () => {
     if(confirm('Tem certeza que deseja sair?')) {
-      if (isDemoMode()) {
-        disableDemoMode();
-        StorageService.clear();
-        window.location.reload();
-      } else {
-        await supabase.auth.signOut();
+      try {
+        if (isDemoMode()) {
+          disableDemoMode();
+        } else {
+          await supabase.auth.signOut();
+        }
+      } catch (error) {
+        console.error('Erro ao deslogar do Supabase:', error);
+      } finally {
         StorageService.clear();
         window.location.reload();
       }
