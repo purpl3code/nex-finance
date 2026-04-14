@@ -9,7 +9,6 @@
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#020617" />
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
       /* 
@@ -265,55 +264,6 @@
       }
     </style>
 
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Plus Jakarta Sans', 'sans-serif'],
-            },
-            colors: {
-              // Override 'white' and 'black' to adapt to light/dark themes
-              white: 'rgb(var(--c-text-100) / <alpha-value>)',
-              black: 'rgb(var(--c-bg-900) / <alpha-value>)',
-              // Override 'slate' to use our theme variables
-              // This allows switching backgrounds/borders without changing class names in components
-              slate: {
-                50:  'rgb(var(--c-text-100) / <alpha-value>)', // Inverted for light/dark logic mostly used for text
-                100: 'rgb(var(--c-text-100) / <alpha-value>)',
-                200: 'rgb(var(--c-text-200) / <alpha-value>)',
-                300: 'rgb(var(--c-text-300) / <alpha-value>)',
-                400: 'rgb(var(--c-text-400) / <alpha-value>)',
-                500: 'rgb(var(--c-text-500) / <alpha-value>)',
-                600: 'rgb(var(--c-bg-600) / <alpha-value>)',
-                700: 'rgb(var(--c-bg-700) / <alpha-value>)',
-                800: 'rgb(var(--c-bg-800) / <alpha-value>)',
-                900: 'rgb(var(--c-bg-900) / <alpha-value>)',
-                950: 'rgb(var(--c-bg-950) / <alpha-value>)',
-              },
-              // Override 'blue' to be the primary accent color
-              blue: {
-                50: 'rgb(var(--c-primary-50) / <alpha-value>)',
-                100: 'rgb(var(--c-primary-100) / <alpha-value>)',
-                200: 'rgb(var(--c-primary-200) / <alpha-value>)',
-                300: 'rgb(var(--c-primary-300) / <alpha-value>)',
-                400: 'rgb(var(--c-primary-400) / <alpha-value>)',
-                500: 'rgb(var(--c-primary-500) / <alpha-value>)',
-                600: 'rgb(var(--c-primary-600) / <alpha-value>)',
-                700: 'rgb(var(--c-primary-700) / <alpha-value>)',
-                800: 'rgb(var(--c-primary-800) / <alpha-value>)',
-                900: 'rgb(var(--c-primary-900) / <alpha-value>)',
-                950: 'rgb(var(--c-primary-950) / <alpha-value>)',
-                foreground: 'rgb(var(--c-primary-foreground) / <alpha-value>)',
-              },
-              // Static aliases for readability
-              background: 'rgb(var(--c-bg-900) / <alpha-value>)',
-              surface: 'rgb(var(--c-bg-800) / <alpha-value>)',
-            }
-          }
-        }
-      }
-    </script>
   <script type="importmap">
 {
   "imports": {
