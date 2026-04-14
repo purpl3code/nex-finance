@@ -8,9 +8,10 @@
   --bg-elev: rgb(var(--c-bg-900));
   
   /* Glass Tokens */
-  --glass-bg: rgb(var(--c-bg-900) / 0.6); 
+  --glass-bg: rgb(var(--c-bg-900) / 0.55); 
   --glass-border: rgb(var(--c-text-100) / 0.08);
-  --glass-highlight: rgb(var(--c-text-100) / 0.05);
+  --glass-highlight: rgb(var(--c-text-100) / 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   
   /* Text */
   --text: rgb(var(--c-text-100));
@@ -23,12 +24,14 @@
   /* Accents */
   --accent: rgb(var(--c-primary-500));
   --accent-2: rgb(var(--c-primary-600));
+  --accent-glow: rgb(var(--c-primary-500) / 0.2);
   
   /* Gradients */
   --gradient-bg: 
-    radial-gradient(circle at 50% -20%, rgb(var(--c-primary-500) / 0.15), transparent 50%),
-    radial-gradient(circle at 100% 0%, rgb(var(--c-primary-600) / 0.1), transparent 40%),
-    radial-gradient(circle at 0% 20%, rgb(var(--c-primary-400) / 0.05), transparent 40%);
+    radial-gradient(ellipse at 20% -10%, rgb(var(--c-primary-600) / 0.18), transparent 50%),
+    radial-gradient(ellipse at 90% 5%,  rgb(var(--c-primary-500) / 0.12), transparent 40%),
+    radial-gradient(ellipse at 50% 80%, rgb(var(--c-primary-700) / 0.08), transparent 50%),
+    radial-gradient(ellipse at 5%  60%, rgb(var(--c-primary-400) / 0.06), transparent 45%);
 }
 
 body {
@@ -40,13 +43,36 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Glass Utilities */
+/* ============================================
+   GLASS UTILITIES
+   ============================================ */
+
+/* Shared inner highlight line */
+.glass-highlight-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgb(var(--c-text-100) / 0.15) 20%, 
+    rgb(var(--c-text-100) / 0.3)  50%, 
+    rgb(var(--c-text-100) / 0.15) 80%, 
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
 .glass-base {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--glass-shadow);
 }
 
 .glass-base::before {
@@ -58,12 +84,12 @@ body {
   height: 1px;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    rgb(var(--c-text-100) / 0.1) 20%, 
-    rgb(var(--c-text-100) / 0.2) 50%, 
-    rgb(var(--c-text-100) / 0.1) 80%, 
+    rgb(var(--c-text-100) / 0.1)  20%, 
+    rgb(var(--c-text-100) / 0.22) 50%, 
+    rgb(var(--c-text-100) / 0.1)  80%, 
     transparent 100%
   );
-  opacity: 0.6;
+  opacity: 0.8;
   pointer-events: none;
 }
 
@@ -75,14 +101,37 @@ body {
 }
 
 .glass-lg {
-  background: rgb(var(--c-bg-900) / 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgb(var(--c-bg-900) / 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow);
+  box-shadow: var(--glass-shadow);
 }
 
-/* Scrollbar */
+/* Card com glow temático ao hover */
+.glass-card-hover {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.glass-card-hover:hover {
+  border-color: rgb(var(--c-primary-500) / 0.25);
+  box-shadow: 
+    var(--glass-shadow),
+    0 0 0 1px rgb(var(--c-primary-500) / 0.1),
+    0 0 20px rgb(var(--c-primary-500) / 0.08);
+  transform: translateY(-2px);
+}
+
+/* Inner inset glass (inputs, inner panels) */
+.glass-inset {
+  background: rgb(var(--c-bg-950) / 0.4);
+  border: 1px solid rgb(var(--c-text-100) / 0.06);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -91,33 +140,124 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--c-text-100) / 0.1);
+  background: rgb(var(--c-primary-500) / 0.2);
   border-radius: 3px;
+  transition: background 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--c-text-100) / 0.2);
+  background: rgb(var(--c-primary-500) / 0.45);
 }
 
-/* Recharts Tooltip Override */
-.recharts-tooltip-wrapper .recharts-default-tooltip {
-  background-color: rgb(var(--c-bg-900) / 0.8) !important;
-  border: 1px solid var(--glass-border) !important;
-  border-top: 1px solid rgb(var(--c-text-100) / 0.15) !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+/* Shimmer effect for skeleton/loading */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(var(--c-text-100) / 0.04) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2.5s infinite;
+  pointer-events: none;
 }
 
-/* Modern Pulse Animation */
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Glow pulse for special elements */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 6px  rgb(var(--c-primary-500) / 0.3); }
+  50%       { box-shadow: 0 0 18px rgb(var(--c-primary-500) / 0.6); }
+}
+.animate-glow-pulse {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+/* Gradient text animation */
+@keyframes gradient-x {
+  0%, 100% { background-position: 0%   50%; }
+  50%       { background-position: 100% 50%; }
+}
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 4s ease infinite;
+}
+
+/* Soft pulse (existing, preserved) */
 @keyframes soft-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(0.98); }
+  50%       { opacity: 0.8; transform: scale(0.98); }
 }
 .animate-soft-pulse {
   animation: soft-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Print Styles */
+/* Orb background animation */
+@keyframes orb-move-1 {
+  0%, 100% { transform: translate(0%,   0%)   scale(1);   }
+  33%       { transform: translate(3%,  -4%)   scale(1.05); }
+  66%       { transform: translate(-2%,  2%)   scale(0.97); }
+}
+@keyframes orb-move-2 {
+  0%, 100% { transform: translate(0%,   0%)   scale(1);   }
+  33%       { transform: translate(-4%,  3%)   scale(0.96); }
+  66%       { transform: translate(3%,  -2%)   scale(1.04); }
+}
+.animate-orb-1 { animation: orb-move-1 18s ease-in-out infinite; }
+.animate-orb-2 { animation: orb-move-2 22s ease-in-out infinite; }
+
+/* Active indicator line (sidebar) */
+.sidebar-active-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: linear-gradient(to bottom, rgb(var(--c-primary-400)), rgb(var(--c-primary-600)));
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgb(var(--c-primary-500) / 0.6);
+}
+
+/* ============================================
+   RECHARTS OVERRIDES
+   ============================================ */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: rgb(var(--c-bg-900) / 0.85) !important;
+  border: 1px solid var(--glass-border)            !important;
+  border-top: 1px solid rgb(var(--c-text-100) / 0.18) !important;
+  border-radius: 12px                              !important;
+  backdrop-filter: blur(16px)                      !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3)        !important;
+}
+
+/* Remove focus outline from Recharts elements */
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-sector:focus,
+path.recharts-sector:focus {
+  outline: none !important;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
 @media print {
   body {
     background: white !important;
@@ -143,12 +283,4 @@ body {
     padding: 0 !important;
     width: 100% !important;
   }
-}
-
-/* Remove focus outline from Recharts elements */
-.recharts-wrapper:focus,
-.recharts-surface:focus,
-.recharts-sector:focus,
-path.recharts-sector:focus {
-  outline: none !important;
 }

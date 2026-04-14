@@ -1,57 +1,70 @@
 import React from 'react';
 import { ThemeService, AppTheme } from '../services/themeService';
-import { Check } from 'lucide-react';
-import { GlassCard } from './ui/GlassCard';
+import { Check, Sun, Moon } from 'lucide-react';
 
 interface ThemeOption {
   id: AppTheme;
   name: string;
+  description: string;
   colors: {
     bg: string;
+    surface: string;
     primary: string;
+    text: string;
   };
+  icon?: React.ReactNode;
 }
 
 const THEMES: ThemeOption[] = [
   { 
     id: 'dark', 
-    name: 'Padrão (Dark)', 
-    colors: { bg: '#0f172a', primary: '#3b82f6' } // Slate-900 / Blue-500
+    name: 'Padrão Dark', 
+    description: 'Azul clássico',
+    colors: { bg: '#0f172a', surface: '#1e293b', primary: '#3b82f6', text: '#94a3b8' }
   },
   { 
     id: 'midnight', 
     name: 'Midnight', 
-    colors: { bg: '#0a0f1e', primary: '#0ea5e9' } // Deep Navy / Sky-500
+    description: 'Azul profundo',
+    colors: { bg: '#0a0f1e', surface: '#172038', primary: '#0ea5e9', text: '#8ca0c0' }
   },
   { 
     id: 'graphite', 
     name: 'Grafite', 
-    colors: { bg: '#171717', primary: '#10b981' } // Neutral-900 / Emerald-500
+    description: 'Verde esmeralda',
+    colors: { bg: '#171717', surface: '#262626', primary: '#10b981', text: '#a3a3a3' }
   },
   { 
     id: 'royal', 
     name: 'Royal', 
-    colors: { bg: '#18181b', primary: '#8b5cf6' } // Zinc-900 / Violet-500
+    description: 'Violeta premium',
+    colors: { bg: '#18181b', surface: '#27272a', primary: '#8b5cf6', text: '#a1a1aa' }
   },
   { 
     id: 'sunset', 
     name: 'Sunset', 
-    colors: { bg: '#1c1917', primary: '#f97316' } // Stone-900 / Orange-500
+    description: 'Laranja quente',
+    colors: { bg: '#1c1917', surface: '#292524', primary: '#f97316', text: '#a8a29e' }
   },
   { 
     id: 'forest', 
     name: 'Forest', 
-    colors: { bg: '#064e3b', primary: '#14b8a6' } // Emerald-900 / Teal-500
+    description: 'Verde selva',
+    colors: { bg: '#064e3b', surface: '#065f46', primary: '#14b8a6', text: '#34d399' }
   },
   { 
     id: 'pure-black', 
     name: 'Pure Black', 
-    colors: { bg: '#000000', primary: '#ffffff' } // Black / White
+    description: 'AMOLED puro',
+    icon: <Moon size={12} />,
+    colors: { bg: '#000000', surface: '#0f0f0f', primary: '#ffffff', text: '#737373' }
   },
   { 
     id: 'pure-white', 
     name: 'Pure White', 
-    colors: { bg: '#ffffff', primary: '#000000' } // White / Black
+    description: 'Modo claro',
+    icon: <Sun size={12} />,
+    colors: { bg: '#f5f5f5', surface: '#e5e5e5', primary: '#000000', text: '#525252' }
   }
 ];
 
@@ -68,44 +81,112 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-      {THEMES.map(theme => (
-        <button
-          key={theme.id}
-          onClick={() => handleSelect(theme.id)}
-          className="relative group outline-none text-left"
-        >
-          <GlassCard 
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {THEMES.map(theme => {
+        const isActive = currentTheme === theme.id;
+        return (
+          <button
+            key={theme.id}
+            onClick={() => handleSelect(theme.id)}
             className={`
-              flex flex-col items-center gap-3 p-4 transition-all h-full
-              ${currentTheme === theme.id 
-                ? 'ring-2 ring-blue-500/50 bg-white/10' 
-                : 'hover:bg-white/5'}
+              relative group outline-none text-left rounded-2xl transition-all duration-300
+              ${isActive 
+                ? 'ring-2 ring-offset-2 ring-offset-transparent scale-[1.02]' 
+                : 'hover:scale-[1.01]'}
             `}
+            style={{ 
+              '--tw-ring-color': theme.colors.primary + '80',
+            } as React.CSSProperties}
           >
-            {/* Color Preview */}
+            {/* Card */}
             <div 
-              className="w-full h-16 rounded-lg shadow-inner flex items-center justify-center relative overflow-hidden border border-white/10"
-              style={{ backgroundColor: theme.colors.bg }}
+              className={`
+                rounded-2xl p-3 border transition-all duration-300 h-full overflow-hidden relative
+                ${isActive 
+                  ? 'border-white/20 shadow-lg' 
+                  : 'border-white/8 hover:border-white/15'}
+              `}
+              style={{ backgroundColor: theme.colors.surface }}
             >
-               <div 
-                 className="w-8 h-8 rounded-full shadow-lg absolute ring-2 ring-white/10" 
-                 style={{ backgroundColor: theme.colors.primary }}
-               ></div>
-            </div>
+              {/* Top gradient bar */}
+              <div 
+                className="absolute top-0 left-0 right-0 h-[2px] opacity-80"
+                style={{ background: `linear-gradient(90deg, transparent, ${theme.colors.primary}90, transparent)` }}
+              />
 
-            <span className={`text-sm font-medium ${currentTheme === theme.id ? 'text-white' : 'text-slate-400'}`}>
-              {theme.name}
-            </span>
+              {/* Color palette preview */}
+              <div 
+                className="w-full h-14 rounded-xl mb-3 relative overflow-hidden border border-white/5"
+                style={{ backgroundColor: theme.colors.bg }}
+              >
+                {/* Mini UI mockup inside */}
+                <div className="absolute inset-2 flex gap-1.5">
+                  {/* Mini sidebar */}
+                  <div 
+                    className="w-3 h-full rounded-md opacity-70"
+                    style={{ backgroundColor: theme.colors.surface }}
+                  />
+                  {/* Mini content */}
+                  <div className="flex-1 flex flex-col gap-1 justify-center">
+                    <div 
+                      className="h-1.5 rounded-full w-3/4"
+                      style={{ backgroundColor: theme.colors.primary, opacity: 0.9 }}
+                    />
+                    <div 
+                      className="h-1 rounded-full w-full opacity-30"
+                      style={{ backgroundColor: theme.colors.text }}
+                    />
+                    <div 
+                      className="h-1 rounded-full w-1/2 opacity-20"
+                      style={{ backgroundColor: theme.colors.text }}
+                    />
+                  </div>
+                </div>
 
-            {currentTheme === theme.id && (
-              <div className="absolute top-2 right-2 bg-blue-500 text-blue-foreground p-1 rounded-full shadow-lg">
-                <Check size={10} strokeWidth={3} />
+                {/* Primary dot accent */}
+                <div 
+                  className="absolute bottom-2 right-2 w-4 h-4 rounded-full shadow-lg"
+                  style={{ 
+                    backgroundColor: theme.colors.primary,
+                    boxShadow: `0 0 8px ${theme.colors.primary}80`
+                  }}
+                />
               </div>
-            )}
-          </GlassCard>
-        </button>
-      ))}
+
+              {/* Theme info */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <p 
+                    className="text-xs font-bold leading-tight"
+                    style={{ color: theme.colors.text === theme.colors.primary ? '#fff' : theme.colors.text }}
+                  >
+                    {theme.name}
+                  </p>
+                  <p 
+                    className="text-[10px] mt-0.5 opacity-60"
+                    style={{ color: theme.colors.text }}
+                  >
+                    {theme.description}
+                  </p>
+                </div>
+                {theme.icon && (
+                  <span style={{ color: theme.colors.primary }} className="opacity-60 mt-0.5">{theme.icon}</span>
+                )}
+              </div>
+
+              {/* Active checkmark */}
+              {isActive && (
+                <div 
+                  className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
+                  style={{ backgroundColor: theme.colors.primary }}
+                >
+                  <Check size={10} strokeWidth={3} style={{ color: theme.id === 'pure-white' ? '#fff' : '#000' }} />
+                </div>
+              )}
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 };

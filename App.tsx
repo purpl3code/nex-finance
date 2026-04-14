@@ -21,7 +21,7 @@ import { PageShell } from './components/ui/PageShell';
 import { PageHeader } from './components/ui/PageHeader';
 import { ThemeService } from './services/themeService';
 import { FilterState } from './types';
-import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft } from 'lucide-react';
+import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft, Wallet } from 'lucide-react';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { MobileFab } from './components/ui/MobileFab';
 import { Toaster } from 'sonner';
@@ -226,8 +226,20 @@ const App: React.FC = () => {
   // --- AUTH LOADING STATE ---
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center" style={{ backgroundImage: 'var(--gradient-bg)', backgroundAttachment: 'fixed' }}>
+        <div className="flex flex-col items-center gap-5">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl animate-glow-pulse" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-2xl shadow-blue-500/30 relative z-10">
+              <Wallet size={32} className="text-white" strokeWidth={2} />
+            </div>
+            <div className="absolute -inset-2 rounded-3xl border border-blue-500/20 animate-ping opacity-30" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-slate-300">Nex Finance</p>
+            <p className="text-xs text-slate-500 mt-0.5">Carregando...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -240,8 +252,20 @@ const App: React.FC = () => {
   // --- DATA LOADING STATE ---
   if (dataLoading) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center" style={{ backgroundImage: 'var(--gradient-bg)', backgroundAttachment: 'fixed' }}>
+        <div className="flex flex-col items-center gap-5">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl animate-glow-pulse" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-2xl shadow-blue-500/30 relative z-10">
+              <Wallet size={32} className="text-white" strokeWidth={2} />
+            </div>
+            <div className="absolute -inset-2 rounded-3xl border border-blue-500/20 animate-ping opacity-30" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-slate-300">Nex Finance</p>
+            <p className="text-xs text-slate-500 mt-0.5">Sincronizando dados...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -303,17 +327,22 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         
         {/* Mobile Header (Hidden on Desktop) */}
-        <header className="md:hidden flex items-center justify-between py-2.5 px-4 glass-sm bg-black/10 backdrop-blur-md border-b border-white/5 z-20">
+        <header className="md:hidden flex items-center justify-between py-3 px-4 glass-lg border-b border-white/8 z-20 relative overflow-hidden">
+          {/* Accent top line */}
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent pointer-events-none" />
           <div className="flex items-center gap-3">
-             <button onClick={() => setIsMobileSidebarOpen(true)} className="p-2 -ml-2 text-slate-400 hover:text-white">
-                <Menu size={24} />
+             <button 
+               onClick={() => setIsMobileSidebarOpen(true)} 
+               className="p-2 -ml-1 text-slate-400 hover:text-white hover:bg-white/8 rounded-xl transition-all duration-200"
+             >
+               <Menu size={22} />
              </button>
-             <h1 className="font-bold text-base">{getPageTitle()}</h1>
+             <h1 className="font-bold text-sm tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">{getPageTitle()}</h1>
           </div>
           {activeTab === 'dashboard' && (
             <GlassButton 
               onClick={() => handleOpenModal()} 
-              icon={<Plus size={18} />}
+              icon={<Plus size={16} />}
               size="sm"
               className="hidden md:flex"
             >
