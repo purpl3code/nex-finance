@@ -19,23 +19,23 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
       variant={isPositive ? 'success' : 'danger'}
     >
       {/* Animated background gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${isPositive ? 'from-emerald-500/12 via-transparent to-blue-500/5' : 'from-red-500/12 via-transparent to-orange-500/5'} opacity-70 group-hover:opacity-100 transition-opacity duration-500`} />
+      <div className={`absolute inset-0 bg-gradient-to-br ${isPositive ? 'from-emerald-500/15 via-transparent to-blue-500/5' : 'from-red-500/15 via-transparent to-orange-500/5'} opacity-70 group-hover:opacity-100 transition-opacity duration-500`} />
       
-      {/* Decorative icon */}
-      <div className={`absolute top-0 right-0 p-5 ${isPositive ? 'text-emerald-400' : 'text-red-400'} opacity-[0.07] group-hover:opacity-[0.12] group-hover:scale-110 transition-all duration-700`}>
-        <ShoppingBag size={90} />
+      {/* Decorative icon — higher opacity + hover stronger */}
+      <div className={`absolute -top-2 -right-2 p-5 ${isPositive ? 'text-emerald-400' : 'text-red-400'} opacity-[0.13] group-hover:opacity-[0.22] group-hover:scale-105 group-hover:rotate-6 transition-all duration-700`}>
+        <ShoppingBag size={100} />
       </div>
       
       <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-2">
-          <div className={`w-1.5 h-4 rounded-full ${isPositive ? 'bg-emerald-400' : 'bg-red-400'} shadow-sm`} />
+        <div className="flex items-center gap-2 mb-3">
+          <div className={`w-1.5 h-4 rounded-full ${isPositive ? 'bg-emerald-400' : 'bg-red-400'} shadow-[0_0_6px_currentColor]`} />
           <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest">Saldo Restante no Mês</h3>
         </div>
         
         <AnimatedNumber 
           value={summary.remainingBalance} 
           format={formatCurrency} 
-          className={`block text-3xl sm:text-4xl font-bold mb-5 ${isPositive ? 'text-emerald-400' : 'text-red-400'}`} 
+          className={`block text-3xl sm:text-4xl font-extrabold mb-5 ${isPositive ? 'value-text-positive' : 'value-text-negative'}`} 
         />
         
         <div className="flex flex-wrap gap-2 text-xs font-medium">
@@ -61,23 +61,23 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
   return (
     <GlassCard className="relative overflow-hidden group" variant="accent">
       {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-indigo-500/5 opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--c-primary-500)/0.12)] via-transparent to-[rgb(var(--c-primary-700)/0.06)] opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
       {/* Decorative icon */}
-      <div className="absolute top-0 right-0 p-5 text-blue-400 opacity-[0.07] group-hover:opacity-[0.12] group-hover:scale-110 transition-all duration-700">
-        <TrendingUp size={90} />
+      <div className="absolute -top-2 -right-2 p-5 text-[rgb(var(--c-primary-400))] opacity-[0.13] group-hover:opacity-[0.22] group-hover:scale-105 group-hover:-rotate-6 transition-all duration-700">
+        <TrendingUp size={100} />
       </div>
 
       <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-4 rounded-full bg-blue-400 shadow-sm" />
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-1.5 h-4 rounded-full bg-[rgb(var(--c-primary-400))] shadow-[0_0_6px_currentColor]" />
           <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest">Total Disponível</h3>
         </div>
 
         <AnimatedNumber 
           value={predicted} 
           format={formatCurrency} 
-          className={`block text-3xl sm:text-4xl font-bold mb-5 ${isPositive ? 'text-blue-300' : 'text-amber-400'}`} 
+          className={`block text-3xl sm:text-4xl font-extrabold mb-5 ${isPositive ? 'value-text-accent' : 'value-text-negative'}`} 
         />
 
         <div className="space-y-2">
@@ -156,7 +156,7 @@ export const BalanceChart: React.FC<{ data: DailyBalance[] }> = ({ data }) => {
   return (
     <GlassCard className="h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-blue-400 to-indigo-500 shadow-sm" />
+        <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-[rgb(var(--c-primary-300))] to-[rgb(var(--c-primary-600))] shadow-[0_0_6px_rgb(var(--c-primary-500)/0.5)]" />
         <h3 className="text-sm font-bold text-slate-200">Evolução do Saldo (Mês Atual)</h3>
       </div>
       <div className="flex-1 min-h-[200px]">

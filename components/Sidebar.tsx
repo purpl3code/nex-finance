@@ -34,17 +34,12 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ item, activeTab, collapsed, o
       className={`
         w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden
         ${isActive 
-          ? 'bg-blue-600/15 text-blue-300 shadow-lg border border-blue-500/25' 
+          ? 'sidebar-item-active text-[rgb(var(--c-primary-300))] border border-transparent' 
           : 'text-slate-400 hover:bg-white/5 hover:text-slate-100 border border-transparent hover:border-white/8'}
         ${collapsed ? 'justify-center' : ''}
       `}
       title={collapsed ? item.label : undefined}
     >
-      {/* Active bg glow */}
-      {isActive && (
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/5 rounded-xl" />
-      )}
-
       {/* Active left indicator bar */}
       {isActive && (
         <span className="sidebar-active-indicator" />
@@ -52,11 +47,11 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ item, activeTab, collapsed, o
       
       {/* Icon */}
       <Icon 
-        size={19} 
+        size={18} 
         className={`
-          min-w-[19px] transition-all duration-200 relative z-10
+          min-w-[18px] transition-all duration-200 relative z-10
           ${isActive 
-            ? 'text-blue-400 scale-110 drop-shadow-[0_0_6px_rgba(96,165,250,0.6)]' 
+            ? 'scale-110' 
             : 'text-slate-400 group-hover:text-slate-100 group-hover:scale-105'}
         `} 
       />
@@ -76,6 +71,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ item, activeTab, collapsed, o
     </button>
   );
 };
+
 
 // Extracted SidebarGroup
 interface SidebarGroupProps {
@@ -256,10 +252,10 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
 
         {/* Footer */}
         {!collapsed && (
-          <div className="p-4 border-t border-white/5 text-center animate-in fade-in duration-500">
+          <div className="p-4 border-t border-white/5 animate-in fade-in duration-500">
             <div className="flex items-center justify-center gap-1.5">
-              <div className="w-1 h-1 rounded-full bg-blue-500/60 animate-pulse" />
-              <p className="text-[10px] text-slate-600 font-semibold tracking-wider">v1.0.0 · Liquid Glass UI</p>
+              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'rgb(var(--c-primary-500) / 0.7)' }} />
+              <p className="text-[10px] text-slate-600 font-semibold tracking-wider">v1.0.0 · Nex Finance</p>
             </div>
           </div>
         )}

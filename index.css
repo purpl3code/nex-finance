@@ -25,6 +25,11 @@
   --accent: rgb(var(--c-primary-500));
   --accent-2: rgb(var(--c-primary-600));
   --accent-glow: rgb(var(--c-primary-500) / 0.2);
+
+  /* Premium card shadow with theme color */
+  --card-shadow-premium: 
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgb(var(--c-primary-500) / 0.04);
   
   /* Gradients */
   --gradient-bg: 
@@ -32,6 +37,12 @@
     radial-gradient(ellipse at 90% 5%,  rgb(var(--c-primary-500) / 0.12), transparent 40%),
     radial-gradient(ellipse at 50% 80%, rgb(var(--c-primary-700) / 0.08), transparent 50%),
     radial-gradient(ellipse at 5%  60%, rgb(var(--c-primary-400) / 0.06), transparent 45%);
+
+  /* Gradient text using theme colors (theme-safe) */
+  --gradient-text-from: rgb(var(--c-text-100));
+  --gradient-text-to: rgb(var(--c-text-300));
+  --gradient-text-accent-from: rgb(var(--c-primary-300));
+  --gradient-text-accent-to: rgb(var(--c-primary-500));
 }
 
 body {
@@ -113,12 +124,13 @@ body {
   transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 .glass-card-hover:hover {
-  border-color: rgb(var(--c-primary-500) / 0.25);
+  border-color: rgb(var(--c-primary-500) / 0.3);
   box-shadow: 
     var(--glass-shadow),
-    0 0 0 1px rgb(var(--c-primary-500) / 0.1),
-    0 0 20px rgb(var(--c-primary-500) / 0.08);
-  transform: translateY(-2px);
+    0 0 0 1px rgb(var(--c-primary-500) / 0.12),
+    0 0 28px rgb(var(--c-primary-500) / 0.12),
+    inset 0 1px 0 rgb(var(--c-text-100) / 0.08);
+  transform: translateY(-3px);
 }
 
 /* Inner inset glass (inputs, inner panels) */
@@ -127,6 +139,93 @@ body {
   border: 1px solid rgb(var(--c-text-100) / 0.06);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+}
+
+/* ============================================
+   GRADIENT TEXT UTILITIES (theme-safe)
+   ============================================ */
+
+/* Neutral gradient — title text */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--gradient-text-from) 0%,
+    var(--gradient-text-to) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Accent gradient — uses theme primary color */
+.gradient-text-accent {
+  background: linear-gradient(
+    135deg,
+    var(--gradient-text-accent-from) 0%,
+    var(--gradient-text-accent-to) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Premium value display — big monetary numbers */
+.value-text-positive {
+  background: linear-gradient(135deg, #6ee7b7 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgba(16,185,129,0.3));
+}
+.value-text-negative {
+  background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgba(239,68,68,0.3));
+}
+.value-text-accent {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--c-primary-300)) 0%,
+    rgb(var(--c-primary-500)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgb(var(--c-primary-500) / 0.3));
+}
+
+/* ============================================
+   SIDEBAR PREMIUM ACTIVE ITEM
+   ============================================ */
+.sidebar-item-active {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--c-primary-500) / 0.18) 0%,
+    rgb(var(--c-primary-600) / 0.08) 100%
+  ) !important;
+  border-color: rgb(var(--c-primary-500) / 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--c-primary-400) / 0.15),
+    0 0 16px rgb(var(--c-primary-500) / 0.1);
+}
+
+/* Brand logo area in sidebar */
+.sidebar-brand-logo {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--c-primary-500)) 0%,
+    rgb(var(--c-primary-700)) 100%
+  );
+  box-shadow:
+    0 4px 12px rgb(var(--c-primary-600) / 0.4),
+    inset 0 1px 0 rgb(var(--c-primary-300) / 0.3);
 }
 
 /* ============================================
@@ -229,10 +328,12 @@ body {
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
-  height: 60%;
-  background: linear-gradient(to bottom, rgb(var(--c-primary-400)), rgb(var(--c-primary-600)));
-  border-radius: 0 2px 2px 0;
-  box-shadow: 0 0 8px rgb(var(--c-primary-500) / 0.6);
+  height: 65%;
+  background: linear-gradient(to bottom, rgb(var(--c-primary-300)), rgb(var(--c-primary-600)));
+  border-radius: 0 3px 3px 0;
+  box-shadow: 
+    0 0 10px rgb(var(--c-primary-500) / 0.7),
+    0 0 20px rgb(var(--c-primary-500) / 0.3);
 }
 
 /* ============================================

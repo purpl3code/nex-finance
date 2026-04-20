@@ -421,21 +421,28 @@ export const ReportView: React.FC<ReportViewProps> = ({
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={[
-                    { name: 'Entradas', value: stats.income, fill: '#10b981' },
-                    { name: 'Saídas', value: stats.expense, fill: '#ef4444' }
+                    { name: 'Entradas', value: stats.income, color: '#10b981' },
+                    { name: 'Saídas', value: stats.expense, color: '#ef4444' }
                   ]}
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
-                  <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(value) => `R$ ${value}`} />
+                  <XAxis dataKey="name" stroke="rgb(var(--c-text-400))" fontSize={12} axisLine={false} tickLine={false} />
+                  <YAxis stroke="rgb(var(--c-text-500))" fontSize={12} tickFormatter={(value) => `R$ ${value}`} axisLine={false} tickLine={false} />
                   <Tooltip 
                     cursor={{ fill: 'rgb(var(--c-text-100) / 0.05)' }}
-                    contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900))', border: '1px solid rgb(var(--c-text-100) / 0.1)', borderRadius: '8px' }}
+                    contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900))', border: '1px solid rgb(var(--c-text-100) / 0.1)', borderRadius: '12px', backdropFilter: 'blur(16px)' }}
                     itemStyle={{ color: 'rgb(var(--c-text-100))' }}
                     formatter={(value: number) => formatCurrency(value)}
                   />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                    {[
+                      { name: 'Entradas', value: stats.income, color: '#10b981' },
+                      { name: 'Saídas', value: stats.expense, color: '#ef4444' }
+                    ].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: `drop-shadow(0 0 8px ${entry.color}50)` }} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -445,7 +452,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
         {/* Daily Spending Trend */}
         <GlassCard className="p-6">
           <div className="flex items-center gap-2 mb-6">
-            <Calendar size={20} className="text-amber-400" />
+            <Calendar size={20} className="text-[rgb(var(--c-primary-400))]" />
             <h3 className="text-lg font-semibold text-white">Evolução de Gastos (Acumulado)</h3>
           </div>
           <div className="h-[350px] w-full">
@@ -453,25 +460,27 @@ export const ReportView: React.FC<ReportViewProps> = ({
               <AreaChart data={dailyTrendData}>
                 <defs>
                   <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="rgb(var(--c-primary-400))" stopOpacity={0.35}/>
+                    <stop offset="95%" stopColor="rgb(var(--c-primary-500))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis dataKey="day" stroke="#94a3b8" fontSize={10} />
-                <YAxis stroke="#94a3b8" fontSize={10} tickFormatter={(value) => `R$ ${value}`} />
+                <XAxis dataKey="day" stroke="rgb(var(--c-text-500))" fontSize={10} axisLine={false} tickLine={false} />
+                <YAxis stroke="rgb(var(--c-text-500))" fontSize={10} tickFormatter={(value) => `R$ ${value}`} axisLine={false} tickLine={false} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900))', border: '1px solid rgb(var(--c-text-100) / 0.1)', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900))', border: '1px solid rgb(var(--c-text-100) / 0.1)', borderRadius: '12px', backdropFilter: 'blur(16px)' }}
                   itemStyle={{ color: 'rgb(var(--c-text-100))' }}
                   formatter={(value: number) => formatCurrency(value)}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="cumulative" 
-                  stroke="#f59e0b" 
+                  stroke="rgb(var(--c-primary-400))" 
                   fillOpacity={1} 
                   fill="url(#colorCumulative)" 
-                  strokeWidth={2}
+                  strokeWidth={2.5}
+                  dot={false}
+                  activeDot={{ r: 4, strokeWidth: 0, fill: 'rgb(var(--c-primary-400))' }}
                 />
               </AreaChart>
             </ResponsiveContainer>

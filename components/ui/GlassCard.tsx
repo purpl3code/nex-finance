@@ -12,7 +12,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const variantStyles: Record<GlassVariant, string> = {
   default:  '',
-  accent:   'border-blue-500/20   shadow-[0_0_24px_rgb(var(--c-primary-500)/0.08)]',
+  accent:   'border-[rgb(var(--c-primary-500)/0.2)]   shadow-[0_0_24px_rgb(var(--c-primary-500)/0.1)]',
   success:  'border-emerald-500/20 shadow-[0_0_24px_rgba(16,185,129,0.08)]',
   warning:  'border-amber-500/20   shadow-[0_0_24px_rgba(245,158,11,0.08)]',
   danger:   'border-red-500/20     shadow-[0_0_24px_rgba(239,68,68,0.08)]',
@@ -20,11 +20,12 @@ const variantStyles: Record<GlassVariant, string> = {
 
 const variantTopLine: Record<GlassVariant, string> = {
   default:  'from-transparent via-white/20 to-transparent',
-  accent:   'from-transparent via-blue-400/40 to-transparent',
+  accent:   'from-transparent via-[rgb(var(--c-primary-400)/0.4)] to-transparent',
   success:  'from-transparent via-emerald-400/40 to-transparent',
   warning:  'from-transparent via-amber-400/40 to-transparent',
   danger:   'from-transparent via-red-400/40 to-transparent',
 };
+
 
 export const GlassCard: React.FC<GlassCardProps> = ({ 
   children, 

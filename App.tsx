@@ -21,7 +21,7 @@ import { PageShell } from './components/ui/PageShell';
 import { PageHeader } from './components/ui/PageHeader';
 import { ThemeService } from './services/themeService';
 import { FilterState } from './types';
-import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft, Wallet } from 'lucide-react';
+import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft, Wallet, LayoutDashboard, List as ListIcon } from 'lucide-react';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { MobileFab } from './components/ui/MobileFab';
 import { Toaster } from 'sonner';
@@ -361,6 +361,7 @@ const App: React.FC = () => {
                   <PageHeader 
                     title="Dashboard" 
                     subtitle="Visão geral das suas finanças neste mês."
+                    icon={<LayoutDashboard />}
                     actions={
                       <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={18} />} className="hidden md:flex">
                         Nova Movimentação
@@ -406,6 +407,7 @@ const App: React.FC = () => {
                    <PageHeader 
                       title="Extrato" 
                       subtitle="Histórico completo de transações e transferências."
+                      icon={<ListIcon />}
                       controls={
                         <>
                           <MonthSelector />

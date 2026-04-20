@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Goal } from '../types';
 import { computeGoalStats, formatCurrency } from '../utils/goalHelpers';
 import { Edit2, Plus, Archive, Target, Clock, AlertTriangle, Trash2, CheckCircle2 } from 'lucide-react';
-import { GlassButton } from './ui/GlassButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { GlassCard } from './ui/GlassCard';
@@ -173,14 +172,29 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
       {/* CTA */}
       {!isComplete && (
         <div className="mt-5 pt-4 border-t border-white/6">
-          <GlassButton 
+          <button
             onClick={() => onAddValue(goal.id, 0)}
-            size="sm"
-            icon={<Plus size={14}/>}
-            className="w-full justify-center"
+            className="
+              w-full relative flex items-center justify-center gap-2
+              py-2.5 px-4 rounded-xl
+              font-semibold text-sm text-white
+              overflow-hidden group/cta
+              transition-all duration-300
+              hover:-translate-y-0.5
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--c-primary-500)/0.6)]
+            "
+            style={{
+              background: 'linear-gradient(135deg, rgb(var(--c-primary-500)) 0%, rgb(var(--c-primary-700)) 100%)',
+              boxShadow: '0 4px 14px rgb(var(--c-primary-600) / 0.4), inset 0 1px 0 rgb(var(--c-primary-300) / 0.25)',
+            }}
           >
-            Adicionar Valor
-          </GlassButton>
+            {/* Shimmer sweep on hover */}
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 pointer-events-none" />
+            {/* Top highlight */}
+            <span className="absolute top-0 inset-x-4 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+            <Plus size={15} className="transition-transform duration-200 group-hover/cta:rotate-90" />
+            <span>Adicionar Valor</span>
+          </button>
         </div>
       )}
 

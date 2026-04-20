@@ -10,9 +10,17 @@ import { GlassCard } from './ui/GlassCard';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
-import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check, UploadCloud } from 'lucide-react';
+import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check, UploadCloud, FileDown, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { extractTextFromPdf, parseNubankTransactions, ParsedTransaction } from '../utils/pdfParser';
+import {
+  extractTextFromPdf,
+  parseBankTransactions,
+  exportInvoiceAsCsv,
+  detectBank,
+  ParsedTransaction,
+  BankId,
+  SUPPORTED_BANKS,
+} from '../utils/pdfParser';
 
 const CARD_COLORS = [
   '#3b82f6', // blue
@@ -148,34 +156,74 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importedTransactions, setImportedTransactions] = useState<(ParsedTransaction & { selected: boolean, categoryId: string })[]>([]);
+  const [detectedBank, setDetectedBank] = useState<BankId>('generic');
+  const [selectedBank, setSelectedBank] = useState<BankId>('generic');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [rawLines, setRawLines] = useState<string[]>([]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setIsImporting(true);
     try {
       const lines = await extractTextFromPdf(file);
-      const parsed = parseNubankTransactions(lines, currentDate.getFullYear());
-      
-      if (parsed.length === 0) {
-         toast.error('Nenhuma compra encontrada ou o formato não é reconhecido.');
+      setRawLines(lines);
+      const auto = detectBank(lines);
+      setDetectedBank(auto);
+      setSelectedBank(auto);
+      const result = parseBankTransactions(lines, currentDate.getFullYear(), auto);
+      if (result.transactions.length === 0) {
+        toast.error('Nenhuma compra encontrada. Tente selecionar o banco manualmente.');
       } else {
-         toast.success(`${parsed.length} compras detectadas na fatura.`);
-         setImportedTransactions(parsed.map(p => ({
-            ...p,
-            selected: true,
-            categoryId: ''
-         })));
+        toast.success(`${result.transactions.length} compras detectadas — ${result.bankName}`);
+        setImportedTransactions(result.transactions.map(p => ({ ...p, selected: true, categoryId: '' })));
       }
     } catch (err: any) {
       console.error(err);
-      toast.error(`Erro ao ler o PDF: ${err?.message || err?.name || 'Formato/senha inválida'}`, { duration: 6000 });
+      toast.error(`Erro ao ler o PDF: ${err?.message || 'Formato inválido'}`, { duration: 6000 });
     } finally {
       setIsImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  // Re-parse with different bank when user manually selects
+  const handleBankChange = (bankId: BankId) => {
+    setSelectedBank(bankId);
+    if (rawLines.length === 0) return;
+    const result = parseBankTransactions(rawLines, currentDate.getFullYear(), bankId);
+    if (result.transactions.length === 0) {
+      toast.warning('Nenhuma transação encontrada com este parser. Tente outro banco.');
+      setImportedTransactions([]);
+    } else {
+      toast.success(`${result.transactions.length} compras detectadas com parser ${result.bankName}`);
+      setImportedTransactions(result.transactions.map(p => ({ ...p, selected: true, categoryId: '' })));
+    }
+  };
+
+  const handleCloseImportModal = () => {
+    setIsImportModalOpen(false);
+    setImportedTransactions([]);
+    setRawLines([]);
+    setDetectedBank('generic');
+    setSelectedBank('generic');
+  };
+
+  const handleExportCsv = () => {
+    if (!invoiceInfo || !selectedCard) return;
+    const txs = (invoiceInfo.transactions as any[]) || [];
+    if (txs.length === 0) {
+      toast.error('Nenhuma transação para exportar.');
+      return;
+    }
+    const mapped = txs.map((tx: any) => ({
+      date: tx.date,
+      description: tx.description || (tx.type === 'refund' ? 'Estorno' : 'Compra'),
+      amount: tx.type === 'refund' ? -tx.amount : tx.amount,
+      categoryName: categories.find(c => c.id === tx.categoryId)?.name || ''
+    }));
+    exportInvoiceAsCsv(selectedCard.name, monthName, mapped, invoiceInfo.amount || 0);
+    toast.success('Fatura exportada como CSV!');
   };
 
   const confirmImport = () => {
@@ -475,7 +523,8 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <GlassButton onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</GlassButton>
               <GlassButton onClick={() => setDeletingCardId(selectedCard.id)} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" icon={<Trash2 size={16}/>}>Excluir</GlassButton>
-              <GlassButton onClick={() => setIsImportModalOpen(true)} icon={<UploadCloud size={16}/>} variant="secondary">Importar Fatura</GlassButton>
+              <GlassButton onClick={() => setIsImportModalOpen(true)} icon={<UploadCloud size={16}/>} variant="secondary">Importar PDF</GlassButton>
+              <GlassButton onClick={handleExportCsv} icon={<FileDown size={16}/>} variant="secondary">Exportar CSV</GlassButton>
               <GlassButton onClick={() => openTxModal()} icon={<Plus size={16}/>} className="hidden md:flex">Nova Compra</GlassButton>
             </div>
           </div>
@@ -591,95 +640,168 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
            </div>
         </GlassCard>
         
-         {/* Modals reused */}
          {/* Import Modal */}
-         <ModalShell isOpen={isImportModalOpen} onClose={() => { setIsImportModalOpen(false); setImportedTransactions([]); }} title="Importar Fatura (Nubank)">
+         <ModalShell isOpen={isImportModalOpen} onClose={handleCloseImportModal} title="Importar Fatura do Banco">
            <ModalBody>
-              {!importedTransactions.length ? (
-                <div className="space-y-4">
-                  <div className="bg-blue-500/10 border border-blue-500/20 text-blue-400 p-4 rounded-xl text-sm flex gap-3">
-                    <UploadCloud size={24} className="shrink-0" />
-                    <div>
-                      <p className="font-bold mb-1">Importação Local Inteligente</p>
-                      <p className="opacity-90">Faça o upload do PDF da sua fatura Nubank. A leitura é feita 100% no seu navegador com IA local.</p>
-                    </div>
-                  </div>
-                  <div className="relative border-2 border-dashed border-white/20 hover:border-blue-400/50 transition-colors rounded-2xl p-10 text-center flex flex-col items-center justify-center bg-white/5 group">
-                    <input 
-                      type="file" 
-                      accept="application/pdf" 
-                      onChange={handleFileUpload} 
-                      ref={fileInputRef}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      disabled={isImporting}
-                    />
-                    {isImporting ? (
-                      <div className="animate-pulse flex flex-col items-center">
-                        <UploadCloud size={40} className="text-blue-400 mb-3" />
-                        <p className="text-slate-200 font-medium">Extraindo compras...</p>
-                        <p className="text-slate-400 text-xs mt-1">Pode levar alguns segundos.</p>
-                      </div>
-                    ) : (
-                      <>
-                        <UploadCloud size={40} className="text-slate-400 group-hover:text-blue-400 transition-colors mb-3" />
-                        <p className="text-slate-200 font-medium">Clique ou arraste o PDF aqui</p>
-                        <p className="text-slate-400 text-xs mt-1">Formatos suportados: .pdf</p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                  <div className="flex items-center justify-between sticky top-0 bg-[#0f172a] py-2 z-10 border-b border-white/10 mb-2">
-                    <p className="text-sm font-semibold text-slate-200">{importedTransactions.filter(t => t.selected).length} de {importedTransactions.length} selecionadas</p>
-                    <GlassButton size="sm" variant="ghost" onClick={() => setImportedTransactions([])}>Cancelar Leitura</GlassButton>
-                  </div>
-                  <div className="space-y-2">
-                    {importedTransactions.map(tx => (
-                      <div key={tx.id} className={`flex flex-col gap-2 p-3 rounded-xl border transition-colors ${tx.selected ? 'border-blue-500/30 bg-blue-500/5' : 'border-white/5 bg-white/5 opacity-60'}`}>
-                        <div className="flex items-start gap-3">
-                          <input 
-                            type="checkbox" 
-                            checked={tx.selected} 
-                            onChange={() => toggleImportRule(tx.id)}
-                            className="mt-1 w-4 h-4 rounded border-white/20 bg-black/20 text-blue-500 focus:ring-blue-500/50"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <input 
-                              type="text" 
-                              value={tx.description}
-                              onChange={(e) => setImportedTransactions(prev => prev.map(t => t.id === tx.id ? { ...t, description: e.target.value } : t))}
-                              className="bg-transparent border-b border-dashed border-white/20 text-white font-medium text-sm focus:outline-none focus:border-blue-400 w-full"
-                            />
-                            <p className="text-slate-500 text-xs mt-1">{new Date(tx.date).toLocaleDateString('pt-BR')} {tx.installments ? `• Parc. ${tx.installments}` : ''}</p>
-                          </div>
-                          <span className="font-semibold text-white whitespace-nowrap">{formatCurrency(tx.amount)}</span>
-                        </div>
-                        {tx.selected && (
-                          <div className="pl-7 mt-1">
-                            <select
-                              value={tx.categoryId}
-                              onChange={e => changeImportCategory(tx.id, e.target.value)}
-                              className="w-full bg-black/20 border border-white/10 rounded-lg text-xs p-1.5 text-slate-300 focus:border-blue-400 focus:outline-none"
-                            >
-                              <option value="">Selecione a Categoria...</option>
-                              {categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => (
-                                <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+             {!importedTransactions.length ? (
+               <div className="space-y-5">
+                 
+                 {/* Info banner */}
+                 <div className="bg-[rgb(var(--c-primary-500)/0.08)] border border-[rgb(var(--c-primary-500)/0.2)] text-[rgb(var(--c-primary-300))] p-4 rounded-xl text-sm flex gap-3 items-start">
+                   <Sparkles size={20} className="shrink-0 mt-0.5" />
+                   <div>
+                     <p className="font-bold mb-0.5">Leitura local — sem envio de dados</p>
+                     <p className="opacity-80 text-xs leading-relaxed">
+                       Faça upload do PDF da fatura do seu cartão. O processamento é feito 100% no navegador.
+                       Compatível com <strong>Nubank, Itaú, Bradesco, Santander, C6, Inter</strong> e outros.
+                     </p>
+                   </div>
+                 </div>
+
+                 {/* Bank selector */}
+                 <div>
+                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-0.5">
+                     Banco do Cartão <span className="text-slate-600 font-normal">(opcional — detectado automaticamente)</span>
+                   </label>
+                   <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-2">
+                     {SUPPORTED_BANKS.map(bank => (
+                       <button
+                         key={bank.id}
+                         type="button"
+                         onClick={() => handleBankChange(bank.id)}
+                         className={`
+                           px-3 py-2 rounded-xl border text-xs font-semibold transition-all duration-150 text-center
+                           ${selectedBank === bank.id
+                             ? 'bg-[rgb(var(--c-primary-500)/0.2)] border-[rgb(var(--c-primary-500)/0.5)] text-[rgb(var(--c-primary-300))]'
+                             : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/8 hover:text-slate-200'}
+                         `}
+                       >
+                         {bank.label}
+                       </button>
+                     ))}
+                   </div>
+                 </div>
+
+                 {/* Drag & drop zone */}
+                 <div className="relative border-2 border-dashed border-white/15 hover:border-[rgb(var(--c-primary-500)/0.5)] transition-all duration-200 rounded-2xl p-10 text-center flex flex-col items-center justify-center bg-white/3 group cursor-pointer">
+                   <input
+                     type="file"
+                     accept="application/pdf"
+                     onChange={handleFileUpload}
+                     ref={fileInputRef}
+                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                     disabled={isImporting}
+                   />
+                   {isImporting ? (
+                     <div className="flex flex-col items-center gap-2">
+                       <div className="w-10 h-10 rounded-full border-2 border-[rgb(var(--c-primary-500))] border-t-transparent animate-spin mb-1" />
+                       <p className="text-slate-200 font-semibold text-sm">Lendo o PDF...</p>
+                       <p className="text-slate-500 text-xs">Pode levar alguns segundos</p>
+                     </div>
+                   ) : (
+                     <>
+                       <div className="w-14 h-14 rounded-2xl bg-[rgb(var(--c-primary-500)/0.1)] border border-[rgb(var(--c-primary-500)/0.2)] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
+                         <UploadCloud size={26} className="text-[rgb(var(--c-primary-400))]" />
+                       </div>
+                       <p className="text-slate-200 font-semibold">Clique ou arraste o PDF aqui</p>
+                       <p className="text-slate-500 text-xs mt-1">Fatura em PDF • Máx. 20MB</p>
+                     </>
+                   )}
+                 </div>
+               </div>
+             ) : (
+               <div className="space-y-3">
+                 
+                 {/* Detected bank chip + action bar */}
+                 <div className="flex items-center justify-between gap-3 sticky top-0 bg-[rgb(var(--c-bg-900))] py-2 z-10 border-b border-white/8 mb-1">
+                   <div className="flex items-center gap-2 min-w-0">
+                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgb(var(--c-primary-500)/0.15)] border border-[rgb(var(--c-primary-500)/0.3)] text-[rgb(var(--c-primary-300))] text-xs font-bold">
+                       <Sparkles size={11} />
+                       {SUPPORTED_BANKS.find(b => b.id === detectedBank)?.label ?? 'Auto'}
+                       {detectedBank !== selectedBank && (
+                         <span className="text-slate-500 font-normal">→ {SUPPORTED_BANKS.find(b => b.id === selectedBank)?.label}</span>
+                       )}
+                     </span>
+                     <p className="text-xs text-slate-500 truncate">
+                       {importedTransactions.filter(t => t.selected).length} / {importedTransactions.length} selecionadas
+                     </p>
+                   </div>
+                   <div className="flex items-center gap-2 shrink-0">
+                     {/* ReParse selector */}
+                     <select
+                       value={selectedBank}
+                       onChange={e => handleBankChange(e.target.value as BankId)}
+                       className="bg-white/5 border border-white/12 rounded-lg text-xs p-1.5 text-slate-300 focus:border-[rgb(var(--c-primary-400))] focus:outline-none"
+                     >
+                       {SUPPORTED_BANKS.map(b => (
+                         <option key={b.id} value={b.id}>{b.label}</option>
+                       ))}
+                     </select>
+                     <GlassButton size="sm" variant="ghost" onClick={() => { setImportedTransactions([]); setRawLines([]); }}>
+                       Trocar PDF
+                     </GlassButton>
+                   </div>
+                 </div>
+
+                 {/* Transaction list */}
+                 <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
+                   {importedTransactions.map(tx => (
+                     <div
+                       key={tx.id}
+                       className={`flex flex-col gap-2.5 p-3 rounded-xl border transition-all duration-150 ${
+                         tx.selected
+                           ? 'border-[rgb(var(--c-primary-500)/0.25)] bg-[rgb(var(--c-primary-500)/0.05)]'
+                           : 'border-white/5 bg-white/5 opacity-50'
+                       }`}
+                     >
+                       <div className="flex items-start gap-3">
+                         <input
+                           type="checkbox"
+                           checked={tx.selected}
+                           onChange={() => toggleImportRule(tx.id)}
+                           className="mt-0.5 w-4 h-4 rounded border-white/20 accent-[rgb(var(--c-primary-500))] shrink-0"
+                         />
+                         <div className="flex-1 min-w-0">
+                           <input
+                             type="text"
+                             value={tx.description}
+                             onChange={(e) => setImportedTransactions(prev => prev.map(t => t.id === tx.id ? { ...t, description: e.target.value } : t))}
+                             className="bg-transparent border-b border-dashed border-white/15 text-white font-medium text-sm focus:outline-none focus:border-[rgb(var(--c-primary-400))] w-full"
+                           />
+                           <p className="text-slate-600 text-xs mt-1">
+                             {new Date(tx.date + 'T12:00:00').toLocaleDateString('pt-BR')}
+                             {tx.installments && <span className="ml-2 text-[rgb(var(--c-primary-500)/0.7)]">Parc. {tx.installments}</span>}
+                           </p>
+                         </div>
+                         <span className="font-bold text-white text-sm whitespace-nowrap shrink-0">{formatCurrency(tx.amount)}</span>
+                       </div>
+                       {tx.selected && (
+                         <div className="pl-7">
+                           <select
+                             value={tx.categoryId}
+                             onChange={e => changeImportCategory(tx.id, e.target.value)}
+                             className="w-full bg-black/20 border border-white/10 rounded-lg text-xs p-1.5 text-slate-300 focus:border-[rgb(var(--c-primary-400))] focus:outline-none"
+                           >
+                             <option value="">Selecione a Categoria...</option>
+                             {categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => (
+                               <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>
+                             ))}
+                           </select>
+                         </div>
+                       )}
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
            </ModalBody>
            <ModalFooter>
-              <GlassButton type="button" variant="ghost" onClick={() => setIsImportModalOpen(false)}>Cancelar</GlassButton>
-              {importedTransactions.length > 0 && (
-                <GlassButton type="button" onClick={confirmImport}>Salvar {importedTransactions.filter(t => t.selected).length} Compras</GlassButton>
-              )}
+             <GlassButton type="button" variant="ghost" onClick={handleCloseImportModal}>Cancelar</GlassButton>
+             {importedTransactions.length > 0 && (
+               <GlassButton type="button" onClick={confirmImport}>
+                 Salvar {importedTransactions.filter(t => t.selected).length} Compras
+               </GlassButton>
+             )}
            </ModalFooter>
          </ModalShell>
 
