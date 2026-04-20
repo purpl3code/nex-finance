@@ -1,14 +1,14 @@
-/**
- * pdfParser.ts — Importação local de faturas (PDF + CSV) — Multi-Banco
+﻿/**
+ * pdfParser.ts â€” ImportaÃ§Ã£o local de faturas (PDF + CSV) â€” Multi-Banco
  *
- * 100% no navegador. Sem API de IA, sem dependência externa no bundle.
+ * 100% no navegador. Sem API de IA, sem dependÃªncia externa no bundle.
  *
  * Formatos suportados:
- *   PDF  → Nubank, Itaú, Bradesco, Santander, C6, Inter, BTG, XP, Caixa, Genérico
- *   CSV  → Nubank, Inter, Itaú, Bradesco, Santander e formato genérico
+ *   PDF  â†’ Nubank, ItaÃº, Bradesco, Santander, C6, Inter, BTG, XP, Caixa, GenÃ©rico
+ *   CSV  â†’ Nubank, Inter, ItaÃº, Bradesco, Santander e formato genÃ©rico
  */
 
-// ─── Public types ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Public types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface ParsedTransaction {
   id: string;
@@ -32,14 +32,14 @@ export interface BankOption {
 
 export const SUPPORTED_BANKS: BankOption[] = [
   { id: 'nubank',      name: 'Nubank',        label: 'Nubank' },
-  { id: 'itau',        name: 'Itaú',          label: 'Itaú' },
+  { id: 'itau',        name: 'ItaÃº',          label: 'ItaÃº' },
   { id: 'bradesco',    name: 'Bradesco',      label: 'Bradesco' },
   { id: 'santander',   name: 'Santander',     label: 'Santander' },
   { id: 'c6',          name: 'C6 Bank',       label: 'C6 Bank' },
   { id: 'inter',       name: 'Inter',         label: 'Banco Inter' },
   { id: 'btg',         name: 'BTG Pactual',   label: 'BTG Pactual' },
   { id: 'xp',          name: 'XP',            label: 'XP/Rico' },
-  { id: 'caixa',       name: 'Caixa',         label: 'Caixa Econômica' },
+  { id: 'caixa',       name: 'Caixa',         label: 'Caixa EconÃ´mica' },
   { id: 'mercadopago', name: 'Mercado Pago',  label: 'Mercado Pago' },
   { id: 'generic',     name: 'Outro',         label: 'Outro Banco' },
 ];
@@ -52,7 +52,7 @@ export interface ParseResult {
   format: 'pdf' | 'csv';
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MONTH_MAP: Record<string, number> = {
   JAN: 0, FEV: 1, MAR: 2, ABR: 3, MAI: 4, JUN: 5,
@@ -64,10 +64,10 @@ const SKIP_PATTERNS = [
   'pagamento recebido', 'pagamento efetuado', 'pagamento em ',
   'saldo anterior', 'saldo total', 'saldo devedor',
   'total nacional', 'total internacional', 'total da fatura',
-  'limite de crédito', 'limite disponível', 'limite total',
+  'limite de crÃ©dito', 'limite disponÃ­vel', 'limite total',
   'vencimento', 'fechamento', 'data de', 'fatura de',
   'encargos', 'juros', 'multa ',
-  'cpf:', 'cnpj:', 'agência', 'conta corrente',
+  'cpf:', 'cnpj:', 'agÃªncia', 'conta corrente',
 ];
 
 function shouldSkip(line: string): boolean {
@@ -100,7 +100,7 @@ function splitInstallments(desc: string): { description: string; installments?: 
     : { description: desc.trim() };
 }
 
-// ─── PDF.js loader ────────────────────────────────────────────────────────────
+// â”€â”€â”€ PDF.js loader â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let pdfjsLib: any = null;
 
@@ -108,9 +108,11 @@ async function getPdfjsLib(): Promise<any> {
   if (pdfjsLib) return pdfjsLib;
   try {
     const mod = await import('pdfjs-dist');
+    // Use the EXACT version of the installed lib to avoid version mismatch error
+    const version: string = (mod as any).version ?? '5.6.205';
     try {
       mod.GlobalWorkerOptions.workerSrc =
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs';
+        `https://cdn.jsdelivr.net/npm/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
     } catch { /* ignore */ }
     pdfjsLib = mod;
   } catch {
@@ -135,7 +137,7 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
-// ─── PDF text extraction ──────────────────────────────────────────────────────
+// â”€â”€â”€ PDF text extraction â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const extractTextFromPdf = async (file: File): Promise<string[]> => {
   const lib = await getPdfjsLib();
@@ -162,24 +164,24 @@ export const extractTextFromPdf = async (file: File): Promise<string[]> => {
   return allLines;
 };
 
-// ─── Bank detection ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Bank detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function detectBank(lines: string[]): BankId {
   const sample = lines.slice(0, 40).join(' ').toLowerCase();
   if (sample.includes('nubank')) return 'nubank';
-  if (sample.includes('itaú') || sample.includes('itau') || sample.includes('icard')) return 'itau';
+  if (sample.includes('itaÃº') || sample.includes('itau') || sample.includes('icard')) return 'itau';
   if (sample.includes('bradesco')) return 'bradesco';
   if (sample.includes('santander')) return 'santander';
   if (sample.includes('c6 bank') || sample.includes('c6bank')) return 'c6';
   if (sample.includes('banco inter') || sample.includes('bancointer')) return 'inter';
   if (sample.includes('btg') || sample.includes('pactual')) return 'btg';
   if (sample.includes('xp investimentos') || sample.includes('rico')) return 'xp';
-  if (sample.includes('caixa econômica') || sample.includes('caixa economica')) return 'caixa';
+  if (sample.includes('caixa econÃ´mica') || sample.includes('caixa economica')) return 'caixa';
   if (sample.includes('mercado pago') || sample.includes('mercadopago')) return 'mercadopago';
   return 'generic';
 }
 
-// ─── PDF parsers (per bank) ───────────────────────────────────────────────────
+// â”€â”€â”€ PDF parsers (per bank) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function parseNubank(lines: string[], year: number): ParsedTransaction[] {
   const re = /^(\d{2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(.*?)\s+(-?\s*\d{1,3}(?:\.\d{3})*,\d{2})$/i;
@@ -289,7 +291,7 @@ function parseGenericPdf(lines: string[], year: number): ParsedTransaction[] {
   return results;
 }
 
-// ─── Unified PDF parse ────────────────────────────────────────────────────────
+// â”€â”€â”€ Unified PDF parse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function parseBankTransactions(lines: string[], year: number, bankHint?: BankId): ParseResult {
   const bank = bankHint ?? detectBank(lines);
@@ -311,7 +313,7 @@ export function parseBankTransactions(lines: string[], year: number, bankHint?: 
   return { bank, bankName: bankInfo.name, transactions, rawLineCount: lines.length, format: 'pdf' };
 }
 
-// ─── CSV parser ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ CSV parser â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function csvDetectSep(line: string): string {
   const semis = (line.match(/;/g) || []).length;
@@ -360,7 +362,7 @@ function parseCsvAmount(raw: string): number {
   const abs = s.replace(/^[-+]/, '');
 
   let num: number;
-  // Detect format: if has both . and , → BR format "1.234,56"
+  // Detect format: if has both . and , â†’ BR format "1.234,56"
   if (abs.includes(',') && abs.includes('.')) {
     // Could be "1.234,56" (BR) or "1,234.56" (US)
     const lastComma = abs.lastIndexOf(',');
@@ -389,7 +391,7 @@ function parseCsvAmount(raw: string): number {
   return isNaN(num) ? NaN : (negative ? -num : num);
 }
 
-/** Parse a date string in multiple formats → YYYY-MM-DD */
+/** Parse a date string in multiple formats â†’ YYYY-MM-DD */
 function parseCsvDate(raw: string, year: number): string | null {
   const s = raw.trim();
   // ISO: 2024-02-15
@@ -425,7 +427,7 @@ export function parseBankCsv(text: string, year: number, bankHint?: BankId): Par
   const rows = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const nonEmpty = rows.filter(r => r.trim() !== '');
   if (nonEmpty.length < 2) {
-    return { bank: 'generic', bankName: 'Genérico', transactions: [], rawLineCount: 0, format: 'csv' };
+    return { bank: 'generic', bankName: 'GenÃ©rico', transactions: [], rawLineCount: 0, format: 'csv' };
   }
 
   // Detect separator from first line
@@ -436,7 +438,7 @@ export function parseBankCsv(text: string, year: number, bankHint?: BankId): Par
   const bank = bankHint ?? detectBank(nonEmpty.slice(0, 10));
   const bankInfo = SUPPORTED_BANKS.find(b => b.id === bank) ?? SUPPORTED_BANKS[SUPPORTED_BANKS.length - 1];
 
-  // ── Nubank CSV (date,category,title,amount) ──────────────────────────────
+  // â”€â”€ Nubank CSV (date,category,title,amount) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Nubank uses ISO dates and decimal amounts (positive = expense)
   const isNubankCsv = headers.includes('date') && headers.includes('title') && headers.includes('amount');
   if (isNubankCsv || bank === 'nubank') {
@@ -463,15 +465,15 @@ export function parseBankCsv(text: string, year: number, bankHint?: BankId): Par
     return { bank, bankName: bankInfo.name, transactions, rawLineCount: nonEmpty.length, format: 'csv' };
   }
 
-  // ── Generic / PT-BR CSV ──────────────────────────────────────────────────
+  // â”€â”€ Generic / PT-BR CSV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Try to detect column positions
   const dateIdx = findCol(headers, [/^(data|date|dt\.?$|data_lan|data_movim)/, /data/, /date/]);
   const descIdx = findCol(headers, [
-    /^(descri|titulo|title|hist|lançamento|lancamento|estabelecimento|comercio|memo|nome)/,
+    /^(descri|titulo|title|hist|lanÃ§amento|lancamento|estabelecimento|comercio|memo|nome)/,
     /descri/, /hist/, /estabelecimento/
   ]);
   const amtIdx = findCol(headers, [
-    /^(valor|amount|vl\.?$|montante|debito|débito)/,
+    /^(valor|amount|vl\.?$|montante|debito|dÃ©bito)/,
     /valor/, /amount/
   ]);
 
@@ -537,7 +539,7 @@ function parseGenericCsvNoHeader(rows: string[], sep: string, year: number): Par
   return transactions;
 }
 
-// ─── Main entry point ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Main entry point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /** Parse a File object (PDF or CSV) and return structured transactions */
 export async function parseInvoiceFile(
@@ -566,15 +568,15 @@ export async function parseInvoiceFile(
     return parseBankCsv(text, year, bankHint);
   }
 
-  throw new Error('Formato não suportado. Use um arquivo PDF ou CSV.');
+  throw new Error('Formato nÃ£o suportado. Use um arquivo PDF ou CSV.');
 }
 
-// ─── Legacy exports ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Legacy exports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const parseNubankTransactions = (lines: string[], year: number) =>
   parseNubank(lines, year);
 
-// ─── CSV export ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ CSV export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const exportInvoiceAsCsv = (
   cardName: string,
@@ -586,9 +588,9 @@ export const exportInvoiceAsCsv = (
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
   const rows = [
-    `"Fatura ${cardName} — ${monthLabel}"`,
+    `"Fatura ${cardName} â€” ${monthLabel}"`,
     '',
-    '"Data","Descrição","Categoria","Valor"',
+    '"Data","DescriÃ§Ã£o","Categoria","Valor"',
     ...transactions.map(tx =>
       [
         `"${new Date(tx.date).toLocaleDateString('pt-BR')}"`,
