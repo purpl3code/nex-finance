@@ -13,8 +13,9 @@ import { MobileFab } from './ui/MobileFab';
 import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check, UploadCloud, FileDown, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  extractTextFromPdf,
+  parseInvoiceFile,
   parseBankTransactions,
+  parseBankCsv,
   exportInvoiceAsCsv,
   detectBank,
   ParsedTransaction,
@@ -152,7 +153,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [editingTx, setEditingTx] = useState<CreditCardTransaction | null>(null);
   const [refundingTx, setRefundingTx] = useState<CreditCardTransaction | null>(null);
 
-  // File Upload States
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importedTransactions, setImportedTransactions] = useState<(ParsedTransaction & { selected: boolean, categoryId: string })[]>([]);
@@ -160,44 +160,65 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [selectedBank, setSelectedBank] = useState<BankId>('generic');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [rawLines, setRawLines] = useState<string[]>([]);
+  const [rawCsvText, setRawCsvText] = useState<string>('');
+  const [fileFormat, setFileFormat] = useState<'pdf' | 'csv' | null>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setIsImporting(true);
     try {
-      const lines = await extractTextFromPdf(file);
-      setRawLines(lines);
-      const auto = detectBank(lines);
-      setDetectedBank(auto);
-      setSelectedBank(auto);
-      const result = parseBankTransactions(lines, currentDate.getFullYear(), auto);
-      if (result.transactions.length === 0) {
-        toast.error('Nenhuma compra encontrada. Tente selecionar o banco manualmente.');
+      const result = await parseInvoiceFile(file, currentDate.getFullYear(), selectedBank === 'generic' ? undefined : selectedBank);
+      setFileFormat(result.format);
+      // store raw data for re-parse
+      if (result.format === 'csv') {
+        const text = await file.text().catch(async () => new TextDecoder('iso-8859-1').decode(await file.arrayBuffer()));
+        setRawCsvText(text);
+        setRawLines([]);
       } else {
-        toast.success(`${result.transactions.length} compras detectadas — ${result.bankName}`);
+        setRawLines([]); // PDF lines not needed — re-read from file if needed
+        setRawCsvText('');
+      }
+      setDetectedBank(result.bank);
+      setSelectedBank(result.bank);
+      if (result.transactions.length === 0) {
+        toast.error('Nenhuma compra encontrada. Tente selecionar o banco manualmente ou outro arquivo.');
+      } else {
+        toast.success(`${result.transactions.length} compras encontradas — ${result.bankName}`);
         setImportedTransactions(result.transactions.map(p => ({ ...p, selected: true, categoryId: '' })));
       }
     } catch (err: any) {
       console.error(err);
-      toast.error(`Erro ao ler o PDF: ${err?.message || 'Formato inválido'}`, { duration: 6000 });
+      toast.error(err?.message || 'Erro ao ler o arquivo.', { duration: 6000 });
     } finally {
       setIsImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  // Re-parse with different bank when user manually selects
+  // Re-parse with different bank
   const handleBankChange = (bankId: BankId) => {
     setSelectedBank(bankId);
-    if (rawLines.length === 0) return;
-    const result = parseBankTransactions(rawLines, currentDate.getFullYear(), bankId);
-    if (result.transactions.length === 0) {
-      toast.warning('Nenhuma transação encontrada com este parser. Tente outro banco.');
-      setImportedTransactions([]);
-    } else {
-      toast.success(`${result.transactions.length} compras detectadas com parser ${result.bankName}`);
-      setImportedTransactions(result.transactions.map(p => ({ ...p, selected: true, categoryId: '' })));
+    if (rawCsvText) {
+      const result = parseBankCsv(rawCsvText, currentDate.getFullYear(), bankId);
+      if (result.transactions.length === 0) {
+        toast.warning('Nenhuma transação encontrada. Tente outro banco.');
+        setImportedTransactions([]);
+      } else {
+        toast.success(`${result.transactions.length} compras com parser ${result.bankName}`);
+        setImportedTransactions(result.transactions.map((p: ParsedTransaction) => ({ ...p, selected: true, categoryId: '' })));
+      }
+      return;
+    }
+    if (rawLines.length > 0) {
+      const result = parseBankTransactions(rawLines, currentDate.getFullYear(), bankId);
+      if (result.transactions.length === 0) {
+        toast.warning('Nenhuma transação encontrada. Tente outro banco.');
+        setImportedTransactions([]);
+      } else {
+        toast.success(`${result.transactions.length} compras com parser ${result.bankName}`);
+        setImportedTransactions(result.transactions.map((p: ParsedTransaction) => ({ ...p, selected: true, categoryId: '' })));
+      }
     }
   };
 
@@ -205,6 +226,8 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     setIsImportModalOpen(false);
     setImportedTransactions([]);
     setRawLines([]);
+    setRawCsvText('');
+    setFileFormat(null);
     setDetectedBank('generic');
     setSelectedBank('generic');
   };
@@ -652,7 +675,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    <div>
                      <p className="font-bold mb-0.5">Leitura local — sem envio de dados</p>
                      <p className="opacity-80 text-xs leading-relaxed">
-                       Faça upload do PDF da fatura do seu cartão. O processamento é feito 100% no navegador.
+                       Importe a fatura do seu banco como <strong>PDF</strong> (fatura fechada) ou <strong>CSV</strong> (fatura aberta ou fechada).
                        Compatível com <strong>Nubank, Itaú, Bradesco, Santander, C6, Inter</strong> e outros.
                      </p>
                    </div>
@@ -682,32 +705,42 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    </div>
                  </div>
 
-                 {/* Drag & drop zone */}
-                 <div className="relative border-2 border-dashed border-white/15 hover:border-[rgb(var(--c-primary-500)/0.5)] transition-all duration-200 rounded-2xl p-10 text-center flex flex-col items-center justify-center bg-white/3 group cursor-pointer">
-                   <input
-                     type="file"
-                     accept="application/pdf"
-                     onChange={handleFileUpload}
-                     ref={fileInputRef}
-                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                     disabled={isImporting}
-                   />
-                   {isImporting ? (
-                     <div className="flex flex-col items-center gap-2">
-                       <div className="w-10 h-10 rounded-full border-2 border-[rgb(var(--c-primary-500))] border-t-transparent animate-spin mb-1" />
-                       <p className="text-slate-200 font-semibold text-sm">Lendo o PDF...</p>
-                       <p className="text-slate-500 text-xs">Pode levar alguns segundos</p>
+                 {/* Drag & drop zone — mobile-safe */}
+                 {/* Hidden real file input (works on all platforms) */}
+                 <input
+                   id="invoice-file-input"
+                   type="file"
+                   accept="application/pdf,.pdf,text/csv,.csv,.txt"
+                   onChange={handleFileUpload}
+                   ref={fileInputRef}
+                   className="sr-only"
+                   disabled={isImporting}
+                 />
+
+                 {isImporting ? (
+                   <div className="flex flex-col items-center gap-2 py-8">
+                     <div className="w-10 h-10 rounded-full border-2 border-[rgb(var(--c-primary-500))] border-t-transparent animate-spin mb-1" />
+                     <p className="text-slate-200 font-semibold text-sm">Lendo o arquivo...</p>
+                     <p className="text-slate-500 text-xs">Pode levar alguns segundos</p>
+                   </div>
+                 ) : (
+                   /* Drop zone (desktop) + explicit button (mobile) */
+                   <label
+                     htmlFor="invoice-file-input"
+                     className="border-2 border-dashed border-white/15 hover:border-[rgb(var(--c-primary-500)/0.5)] active:border-[rgb(var(--c-primary-500)/0.8)] transition-all duration-200 rounded-2xl p-8 flex flex-col items-center justify-center bg-white/3 cursor-pointer group"
+                   >
+                     <div className="w-14 h-14 rounded-2xl bg-[rgb(var(--c-primary-500)/0.1)] border border-[rgb(var(--c-primary-500)/0.2)] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
+                       <UploadCloud size={26} className="text-[rgb(var(--c-primary-400))]" />
                      </div>
-                   ) : (
-                     <>
-                       <div className="w-14 h-14 rounded-2xl bg-[rgb(var(--c-primary-500)/0.1)] border border-[rgb(var(--c-primary-500)/0.2)] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
-                         <UploadCloud size={26} className="text-[rgb(var(--c-primary-400))]" />
-                       </div>
-                       <p className="text-slate-200 font-semibold">Clique ou arraste o PDF aqui</p>
-                       <p className="text-slate-500 text-xs mt-1">Fatura em PDF • Máx. 20MB</p>
-                     </>
-                   )}
-                 </div>
+                     <p className="text-slate-200 font-semibold text-center">Toque aqui para selecionar o arquivo</p>
+                     <p className="text-slate-500 text-xs mt-1 text-center">PDF ou CSV da fatura do banco</p>
+                     <div className="mt-4 flex gap-2">
+                       <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-500 text-[10px] font-bold uppercase tracking-wider">PDF</span>
+                       <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-500 text-[10px] font-bold uppercase tracking-wider">CSV</span>
+                       <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-500 text-[10px] font-bold uppercase tracking-wider">TXT</span>
+                     </div>
+                   </label>
+                 )}
                </div>
              ) : (
                <div className="space-y-3">
