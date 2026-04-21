@@ -1,4 +1,4 @@
-﻿
+
 
 import React, { useState } from 'react';
 import { CreditCard, CreditCardInvoice, Category, Account, CreditCardTransaction } from '../types';
@@ -249,6 +249,17 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     toast.success('Fatura exportada como CSV!');
   };
 
+  /** Extrai { current, total } de uma string como "2/6" ou "02/06" */
+  const parseInstallmentStr = (str?: string): { current: number; total: number } | null => {
+    if (!str) return null;
+    const m = str.match(/(\d+)\/(\d+)/);
+    if (!m) return null;
+    const current = parseInt(m[1], 10);
+    const total = parseInt(m[2], 10);
+    if (isNaN(current) || isNaN(total) || total < 1 || current > total) return null;
+    return { current, total };
+  };
+
   const confirmImport = () => {
     if (!selectedCardId) return;
     const toImport = importedTransactions.filter(t => t.selected);
@@ -257,18 +268,42 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       return;
     }
     
-    // Default to 1 installment for imported transactions to reflect the exact bill line
+    let totalInstallmentsCreated = 0;
+
     toImport.forEach(tx => {
-      onAddTransaction({
-         cardId: selectedCardId,
-         amount: tx.amount,
-         date: tx.date,
-         categoryId: tx.categoryId,
-         description: tx.description + (tx.installments ? ` (${tx.installments})` : '')
-      }, 1); 
+      const inst = parseInstallmentStr(tx.installments);
+
+      if (inst && inst.total > 1) {
+        // Parcelas restantes a criar (da atual até a última)
+        const remaining = inst.total - inst.current + 1;
+        // tx.amount já é o valor de UMA parcela; reconstruímos o total para que
+        // addCreditCardTransaction divida igualmente entre as parcelas restantes.
+        const totalAmount = tx.amount * remaining;
+        onAddTransaction({
+          cardId: selectedCardId,
+          amount: totalAmount,
+          date: tx.date,
+          categoryId: tx.categoryId,
+          description: tx.description,
+        }, remaining);
+        totalInstallmentsCreated += remaining;
+      } else {
+        // Compra à vista ou parcela única
+        onAddTransaction({
+          cardId: selectedCardId,
+          amount: tx.amount,
+          date: tx.date,
+          categoryId: tx.categoryId,
+          description: tx.description + (tx.installments ? ` (${tx.installments})` : ''),
+        }, 1);
+        totalInstallmentsCreated += 1;
+      }
     });
 
-    toast.success(`${toImport.length} compras importadas!`);
+    const extraMsg = totalInstallmentsCreated > toImport.length
+      ? ` (+${totalInstallmentsCreated - toImport.length} parcelas futuras criadas)`
+      : '';
+    toast.success(`${toImport.length} compras importadas!${extraMsg}`);
     setIsImportModalOpen(false);
     setImportedTransactions([]);
   };
@@ -801,10 +836,26 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                              onChange={(e) => setImportedTransactions(prev => prev.map(t => t.id === tx.id ? { ...t, description: e.target.value } : t))}
                              className="bg-transparent border-b border-dashed border-white/15 text-white font-medium text-sm focus:outline-none focus:border-[rgb(var(--c-primary-400))] w-full"
                            />
-                           <p className="text-slate-600 text-xs mt-1">
-                             {new Date(tx.date + 'T12:00:00').toLocaleDateString('pt-BR')}
-                             {tx.installments && <span className="ml-2 text-[rgb(var(--c-primary-500)/0.7)]">Parc. {tx.installments}</span>}
-                           </p>
+                            <p className="text-slate-600 text-xs mt-1 flex items-center flex-wrap gap-x-2">
+                              <span>{new Date(tx.date + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+                              {tx.installments && (() => {
+                                const instMatch = tx.installments!.match(/(\d+)\/(\d+)/);
+                                const cur = instMatch ? parseInt(instMatch[1], 10) : NaN;
+                                const tot = instMatch ? parseInt(instMatch[2], 10) : NaN;
+                                const validInst = !isNaN(cur) && !isNaN(tot) && tot > 1 && cur <= tot;
+                                const remaining = validInst ? tot - cur : 0;
+                                return (
+                                  <span className="inline-flex items-center gap-1.5">
+                                    <span className="text-[rgb(var(--c-primary-500)/0.7)]">Parc. {tx.installments}</span>
+                                    {remaining > 0 && (
+                                      <span className="px-1.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-400 text-[10px] font-bold whitespace-nowrap">
+                                        +{remaining} futura{remaining > 1 ? 's' : ''}
+                                      </span>
+                                    )}
+                                  </span>
+                                );
+                              })()}
+                            </p>
                          </div>
                          <span className="font-bold text-white text-sm whitespace-nowrap shrink-0">{formatCurrency(tx.amount)}</span>
                        </div>
