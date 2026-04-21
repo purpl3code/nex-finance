@@ -18,8 +18,8 @@ export const AppleEmoji: React.FC<AppleEmojiProps> = ({ emoji, className = '' })
         .map(c => c.codePointAt(0)?.toString(16))
         .filter(h => h && h !== 'fe0f'); // remove variation selectors
       const code = hexes.join('-');
-      // Uses a high CDN (15.0.0 handles latest emojis)
-      return `https://cdnjs.cloudflare.com/ajax/libs/emoji-datasource-apple/15.0.0/img/apple/64/${code}.png`;
+      // Serving the emojis locally from the public folder
+      return `/emojis/${code}.png`;
     } catch {
       return '';
     }
@@ -36,9 +36,11 @@ export const AppleEmoji: React.FC<AppleEmojiProps> = ({ emoji, className = '' })
     <img 
       src={url}
       alt={emoji}
-      className={`inline-block object-contain w-[1.25em] h-[1.25em] leading-none align-text-bottom ${className}`}
+      className={`inline-block object-contain shrink-0 w-[1.25em] h-[1.25em] leading-none align-text-bottom ${className}`}
       onError={() => setError(true)}
       draggable={false}
+      loading="lazy"
+      decoding="async"
       style={{ verticalAlign: '-0.15em' }}
     />
   );
