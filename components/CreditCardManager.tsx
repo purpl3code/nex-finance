@@ -934,7 +934,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                       label="Parcelas"
                       value={txForm.installments}
                       onChange={e => setTxForm({...txForm, installments: e.target.value})}
-                      options={Array.from({length: 12}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(À vista)' : ''}` }))}
+                      options={Array.from({length: 24}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(À vista)' : ''}` }))}
                    />
                )}
             </form>
