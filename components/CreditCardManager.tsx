@@ -616,12 +616,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    <GlassButton onClick={() => {
                      setPayAccount(selectedCard.defaultPaymentAccountId || '');
                      setIsPayModalOpen(true);
-                   }} variant="primary" size="lg" className="w-full md:w-auto min-h-[48px]">Pagar Fatura</GlassButton>
+                   }} variant="primary" size="lg" className="w-full md:w-auto">Pagar Fatura</GlassButton>
                  )}
                  <GlassButton onClick={() => {
                    setPayAccount(selectedCard.defaultPaymentAccountId || '');
                    setIsAnticipateModalOpen(true);
-                 }} variant="secondary" size="lg" className="w-full md:w-auto min-h-[48px]">Antecipar</GlassButton>
+                 }} variant="secondary" size="lg" className="w-full md:w-auto">Antecipar</GlassButton>
                </div>
              </div>
              {(selectedCard?.positiveBalance || 0) > 0 && (
@@ -666,15 +666,15 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                         
                         {/* Actions (Only for unpaid invoices and not already refunds) */}
                         {!invoiceInfo.isPaid && !isRefund && (
-                           <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity relative z-20">
-                              <button onClick={() => openRefundModal(tx)} className="p-2.5 md:p-1.5 text-amber-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Estornar">
-                                 <RotateCcw size={16} className="md:w-3.5 md:h-3.5" />
+                           <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity relative z-20">
+                              <button onClick={() => openRefundModal(tx)} className="p-1.5 text-amber-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Estornar">
+                                 <RotateCcw size={14} className="md:w-3.5 md:h-3.5" />
                               </button>
-                              <button onClick={() => openTxModal(tx)} className="p-2.5 md:p-1.5 text-blue-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Editar">
-                                 <Edit2 size={16} className="md:w-3.5 md:h-3.5" />
+                              <button onClick={() => openTxModal(tx)} className="p-1.5 text-blue-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Editar">
+                                 <Edit2 size={14} className="md:w-3.5 md:h-3.5" />
                               </button>
-                              <button onClick={() => handleDeleteTx(tx.id)} className="p-2.5 md:p-1.5 text-red-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Excluir">
-                                 <Trash2 size={16} className="md:w-3.5 md:h-3.5" />
+                              <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Excluir">
+                                 <Trash2 size={14} className="md:w-3.5 md:h-3.5" />
                               </button>
                            </div>
                         )}

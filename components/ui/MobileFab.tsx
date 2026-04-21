@@ -82,13 +82,12 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
       {/* FAB container — always fixed at bottom-right, never unmounted */}
       <div
         ref={menuRef}
-        className="fixed md:hidden z-[9999] flex flex-col items-end gap-3"
+        className="fixed md:hidden z-[9999] flex flex-col items-end gap-3 pointer-events-none"
         style={{
           bottom:         'calc(1rem + env(safe-area-inset-bottom))',
           right:          '1rem',
           opacity:        visible ? 1 : 0,
           transform:      visible ? 'translateY(0)' : 'translateY(16px)',
-          pointerEvents:  visible ? 'auto' : 'none',
           transition:     'opacity 220ms ease, transform 220ms ease',
         }}
       >
@@ -97,7 +96,7 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
           className="flex flex-col items-end gap-3 mb-2"
           style={{
             opacity:       isOpen ? 1 : 0,
-            pointerEvents: isOpen ? 'auto' : 'none',
+            pointerEvents: isOpen && visible ? 'auto' : 'none',
             transition:    'opacity 200ms ease',
           }}
         >
@@ -131,6 +130,7 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
         <button
           onClick={handleMainClick}
           aria-label={isOpen ? 'Fechar menu' : 'Adicionar'}
+          style={{ pointerEvents: visible ? 'auto' : 'none' }}
           className={`
             w-14 h-14 rounded-full shadow-2xl
             flex items-center justify-center
