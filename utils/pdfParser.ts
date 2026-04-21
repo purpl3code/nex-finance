@@ -1,11 +1,11 @@
 ﻿/**
- * pdfParser.ts â€” ImportaÃ§Ã£o local de faturas (PDF + CSV) â€” Multi-Banco
+ * pdfParser.ts â€” Importação local de faturas (PDF + CSV) â€” Multi-Banco
  *
- * 100% no navegador. Sem API de IA, sem dependÃªncia externa no bundle.
+ * 100% no navegador. Sem API de IA, sem dependência externa no bundle.
  *
  * Formatos suportados:
- *   PDF  â†’ Nubank, ItaÃº, Bradesco, Santander, C6, Inter, BTG, XP, Caixa, GenÃ©rico
- *   CSV  â†’ Nubank, Inter, ItaÃº, Bradesco, Santander e formato genÃ©rico
+ *   PDF  â†’ Nubank, Itaú, Bradesco, Santander, C6, Inter, BTG, XP, Caixa, Genérico
+ *   CSV  â†’ Nubank, Inter, Itaú, Bradesco, Santander e formato genérico
  */
 
 // â”€â”€â”€ Public types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -32,14 +32,14 @@ export interface BankOption {
 
 export const SUPPORTED_BANKS: BankOption[] = [
   { id: 'nubank',      name: 'Nubank',        label: 'Nubank' },
-  { id: 'itau',        name: 'ItaÃº',          label: 'ItaÃº' },
+  { id: 'itau',        name: 'Itaú',          label: 'Itaú' },
   { id: 'bradesco',    name: 'Bradesco',      label: 'Bradesco' },
   { id: 'santander',   name: 'Santander',     label: 'Santander' },
   { id: 'c6',          name: 'C6 Bank',       label: 'C6 Bank' },
   { id: 'inter',       name: 'Inter',         label: 'Banco Inter' },
   { id: 'btg',         name: 'BTG Pactual',   label: 'BTG Pactual' },
   { id: 'xp',          name: 'XP',            label: 'XP/Rico' },
-  { id: 'caixa',       name: 'Caixa',         label: 'Caixa EconÃ´mica' },
+  { id: 'caixa',       name: 'Caixa',         label: 'Caixa Econômica' },
   { id: 'mercadopago', name: 'Mercado Pago',  label: 'Mercado Pago' },
   { id: 'generic',     name: 'Outro',         label: 'Outro Banco' },
 ];
@@ -64,10 +64,10 @@ const SKIP_PATTERNS = [
   'pagamento recebido', 'pagamento efetuado', 'pagamento em ',
   'saldo anterior', 'saldo total', 'saldo devedor',
   'total nacional', 'total internacional', 'total da fatura',
-  'limite de crÃ©dito', 'limite disponÃ­vel', 'limite total',
+  'limite de crédito', 'limite disponível', 'limite total',
   'vencimento', 'fechamento', 'data de', 'fatura de',
   'encargos', 'juros', 'multa ',
-  'cpf:', 'cnpj:', 'agÃªncia', 'conta corrente',
+  'cpf:', 'cnpj:', 'agência', 'conta corrente',
 ];
 
 function shouldSkip(line: string): boolean {
@@ -169,14 +169,14 @@ export const extractTextFromPdf = async (file: File): Promise<string[]> => {
 export function detectBank(lines: string[]): BankId {
   const sample = lines.slice(0, 40).join(' ').toLowerCase();
   if (sample.includes('nubank')) return 'nubank';
-  if (sample.includes('itaÃº') || sample.includes('itau') || sample.includes('icard')) return 'itau';
+  if (sample.includes('itaú') || sample.includes('itau') || sample.includes('icard')) return 'itau';
   if (sample.includes('bradesco')) return 'bradesco';
   if (sample.includes('santander')) return 'santander';
   if (sample.includes('c6 bank') || sample.includes('c6bank')) return 'c6';
   if (sample.includes('banco inter') || sample.includes('bancointer')) return 'inter';
   if (sample.includes('btg') || sample.includes('pactual')) return 'btg';
   if (sample.includes('xp investimentos') || sample.includes('rico')) return 'xp';
-  if (sample.includes('caixa econÃ´mica') || sample.includes('caixa economica')) return 'caixa';
+  if (sample.includes('caixa econômica') || sample.includes('caixa economica')) return 'caixa';
   if (sample.includes('mercado pago') || sample.includes('mercadopago')) return 'mercadopago';
   return 'generic';
 }
@@ -427,7 +427,7 @@ export function parseBankCsv(text: string, year: number, bankHint?: BankId): Par
   const rows = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const nonEmpty = rows.filter(r => r.trim() !== '');
   if (nonEmpty.length < 2) {
-    return { bank: 'generic', bankName: 'GenÃ©rico', transactions: [], rawLineCount: 0, format: 'csv' };
+    return { bank: 'generic', bankName: 'Genérico', transactions: [], rawLineCount: 0, format: 'csv' };
   }
 
   // Detect separator from first line
@@ -469,11 +469,11 @@ export function parseBankCsv(text: string, year: number, bankHint?: BankId): Par
   // Try to detect column positions
   const dateIdx = findCol(headers, [/^(data|date|dt\.?$|data_lan|data_movim)/, /data/, /date/]);
   const descIdx = findCol(headers, [
-    /^(descri|titulo|title|hist|lanÃ§amento|lancamento|estabelecimento|comercio|memo|nome)/,
+    /^(descri|titulo|title|hist|lançamento|lancamento|estabelecimento|comercio|memo|nome)/,
     /descri/, /hist/, /estabelecimento/
   ]);
   const amtIdx = findCol(headers, [
-    /^(valor|amount|vl\.?$|montante|debito|dÃ©bito)/,
+    /^(valor|amount|vl\.?$|montante|debito|débito)/,
     /valor/, /amount/
   ]);
 
@@ -568,7 +568,7 @@ export async function parseInvoiceFile(
     return parseBankCsv(text, year, bankHint);
   }
 
-  throw new Error('Formato nÃ£o suportado. Use um arquivo PDF ou CSV.');
+  throw new Error('Formato não suportado. Use um arquivo PDF ou CSV.');
 }
 
 // â”€â”€â”€ Legacy exports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -590,7 +590,7 @@ export const exportInvoiceAsCsv = (
   const rows = [
     `"Fatura ${cardName} â€” ${monthLabel}"`,
     '',
-    '"Data","DescriÃ§Ã£o","Categoria","Valor"',
+    '"Data","Descrição","Categoria","Valor"',
     ...transactions.map(tx =>
       [
         `"${new Date(tx.date).toLocaleDateString('pt-BR')}"`,

@@ -202,7 +202,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (rawCsvText) {
       const result = parseBankCsv(rawCsvText, currentDate.getFullYear(), bankId);
       if (result.transactions.length === 0) {
-        toast.warning('Nenhuma transaÃ§Ã£o encontrada. Tente outro banco.');
+        toast.warning('Nenhuma transação encontrada. Tente outro banco.');
         setImportedTransactions([]);
       } else {
         toast.success(`${result.transactions.length} compras com parser ${result.bankName}`);
@@ -213,7 +213,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (rawLines.length > 0) {
       const result = parseBankTransactions(rawLines, currentDate.getFullYear(), bankId);
       if (result.transactions.length === 0) {
-        toast.warning('Nenhuma transaÃ§Ã£o encontrada. Tente outro banco.');
+        toast.warning('Nenhuma transação encontrada. Tente outro banco.');
         setImportedTransactions([]);
       } else {
         toast.success(`${result.transactions.length} compras com parser ${result.bankName}`);
@@ -236,7 +236,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (!invoiceInfo || !selectedCard) return;
     const txs = (invoiceInfo.transactions as any[]) || [];
     if (txs.length === 0) {
-      toast.error('Nenhuma transaÃ§Ã£o para exportar.');
+      toast.error('Nenhuma transação para exportar.');
       return;
     }
     const mapped = txs.map((tx: any) => ({
@@ -463,7 +463,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (refundingTx && onAddRefund) {
       const amt = parseFloat(refundForm.amount);
       if (amt > refundingTx.amount) {
-        toast.error('O valor do estorno nÃ£o pode ser maior que o valor da compra.');
+        toast.error('O valor do estorno não pode ser maior que o valor da compra.');
         return;
       }
       onAddRefund(refundingTx, amt, refundForm.date, refundForm.description);
@@ -556,7 +556,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     return (
       <PageShell>
         <button onClick={handleBack} className="flex items-center text-slate-400 hover:text-white mb-4 transition-colors">
-          <ChevronLeft size={16} className="mr-1" /> Voltar para CartÃµes
+          <ChevronLeft size={16} className="mr-1" /> Voltar para Cartões
         </button>
 
         {/* Card Header */}
@@ -573,7 +573,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                 <p className="text-slate-400">Limite: <span className="text-slate-200 font-medium">{formatCurrency(selectedCard.limit)}</span></p>
                 {selectedCard.defaultPaymentAccountId && (
                   <p className="text-slate-500">
-                    Conta PadrÃ£o: {accounts.find(a => a.id === selectedCard.defaultPaymentAccountId)?.name}
+                    Conta Padrão: {accounts.find(a => a.id === selectedCard.defaultPaymentAccountId)?.name}
                   </p>
                 )}
               </div>
@@ -631,7 +631,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    <p className="text-lg font-bold">{formatCurrency(selectedCard.positiveBalance || 0)}</p>
                  </div>
                  <p className="text-xs opacity-80 max-w-[200px] text-right">
-                   Este valor serÃ¡ abatido automaticamente no pagamento da prÃ³xima fatura.
+                   Este valor será abatido automaticamente no pagamento da próxima fatura.
                  </p>
                </div>
              )}
@@ -639,7 +639,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
            {/* Transaction List */}
            <div className="p-6 space-y-4">
-             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">TransaÃ§Ãµes da Fatura</h3>
+             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Transações da Fatura</h3>
              {invoiceInfo?.transactions && (invoiceInfo.transactions as any[]).length > 0 ? (
                (invoiceInfo.transactions as any[]).map((tx: CreditCardTransaction) => {
                  const isRefund = tx.type === 'refund';
@@ -711,7 +711,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      <p className="font-bold mb-0.5">Leitura local â€” sem envio de dados</p>
                      <p className="opacity-80 text-xs leading-relaxed">
                        Importe a fatura do seu banco como <strong>PDF</strong> (fatura fechada) ou <strong>CSV</strong> (fatura aberta ou fechada).
-                       CompatÃ­vel com <strong>Nubank, ItaÃº, Bradesco, Santander, C6, Inter</strong> e outros.
+                       Compatível com <strong>Nubank, Itaú, Bradesco, Santander, C6, Inter</strong> e outros.
                      </p>
                    </div>
                  </div>
@@ -719,7 +719,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  {/* Bank selector */}
                  <div>
                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-0.5">
-                     Banco do CartÃ£o <span className="text-slate-600 font-normal">(opcional â€” detectado automaticamente)</span>
+                     Banco do Cartão <span className="text-slate-600 font-normal">(opcional â€” detectado automaticamente)</span>
                    </label>
                    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-2">
                      {SUPPORTED_BANKS.map(bank => (
@@ -896,7 +896,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                {editingTx && (
                   <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 mb-4">
                      <AlertTriangle size={14} />
-                     <span>Editando apenas esta parcela. O limite total nÃ£o serÃ¡ recalculado automaticamente para outras parcelas.</span>
+                     <span>Editando apenas esta parcela. O limite total não será recalculado automaticamente para outras parcelas.</span>
                   </div>
                )}
                <GlassInput 
@@ -925,7 +925,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   required
                />
                <GlassInput 
-                  label="DescriÃ§Ã£o"
+                  label="Descrição"
                   value={txForm.description} 
                   onChange={e => setTxForm({...txForm, description: e.target.value})} 
                />
@@ -963,7 +963,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                        onChange={e => setRefundForm({...refundForm, amount: e.target.value})} 
                        required 
                     />
-                    <p className="text-xs text-slate-500 mt-1 ml-1">O valor serÃ¡ subtraÃ­do da fatura.</p>
+                    <p className="text-xs text-slate-500 mt-1 ml-1">O valor será subtraído da fatura.</p>
                  </div>
                  <GlassInput 
                     label="Data do Estorno"
@@ -973,7 +973,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                     required 
                  />
                  <GlassInput 
-                    label="DescriÃ§Ã£o"
+                    label="Descrição"
                     value={refundForm.description} 
                     onChange={e => setRefundForm({...refundForm, description: e.target.value})} 
                  />
@@ -991,8 +991,8 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="text-sm text-slate-300 mb-2">
                   {selectedCard?.anticipationBehavior === 'discount' 
-                    ? 'Ao antecipar, vocÃª pode receber um desconto. O valor pago + desconto serÃ¡ abatido da sua fatura atual.' 
-                    : 'O valor pago serÃ¡ adicionado como Saldo Positivo no cartÃ£o e abaterÃ¡ automaticamente as prÃ³ximas faturas.'}
+                    ? 'Ao antecipar, você pode receber um desconto. O valor pago + desconto será abatido da sua fatura atual.' 
+                    : 'O valor pago será adicionado como Saldo Positivo no cartão e abaterá automaticamente as próximas faturas.'}
                 </p>
               </div>
               <GlassInput 
@@ -1026,7 +1026,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
           </ModalBody>
           <ModalFooter>
              <GlassButton type="button" variant="ghost" onClick={() => setIsAnticipateModalOpen(false)}>Cancelar</GlassButton>
-             <GlassButton type="submit" form="anticipate-form">Confirmar AntecipaÃ§Ã£o</GlassButton>
+             <GlassButton type="submit" form="anticipate-form">Confirmar Antecipação</GlassButton>
           </ModalFooter>
         </ModalShell>
 
@@ -1081,42 +1081,42 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               <div>
                 <p className="text-lg text-slate-200">Tem certeza que deseja excluir esta compra?</p>
                 <p className="text-sm text-slate-400 mt-2">
-                  Se houver estornos vinculados, eles tambÃ©m serÃ£o removidos.
+                  Se houver estornos vinculados, eles também serão removidos.
                 </p>
               </div>
             </div>
           </ModalBody>
           <ModalFooter>
             <GlassButton type="button" variant="ghost" onClick={() => setDeletingTxId(null)}>Cancelar</GlassButton>
-            <GlassButton type="button" variant="danger" onClick={confirmDeleteTx}>Confirmar ExclusÃ£o</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={confirmDeleteTx}>Confirmar Exclusão</GlassButton>
           </ModalFooter>
         </ModalShell>
 
-        <ModalShell isOpen={!!deletingCardId} onClose={() => setDeletingCardId(null)} title="Excluir CartÃ£o">
+        <ModalShell isOpen={!!deletingCardId} onClose={() => setDeletingCardId(null)} title="Excluir Cartão">
           <ModalBody>
             <div className="text-center space-y-4 py-4">
               <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
                  <AlertTriangle size={32} className="text-red-500" />
               </div>
               <div>
-                <p className="text-lg text-slate-200">Tem certeza que deseja excluir este cartÃ£o?</p>
+                <p className="text-lg text-slate-200">Tem certeza que deseja excluir este cartão?</p>
                 <p className="text-sm text-slate-400 mt-2">
-                  Todas as compras, estornos e faturas vinculadas a este cartÃ£o tambÃ©m serÃ£o removidas permanentemente.
+                  Todas as compras, estornos e faturas vinculadas a este cartão também serão removidas permanentemente.
                 </p>
               </div>
             </div>
           </ModalBody>
           <ModalFooter>
             <GlassButton type="button" variant="ghost" onClick={() => setDeletingCardId(null)}>Cancelar</GlassButton>
-            <GlassButton type="button" variant="danger" onClick={confirmDeleteCard}>Confirmar ExclusÃ£o</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={confirmDeleteCard}>Confirmar Exclusão</GlassButton>
           </ModalFooter>
         </ModalShell>
 
-        <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar CartÃ£o' : 'Novo CartÃ£o'}>
+        <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
             <ModalBody>
                <form id="card-form-details" onSubmit={handleCardSubmit} className="space-y-4">
                   <GlassInput 
-                     label="Nome do CartÃ£o"
+                     label="Nome do Cartão"
                      value={cardForm.name} 
                      onChange={e => setCardForm({...cardForm, name: e.target.value})} 
                      placeholder="Ex: Nubank, Inter..." 
@@ -1151,7 +1151,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   </div>
                   <div>
                      <GlassSelect
-                        label="Conta PadrÃ£o de Pagamento (Opcional)"
+                        label="Conta Padrão de Pagamento (Opcional)"
                         value={cardForm.defaultPaymentAccountId}
                         onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
                         options={[
@@ -1163,7 +1163,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   </div>
                   <div>
                      <GlassSelect
-                        label="Comportamento de AntecipaÃ§Ã£o"
+                        label="Comportamento de Antecipação"
                         value={cardForm.anticipationBehavior}
                         onChange={e => setCardForm({...cardForm, anticipationBehavior: e.target.value as 'credit' | 'discount'})}
                         options={[
@@ -1173,7 +1173,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do CartÃ£o</label>
+                    <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do Cartão</label>
                     <div className="flex flex-wrap gap-2 px-1">
                       {CARD_COLORS.map(color => (
                         <button
@@ -1192,7 +1192,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             </ModalBody>
             <ModalFooter>
               <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
-              <GlassButton type="submit" form="card-form-details">Salvar CartÃ£o</GlassButton>
+              <GlassButton type="submit" form="card-form-details">Salvar Cartão</GlassButton>
             </ModalFooter>
         </ModalShell>
 
@@ -1235,10 +1235,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   return (
     <PageShell>
       <PageHeader 
-        title="Meus CartÃµes" 
-        subtitle="Gerencie faturas e limites dos seus cartÃµes de crÃ©dito."
+        title="Meus Cartões" 
+        subtitle="Gerencie faturas e limites dos seus cartões de crédito."
         actions={
-          <GlassButton onClick={() => openCardModal()} icon={<Plus size={18}/>} className="hidden md:flex">Novo CartÃ£o</GlassButton>
+          <GlassButton onClick={() => openCardModal()} icon={<Plus size={18}/>} className="hidden md:flex">Novo Cartão</GlassButton>
         }
       />
 
@@ -1277,7 +1277,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                
              <div className="relative z-10 mt-auto pt-4 border-t border-white/5">
                 <span className="text-sm font-semibold text-blue-400 group-hover:text-blue-300 flex items-center gap-1 transition-colors">
-                  Ver Fatura e LanÃ§amentos <ChevronRight size={16}/>
+                  Ver Fatura e Lançamentos <ChevronRight size={16}/>
                 </span>
              </div>
           </GlassCard>
@@ -1286,18 +1286,18 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         {cards.length === 0 && (
            <div className="col-span-full text-center py-10 text-slate-500 border-2 border-dashed border-white/10 rounded-2xl bg-white/5">
              <CardIcon size={48} className="mx-auto mb-4 opacity-20" />
-             <p className="text-lg font-medium">Nenhum cartÃ£o cadastrado.</p>
-             <p className="text-sm opacity-70">Adicione um cartÃ£o para controlar seus gastos a crÃ©dito.</p>
+             <p className="text-lg font-medium">Nenhum cartão cadastrado.</p>
+             <p className="text-sm opacity-70">Adicione um cartão para controlar seus gastos a crédito.</p>
            </div>
         )}
       </div>
 
       {/* Add/Edit Card Modal */}
-      <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar CartÃ£o' : 'Novo CartÃ£o'}>
+      <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
         <ModalBody>
            <form id="card-form-list" onSubmit={handleCardSubmit} className="space-y-4">
               <GlassInput 
-                 label="Nome do CartÃ£o"
+                 label="Nome do Cartão"
                  value={cardForm.name} 
                  onChange={e => setCardForm({...cardForm, name: e.target.value})} 
                  placeholder="Ex: Nubank, Inter..." 
@@ -1332,7 +1332,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               </div>
               <div>
                  <GlassSelect
-                    label="Conta PadrÃ£o de Pagamento (Opcional)"
+                    label="Conta Padrão de Pagamento (Opcional)"
                     value={cardForm.defaultPaymentAccountId}
                     onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
                     options={[
@@ -1344,7 +1344,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               </div>
               <div>
                  <GlassSelect
-                    label="Comportamento de AntecipaÃ§Ã£o"
+                    label="Comportamento de Antecipação"
                     value={cardForm.anticipationBehavior}
                     onChange={e => setCardForm({...cardForm, anticipationBehavior: e.target.value as 'credit' | 'discount'})}
                     options={[
@@ -1354,7 +1354,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do CartÃ£o</label>
+                <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do Cartão</label>
                 <div className="flex flex-wrap gap-2 px-1">
                   {CARD_COLORS.map(color => (
                     <button
@@ -1373,7 +1373,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         </ModalBody>
         <ModalFooter>
            <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
-           <GlassButton type="submit" form="card-form-list">Salvar CartÃ£o</GlassButton>
+           <GlassButton type="submit" form="card-form-list">Salvar Cartão</GlassButton>
         </ModalFooter>
       </ModalShell>
 
@@ -1382,7 +1382,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         actions={[
           { 
             id: 'new-card', 
-            label: 'Novo CartÃ£o', 
+            label: 'Novo Cartão', 
             icon: <Plus size={24} />, 
             onClick: () => openCardModal() 
           }
