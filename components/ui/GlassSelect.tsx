@@ -4,7 +4,7 @@ import { Check, ChevronDown, X } from 'lucide-react';
 
 interface SelectOption {
   value: string | number;
-  label: string;
+  label: React.ReactNode;
   disabled?: boolean;
   color?: string;
 }
@@ -37,7 +37,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Find selected label and color
-  let selectedLabel = placeholder;
+  let selectedLabel: React.ReactNode = placeholder;
   let selectedColor: string | undefined = undefined;
   if (value !== undefined && value !== '') {
     if (options) {

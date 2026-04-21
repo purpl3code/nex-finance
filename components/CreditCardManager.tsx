@@ -1,6 +1,7 @@
 
 
 import React, { useState } from 'react';
+import { AppleEmoji } from './ui/AppleEmoji';
 import { CreditCard, CreditCardInvoice, Category, Account, CreditCardTransaction } from '../types';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
@@ -647,7 +648,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   <div key={tx.id} className={`flex justify-between items-center py-2 border-b border-white/5 last:border-0 hover:bg-white/5 px-3 -mx-3 rounded-lg transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={`p-2.5 rounded-xl text-xl shadow-inner border border-white/5 shrink-0 ${isRefund ? 'bg-red-500/10 text-red-400' : 'bg-white/5'}`}>
-                        {isRefund ? <RotateCcw size={20}/> : (categories.find(c => c.id === tx.categoryId)?.emoji || '🛒')}
+                        {isRefund ? <RotateCcw size={20}/> : <AppleEmoji emoji={categories.find(c => c.id === tx.categoryId)?.emoji || '🛒'} />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className={`text-sm font-semibold truncate ${isRefund ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
@@ -920,7 +921,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   onChange={e => setTxForm({...txForm, categoryId: e.target.value})}
                   options={[
                     { value: "", label: "Selecione..." },
-                    ...categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                    ...categories.filter(c => c.kind === 'expense' && c.id !== 'cat_invoice_payment').map(c => ({ value: c.id, label: <span className="flex items-center gap-1.5"><AppleEmoji emoji={c.emoji}/> {c.name}</span> }))
                   ]}
                   required
                />

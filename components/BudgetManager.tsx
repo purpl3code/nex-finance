@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AppleEmoji } from './ui/AppleEmoji';
 import { Budget, Category } from '../types';
 import { GlassInput } from './ui/GlassInput';
 import { GlassButton } from './ui/GlassButton';
@@ -139,7 +140,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
            <div className="flex flex-wrap gap-2">
               {suggestions.map(s => (
                  <button key={s.category.id} onClick={() => { setForm({...form, categoryId: s.category.id}); openModal(); }} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-3 py-2 rounded-xl text-sm text-slate-200 transition-colors border border-white/5">
-                    <span>{s.category.emoji} {s.category.name}</span>
+                    <span><AppleEmoji emoji={s.category.emoji} /> {s.category.name}</span>
                     <span className="text-slate-400 text-xs bg-black/20 px-1.5 py-0.5 rounded-md">Gastou: {formatCurrency(s.spent)}</span>
                     <Plus size={14} className="text-blue-400 ml-1"/>
                  </button>
@@ -161,7 +162,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
              <GlassCard key={budget.id} className="p-6 relative group hover:border-white/10 transition-colors">
                 <div className="flex justify-between items-start mb-4">
                    <div className="flex items-center gap-4">
-                      <div className="text-3xl bg-white/5 p-2 rounded-xl border border-white/5">{category?.emoji}</div>
+                      <div className="text-3xl bg-white/5 p-2 rounded-xl border border-white/5"><AppleEmoji emoji={category?.emoji} /></div>
                       <div>
                          <h3 className="font-semibold text-white">{category?.name}</h3>
                          <div className="text-xs font-bold flex gap-2 mt-1">
@@ -215,7 +216,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                   required
                   options={[
                     { value: '', label: 'Selecione...' },
-                    ...categories.filter(c => c.kind === 'expense').map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                    ...categories.filter(c => c.kind === 'expense').map(c => ({ value: c.id, label: <span className="flex items-center gap-1.5"><AppleEmoji emoji={c.emoji}/> {c.name}</span> }))
                   ]}
                />
                <GlassInput 

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { AppleEmoji } from './ui/AppleEmoji';
 import { Category, CategoryGroup, TransactionType } from '../types';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
@@ -174,7 +175,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
               <GlassCard key={cat.id} className={`p-3 flex items-center justify-between group h-20 md:h-22 transition-all hover:border-white/20 hover:bg-white/5 ${cat.isArchived ? 'opacity-50 grayscale' : ''}`}>
                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-white/5 shrink-0 border border-white/10 shadow-sm" style={{ color: cat.color }}>
-                       {cat.emoji}
+                       <AppleEmoji emoji={cat.emoji} />
                     </div>
                     <div className="min-w-0 flex-1">
                        <div className="flex items-center gap-1.5 min-w-0">
@@ -294,7 +295,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                                       onChange={(e) => setReassignId(e.target.value)}
                                       options={categories
                                          .filter(c => c.id !== targetCategory?.id && c.kind === targetCategory?.kind && !c.isArchived)
-                                         .map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                                         .map(c => ({ value: c.id, label: <span className="flex items-center gap-1.5"><AppleEmoji emoji={c.emoji}/> {c.name}</span> }))
                                       }
                                    />
                                  </div>

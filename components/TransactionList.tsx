@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AppleEmoji } from './ui/AppleEmoji';
 import { Transaction, Category, Account, Transfer } from '../types';
 import { Trash2, Edit2, Search, ArrowRightLeft, Repeat, AlertTriangle } from 'lucide-react';
 import { GlassCard } from './ui/GlassCard';
@@ -77,7 +78,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                          </span>
                       ) : (
                         <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 text-slate-200 border border-white/10 text-xs font-medium">
-                          <span>{getCategory(item.categoryId)?.emoji}</span>
+                          <span><AppleEmoji emoji={getCategory(item.categoryId)?.emoji} /></span>
                           <span>{getCategory(item.categoryId)?.name}</span>
                         </span>
                       )}
@@ -141,7 +142,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl bg-white/5 p-2 rounded-xl border border-white/5">
-                    {isTransfer ? '🔄' : category?.emoji}
+                    <AppleEmoji emoji={isTransfer ? '🔄' : category?.emoji} />
                   </span>
                   <div>
                     <h4 className="font-medium text-white text-sm flex items-center gap-1">

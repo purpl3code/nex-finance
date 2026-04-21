@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { AppleEmoji } from './ui/AppleEmoji';
 import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer, CreditCard } from '../types';
 import { GlassButton } from './ui/GlassButton';
 import { GlassInput } from './ui/GlassInput';
@@ -305,7 +306,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                   label: group,
                   options: (cats as Category[]).map(cat => ({
                     value: cat.id,
-                    label: `${cat.emoji} ${cat.name} ${cat.isArchived ? '(Arquivada)' : ''}`
+                    label: <span className="flex items-center gap-1.5"><AppleEmoji emoji={cat.emoji}/> {cat.name} {cat.isArchived ? '(Arquivada)' : ''}</span>
                   }))
                 }))}
               />

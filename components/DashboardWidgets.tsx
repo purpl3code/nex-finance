@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { AppleEmoji } from './ui/AppleEmoji';
 import { ArrowUp, ArrowDown, CreditCard, Calendar, TrendingUp, AlertTriangle, Info, CheckCircle, ShoppingBag } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip, CartesianGrid } from 'recharts';
 import { MonthlySummary, ForecastSummary, DailyBalance, Insight } from '../selectors/dashboard';
@@ -121,7 +122,7 @@ export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities
               >
                 <div className="flex items-center gap-3 overflow-hidden flex-1 mr-2">
                   <div className="text-xl bg-white/5 p-2.5 rounded-xl shrink-0 border border-white/5 group-hover:border-white/12 group-hover:bg-white/8 transition-all duration-200">
-                    {item.category?.emoji || (item.isCard ? '💳' : '💰')}
+                    <AppleEmoji emoji={item.category?.emoji || (item.isCard ? '💳' : '💰')} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">

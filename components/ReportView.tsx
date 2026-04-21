@@ -1,5 +1,6 @@
 
 import React, { useMemo } from 'react';
+import { AppleEmoji } from './ui/AppleEmoji';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
@@ -135,7 +136,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
       .map(([id, value]) => {
         const cat = categories.find(c => c.id === id);
         return {
-          name: cat ? `${cat.emoji} ${cat.name}` : 'Outros',
+          name: cat ? <span className="flex items-center gap-1.5"><AppleEmoji emoji={cat.emoji}/> {cat.name}</span> : 'Outros',
           value,
           color: cat?.color || '' // Temporary empty color
         };

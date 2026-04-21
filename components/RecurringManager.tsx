@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AppleEmoji } from './ui/AppleEmoji';
 import { RecurringRule, Category, Account, TransactionType, CreditCard } from '../types';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassButton } from './ui/GlassButton';
@@ -245,7 +246,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                   required
                   options={[
                     { value: '', label: 'Selecione...' },
-                    ...categories.filter(c => c.kind === formData.type).map(c => ({ value: c.id, label: `${c.emoji} ${c.name}` }))
+                    ...categories.filter(c => c.kind === formData.type).map(c => ({ value: c.id, label: <span className="flex items-center gap-1.5"><AppleEmoji emoji={c.emoji}/> {c.name}</span> }))
                   ]}
                />
 
