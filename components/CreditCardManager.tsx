@@ -176,7 +176,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         setRawCsvText(text);
         setRawLines([]);
       } else {
-        setRawLines([]); // PDF lines not needed â€” re-read from file if needed
+        setRawLines([]); // PDF lines not needed — re-read from file if needed
         setRawCsvText('');
       }
       setDetectedBank(result.bank);
@@ -184,7 +184,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       if (result.transactions.length === 0) {
         toast.error('Nenhuma compra encontrada. Tente selecionar o banco manualmente ou outro arquivo.');
       } else {
-        toast.success(`${result.transactions.length} compras encontradas â€” ${result.bankName}`);
+        toast.success(`${result.transactions.length} compras encontradas — ${result.bankName}`);
         setImportedTransactions(result.transactions.map(p => ({ ...p, selected: true, categoryId: '' })));
       }
     } catch (err: any) {
@@ -611,17 +611,17 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    {invoiceInfo?.isPaid ? 'Fatura Paga' : 'Fatura Aberta'}
                  </p>
                </div>
-               <div className="flex flex-col md:flex-row gap-3">
+               <div className="flex flex-col md:flex-row gap-3 relative z-20 pointer-events-auto">
                  {!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 && (
                    <GlassButton onClick={() => {
                      setPayAccount(selectedCard.defaultPaymentAccountId || '');
                      setIsPayModalOpen(true);
-                   }} variant="primary" size="lg" className="w-full md:w-auto">Pagar Fatura</GlassButton>
+                   }} variant="primary" size="lg" className="w-full md:w-auto min-h-[48px]">Pagar Fatura</GlassButton>
                  )}
                  <GlassButton onClick={() => {
                    setPayAccount(selectedCard.defaultPaymentAccountId || '');
                    setIsAnticipateModalOpen(true);
-                 }} variant="secondary" size="lg" className="w-full md:w-auto">Antecipar</GlassButton>
+                 }} variant="secondary" size="lg" className="w-full md:w-auto min-h-[48px]">Antecipar</GlassButton>
                </div>
              </div>
              {(selectedCard?.positiveBalance || 0) > 0 && (
@@ -647,7 +647,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   <div key={tx.id} className={`flex justify-between items-center py-2 border-b border-white/5 last:border-0 hover:bg-white/5 px-3 -mx-3 rounded-lg transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={`p-2.5 rounded-xl text-xl shadow-inner border border-white/5 shrink-0 ${isRefund ? 'bg-red-500/10 text-red-400' : 'bg-white/5'}`}>
-                        {isRefund ? <RotateCcw size={20}/> : (categories.find(c => c.id === tx.categoryId)?.emoji || 'ðŸ›’')}
+                        {isRefund ? <RotateCcw size={20}/> : (categories.find(c => c.id === tx.categoryId)?.emoji || '🛒')}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className={`text-sm font-semibold truncate ${isRefund ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
@@ -655,7 +655,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                         </p>
                         <p className="text-slate-500 text-xs mt-0.5 truncate">
                           {new Date(tx.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
-                          {!isRefund && tx.installment.total > 1 && ` â€¢ Parcela ${tx.installment.current}/${tx.installment.total}`}
+                          {!isRefund && tx.installment.total > 1 && ` • Parcela ${tx.installment.current}/${tx.installment.total}`}
                         </p>
                       </div>
                     </div>
@@ -666,15 +666,15 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                         
                         {/* Actions (Only for unpaid invoices and not already refunds) */}
                         {!invoiceInfo.isPaid && !isRefund && (
-                           <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => openRefundModal(tx)} className="p-1.5 text-amber-400 hover:bg-white/10 rounded-lg transition-colors" title="Estornar">
-                                 <RotateCcw size={14} />
+                           <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity relative z-20">
+                              <button onClick={() => openRefundModal(tx)} className="p-2.5 md:p-1.5 text-amber-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Estornar">
+                                 <RotateCcw size={16} className="md:w-3.5 md:h-3.5" />
                               </button>
-                              <button onClick={() => openTxModal(tx)} className="p-1.5 text-blue-400 hover:bg-white/10 rounded-lg transition-colors" title="Editar">
-                                 <Edit2 size={14} />
+                              <button onClick={() => openTxModal(tx)} className="p-2.5 md:p-1.5 text-blue-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Editar">
+                                 <Edit2 size={16} className="md:w-3.5 md:h-3.5" />
                               </button>
-                              <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-white/10 rounded-lg transition-colors" title="Excluir">
-                                 <Trash2 size={14} />
+                              <button onClick={() => handleDeleteTx(tx.id)} className="p-2.5 md:p-1.5 text-red-400 hover:bg-white/10 rounded-lg transition-colors active:scale-95" title="Excluir">
+                                 <Trash2 size={16} className="md:w-3.5 md:h-3.5" />
                               </button>
                            </div>
                         )}
@@ -708,7 +708,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  <div className="bg-[rgb(var(--c-primary-500)/0.08)] border border-[rgb(var(--c-primary-500)/0.2)] text-[rgb(var(--c-primary-300))] p-4 rounded-xl text-sm flex gap-3 items-start">
                    <Sparkles size={20} className="shrink-0 mt-0.5" />
                    <div>
-                     <p className="font-bold mb-0.5">Leitura local â€” sem envio de dados</p>
+                     <p className="font-bold mb-0.5">Leitura local — sem envio de dados</p>
                      <p className="opacity-80 text-xs leading-relaxed">
                        Importe a fatura do seu banco como <strong>PDF</strong> (fatura fechada) ou <strong>CSV</strong> (fatura aberta ou fechada).
                        Compatível com <strong>Nubank, Itaú, Bradesco, Santander, C6, Inter</strong> e outros.
@@ -719,7 +719,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  {/* Bank selector */}
                  <div>
                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-0.5">
-                     Banco do Cartão <span className="text-slate-600 font-normal">(opcional â€” detectado automaticamente)</span>
+                     Banco do Cartão <span className="text-slate-600 font-normal">(opcional — detectado automaticamente)</span>
                    </label>
                    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-2">
                      {SUPPORTED_BANKS.map(bank => (
@@ -740,7 +740,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    </div>
                  </div>
 
-                 {/* Drag & drop zone â€” mobile-safe */}
+                 {/* Drag & drop zone — mobile-safe */}
                  {/* Hidden real file input (works on all platforms) */}
                  <input
                    id="invoice-file-input"
@@ -934,7 +934,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                       label="Parcelas"
                       value={txForm.installments}
                       onChange={e => setTxForm({...txForm, installments: e.target.value})}
-                      options={Array.from({length: 12}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(Ã€ vista)' : ''}` }))}
+                      options={Array.from({length: 12}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(À vista)' : ''}` }))}
                    />
                )}
             </form>

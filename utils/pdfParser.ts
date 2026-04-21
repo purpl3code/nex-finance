@@ -1,5 +1,5 @@
 ﻿/**
- * pdfParser.ts â€” Importação local de faturas (PDF + CSV) â€” Multi-Banco
+ * pdfParser.ts — Importação local de faturas (PDF + CSV) — Multi-Banco
  *
  * 100% no navegador. Sem API de IA, sem dependência externa no bundle.
  *
@@ -588,7 +588,7 @@ export const exportInvoiceAsCsv = (
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
   const rows = [
-    `"Fatura ${cardName} â€” ${monthLabel}"`,
+    `"Fatura ${cardName} — ${monthLabel}"`,
     '',
     '"Data","Descrição","Categoria","Valor"',
     ...transactions.map(tx =>
