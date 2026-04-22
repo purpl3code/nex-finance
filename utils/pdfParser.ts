@@ -1,4 +1,4 @@
-﻿/**
+/**
  * pdfParser.ts — Importação local de faturas (PDF + CSV) — Multi-Banco
  *
  * 100% no navegador. Sem API de IA, sem dependência externa no bundle.
@@ -91,13 +91,29 @@ function buildDate(year: number, month: number, day: number): string {
   return new Date(year, month, day).toISOString().split('T')[0];
 }
 
-const INSTALLMENT_RE = /[\s-]*(\d{1,2}\/\d{1,2})[\s-]*$/;
+// Matches: "Parcela 2 de 6", "Parcela 12 de 18"
+const INSTALLMENT_RE_DE    = /\s*-?\s*[Pp]arcela\s+(\d{1,2})\s+de\s+(\d{1,2})\s*/i;
+// Matches: "Parcela 2/6", "- Parcela 2/6"
+const INSTALLMENT_RE_WORD  = /\s*-?\s*[Pp]arcela\s+(\d{1,2})\/(\d{1,2})\s*/i;
+// Matches simple trailing: "2/6"
+const INSTALLMENT_RE_TRAIL = /[\s-]*(\d{1,2})\/(\d{1,2})[\s-]*$/;
 
 function splitInstallments(desc: string): { description: string; installments?: string } {
-  const m = desc.match(INSTALLMENT_RE);
-  return m
-    ? { description: desc.replace(INSTALLMENT_RE, '').trim(), installments: m[1] }
-    : { description: desc.trim() };
+  let m = desc.match(INSTALLMENT_RE_DE);
+  if (m) {
+    const clean = desc.replace(INSTALLMENT_RE_DE, ' ').trim().replace(/[-\s]+$/, '').replace(/\s{2,}/g, ' ');
+    return { description: clean, installments: `${m[1]}/${m[2]}` };
+  }
+  m = desc.match(INSTALLMENT_RE_WORD);
+  if (m) {
+    const clean = desc.replace(INSTALLMENT_RE_WORD, ' ').trim().replace(/[-\s]+$/, '').replace(/\s{2,}/g, ' ');
+    return { description: clean, installments: `${m[1]}/${m[2]}` };
+  }
+  m = desc.match(INSTALLMENT_RE_TRAIL);
+  if (m) {
+    return { description: desc.replace(INSTALLMENT_RE_TRAIL, '').trim(), installments: `${m[1]}/${m[2]}` };
+  }
+  return { description: desc.trim() };
 }
 
 // â”€â”€â”€ PDF.js loader â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -183,14 +199,28 @@ export function detectBank(lines: string[]): BankId {
 
 // â”€â”€â”€ PDF parsers (per bank) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+// Regex para Nubank PDF:
+// "27 FEV .... 4455 Manual Saude Brasil - Parcela 2/6 R$ 67,50"
+// "27 FEV Cobasi - NuPay - Parcela 2/3 R$ 32,78"
+const NUBANK_CARD_DIGITS_RE = /^[\u2022•\.\s]{0,6}\d{4}\s+/; // "•••• 4455 " or ".... 0646 "
+
 function parseNubank(lines: string[], year: number): ParsedTransaction[] {
-  const re = /^(\d{2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(.*?)\s+(-?\s*\d{1,3}(?:\.\d{3})*,\d{2})$/i;
+  // Primary: explicit R$ prefix in amount
+  const reWithRS  = /^(\d{2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(.*?)\s+R\$\s*(-?\d{1,3}(?:\.\d{3})*,\d{2})$/i;
+  // Fallback: amount without R$ prefix
+  const reFallback = /^(\d{2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(.*?)\s+(-?\s*\d{1,3}(?:\.\d{3})*,\d{2})$/i;
+
   return lines.filter(l => !shouldSkip(l)).flatMap(line => {
-    const m = line.match(re);
+    const m = line.match(reWithRS) ?? line.match(reFallback);
     if (!m) return [];
     const amount = parseAmount(m[4]);
     if (isNaN(amount) || amount <= 0) return [];
-    const { description, installments } = splitInstallments(m[3]);
+    // Clean: remove card digits prefix ("•••• 4455") and trailing "R$" artifact
+    const rawDesc = m[3]
+      .replace(NUBANK_CARD_DIGITS_RE, '')
+      .replace(/\s*R\$\s*$/, '')
+      .trim();
+    const { description, installments } = splitInstallments(rawDesc);
     return [{ id: makeId(), originalText: line, installments,
       date: buildDate(year, MONTH_MAP[m[2].toUpperCase()] ?? 0, parseInt(m[1])), description, amount }];
   });
@@ -293,14 +323,37 @@ function parseGenericPdf(lines: string[], year: number): ParsedTransaction[] {
 
 // â”€â”€â”€ Unified PDF parse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+
+// --- Mercado Pago PDF parser ---
+// Format: "DD/MM DESCRIPTION [Parcela X de Y] R$ amount"
+// e.g.:   "25/04 MERCADOLIVRE*EBAZARCOMBRL Parcela 12 de 18 R$ 49,94"
+//         "01/03 MERCADOLIVRE*MERCADOLI R$ 129,90"
+
+function parseMercadoPago(lines: string[], year: number): ParsedTransaction[] {
+  const reWithRS   = /^(\d{2})\/(\d{2})\s+(.+?)\s+R\$\s*(-?\d{1,3}(?:\.\d{3})*,\d{2})$/i;
+  const reFallback = /^(\d{2})\/(\d{2})\s+(.+?)\s+(-?\d{1,3}(?:\.\d{3})*,\d{2})$/;
+
+  return lines.filter(l => !shouldSkip(l)).flatMap(line => {
+    const n = line.replace(/\s{2,}/g, ' ').trim();
+    const m = n.match(reWithRS) ?? n.match(reFallback);
+    if (!m) return [];
+    const amount = parseAmount(m[4]);
+    if (isNaN(amount) || amount <= 0) return [];
+    const { description, installments } = splitInstallments(m[3]);
+    return [{ id: makeId(), originalText: line, installments,
+      date: buildDate(year, parseInt(m[2]) - 1, parseInt(m[1])), description, amount }];
+  });
+}
+
 export function parseBankTransactions(lines: string[], year: number, bankHint?: BankId): ParseResult {
   const bank = bankHint ?? detectBank(lines);
   const bankInfo = SUPPORTED_BANKS.find(b => b.id === bank) ?? SUPPORTED_BANKS[SUPPORTED_BANKS.length - 1];
 
   let transactions: ParsedTransaction[];
   switch (bank) {
-    case 'nubank':    transactions = parseNubank(lines, year); break;
-    case 'santander': transactions = parseSantander(lines, year); break;
+    case 'nubank':      transactions = parseNubank(lines, year); break;
+    case 'mercadopago': transactions = parseMercadoPago(lines, year); break;
+    case 'santander':   transactions = parseSantander(lines, year); break;
     case 'itau': case 'bradesco': case 'c6': case 'inter':
       transactions = parseSlashDate(lines, year); break;
     default: transactions = parseGenericPdf(lines, year); break;
