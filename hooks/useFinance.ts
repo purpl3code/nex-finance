@@ -178,6 +178,17 @@ export const useFinance = () => {
     touchData();
   }, [touchData]);
 
+  const deleteCategory = useCallback((id: string) => {
+    // Remove from all references (set to empty string / undefined)
+    setTransactions(prev => prev.map(t => t.categoryId === id ? { ...t, categoryId: '' } : t));
+    setCreditCardTransactions(prev => prev.map(t => t.categoryId === id ? { ...t, categoryId: '' } : t));
+    setRecurringRules(prev => prev.map(r => r.categoryId === id ? { ...r, categoryId: '' } : r));
+    setBudgets(prev => prev.filter(b => b.categoryId !== id));
+    // Delete the category itself
+    setCategories(prev => prev.filter(c => c.id !== id));
+    touchData();
+  }, [touchData]);
+
   // --- Transactions ---
   const addTransaction = useCallback((tx: Omit<Transaction, 'id' | 'createdAt'>) => {
     const newTx: Transaction = { ...tx, id: crypto.randomUUID(), createdAt: Date.now() };
@@ -977,7 +988,7 @@ export const useFinance = () => {
     commitRecurringTransactions,
     
     // Category Actions (NEW)
-    addCategory, editCategory, archiveCategory, reassignCategory,
+    addCategory, editCategory, archiveCategory, reassignCategory, deleteCategory,
     
     // Goal Actions
     addGoal, editGoal, toggleArchiveGoal, addValueToGoal, deleteGoal,

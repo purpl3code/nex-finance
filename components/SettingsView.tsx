@@ -49,7 +49,7 @@ export const SettingsView: React.FC = () => {
   const { 
     transactions,
     categories, creditCardTransactions,
-    addCategory, editCategory, archiveCategory, reassignCategory
+    addCategory, editCategory, archiveCategory, reassignCategory, deleteCategory
   } = useFinance();
 
   const { profile, updateName, updateAvatar, removeAvatar } = useUserProfile();
@@ -389,6 +389,7 @@ export const SettingsView: React.FC = () => {
                onEdit={editCategory}
                onArchive={archiveCategory}
                onReassign={reassignCategory}
+               onDelete={deleteCategory}
             />
          </ModalBody>
       </ModalShell>
