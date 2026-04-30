@@ -2,18 +2,13 @@
   <!-- Black rounded background -->
   <rect width="512" height="512" rx="115" fill="#000000"/>
 
-  <!-- Card peeking from top of wallet -->
-  <rect x="162" y="102" width="175" height="112" rx="36"
-        fill="none" stroke="#ffffff" stroke-width="32"
-        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Main wallet rectangle -->
+  <rect x="96" y="188" width="320" height="200" rx="30" fill="none" stroke="#ffffff" stroke-width="26" stroke-linejoin="round"/>
 
-  <!-- Main wallet body -->
-  <rect x="84" y="182" width="344" height="218" rx="46"
-        fill="none" stroke="#ffffff" stroke-width="34"
-        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Wallet top flap / card area -->
+  <rect x="144" y="130" width="196" height="106" rx="22" fill="none" stroke="#ffffff" stroke-width="22" stroke-linejoin="round"/>
 
-  <!-- Coin pocket – clean circle, no fill dot -->
-  <circle cx="362" cy="291" r="33"
-          fill="none" stroke="#ffffff" stroke-width="28"
-          stroke-linecap="round"/>
+  <!-- Coin pocket / clasp on right side -->
+  <circle cx="360" cy="288" r="34" fill="none" stroke="#ffffff" stroke-width="22"/>
+  <circle cx="360" cy="288" r="12" fill="#ffffff"/>
 </svg>
