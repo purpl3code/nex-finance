@@ -1,18 +1,15 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Black background -->
-  <rect width="512" height="512" rx="110" fill="#000000"/>
+  <!-- Black rounded background -->
+  <rect width="512" height="512" rx="115" fill="#000000"/>
 
-  <!-- Wallet body — white/light grey on black, minimalist -->
+  <!-- Wallet body — thick white strokes, slightly smaller/centered -->
   <!-- Main wallet rectangle -->
-  <rect x="80" y="172" width="352" height="228" rx="26" fill="none" stroke="#e2e8f0" stroke-width="14"/>
+  <rect x="96" y="188" width="320" height="200" rx="30" fill="none" stroke="#ffffff" stroke-width="26" stroke-linejoin="round"/>
 
-  <!-- Wallet top flap area (card sticking out above) -->
-  <rect x="130" y="118" width="210" height="110" rx="18" fill="none" stroke="#e2e8f0" stroke-width="11"/>
+  <!-- Wallet top flap / card area -->
+  <rect x="144" y="130" width="196" height="106" rx="22" fill="none" stroke="#ffffff" stroke-width="22" stroke-linejoin="round"/>
 
-  <!-- Card horizontal stripe (chip line) -->
-  <rect x="158" y="164" width="42" height="30" rx="7" fill="#e2e8f0" opacity="0.9"/>
-
-  <!-- Clasp / coin pocket on the right edge of wallet -->
-  <circle cx="368" cy="286" r="38" fill="none" stroke="#e2e8f0" stroke-width="11"/>
-  <circle cx="368" cy="286" r="16" fill="#e2e8f0" opacity="0.85"/>
+  <!-- Coin pocket / clasp on right side -->
+  <circle cx="360" cy="288" r="34" fill="none" stroke="#ffffff" stroke-width="22"/>
+  <circle cx="360" cy="288" r="12" fill="#ffffff"/>
 </svg>
