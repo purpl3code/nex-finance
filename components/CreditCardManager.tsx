@@ -43,7 +43,7 @@ interface CreditCardManagerProps {
   accounts: Account[];
   onAddCard: (card: any) => void;
   onDeleteCard: (id: string) => void;
-  onAddTransaction: (tx: any, installments: number) => void;
+  onAddTransaction: (tx: any, installments: number, installmentStart?: number, installmentTotal?: number) => void;
   onEditTransaction?: (id: string, updates: any) => void;
   onDeleteTransaction?: (id: string) => void;
   onAddRefund?: (originalTx: CreditCardTransaction, amount: number, date: string, desc: string) => void;
@@ -286,7 +286,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
           date: tx.date,
           categoryId: tx.categoryId,
           description: tx.description,
-        }, remaining);
+        }, remaining, inst.current, inst.total);
         totalInstallmentsCreated += remaining;
       } else {
         // Compra à vista ou parcela única

@@ -334,10 +334,18 @@ export const useFinance = () => {
 
   const addCreditCardTransaction = useCallback((
     tx: Omit<CreditCardTransaction, 'id' | 'createdAt' | 'installment' | 'type'>, 
-    installments: number
+    installments: number,
+    installmentStart: number = 1,
+    installmentTotal: number = installments
   ) => {
+    // installmentStart: the number of the first installment being created (default 1)
+    // installmentTotal: the real total number of installments in the purchase (default = installments count)
+    // Example: importing "Parcela 6 de 24" with 19 remaining:
+    //   installments = 19, installmentStart = 6, installmentTotal = 24
+    //   → creates transactions labeled 6/24, 7/24, ..., 24/24
     const baseDate = new Date(tx.date + 'T12:00:00');
     const newTxs: CreditCardTransaction[] = [];
+    const amountPerInstallment = tx.amount / installments;
 
     for (let i = 0; i < installments; i++) {
       const txDate = addMonths(baseDate, i);
@@ -346,8 +354,8 @@ export const useFinance = () => {
         ...tx,
         type: 'purchase',
         date: dateStr,
-        amount: tx.amount / installments, 
-        installment: { current: i + 1, total: installments },
+        amount: amountPerInstallment, 
+        installment: { current: installmentStart + i, total: installmentTotal },
         id: crypto.randomUUID(),
         createdAt: Date.now() + i,
       });
