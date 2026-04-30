@@ -361,7 +361,6 @@ const App: React.FC = () => {
                   <PageHeader 
                     title="Dashboard" 
                     subtitle="Visão geral das suas finanças neste mês."
-                    icon={<LayoutDashboard />}
                     actions={
                       <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={18} />} className="hidden md:flex">
                         Nova Movimentação
@@ -407,7 +406,6 @@ const App: React.FC = () => {
                    <PageHeader 
                       title="Extrato" 
                       subtitle="Histórico completo de transações e transferências."
-                      icon={<ListIcon />}
                       controls={
                         <>
                           <MonthSelector />
