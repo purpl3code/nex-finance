@@ -325,24 +325,134 @@ function parseGenericPdf(lines: string[], year: number): ParsedTransaction[] {
 
 
 // --- Mercado Pago PDF parser ---
-// Format: "DD/MM DESCRIPTION [Parcela X de Y] R$ amount"
-// e.g.:   "25/04 MERCADOLIVRE*EBAZARCOMBRL Parcela 12 de 18 R$ 49,94"
-//         "01/03 MERCADOLIVRE*MERCADOLI R$ 129,90"
+// The Mercado Pago PDF lists transactions with dates like "DD/MM" (day/month only).
+// Installment purchases from previous months appear with their original purchase month,
+// which can be earlier in the year or even from the previous year.
+//
+// Examples from PDF:
+//   "25/04 MERCADOLIVRE*EBAZARCOMBRL Parcela 13 de 18 R$ 49,94"
+//   "31/10 MERCADOLIVRE*MERCADOLIVRE Parcela 6 de 24 R$ 85,37"  ← Oct, likely prior year
+//   "06/04 Pagamento da fatura de abril/2026 R$ 83,00"           ← SKIP (credit/payment)
+//
+// Year inference rule:
+//   - The invoice month (billingMonth) is derived from the year passed in and the most
+//     common month seen in recent lines (or we infer from the invoice header).
+//   - For any transaction date whose month > billingMonth, it belongs to year - 1.
+
+const MP_SKIP_EXTRA = [
+  'pagamento da fatura', 'pagamentos e créditos', 'pagamentos e creditos',
+  'total da fatura', 'saldo positivo', 'resumo da fatura',
+  'tarifas e encargos', 'multas por atraso', 'juros do mês',
+  'consumos de ', 'informações complementares', 'detalhes de consumo',
+  'movimentações na fatura', 'cartão visa', 'cartão mastercard',
+  'data movimentações', 'data  movimentações', 'vencimento:',
+  'emitido em:', 'limite total', 'limite disponível', 'saque total',
+];
+
+function shouldSkipMP(line: string): boolean {
+  const l = line.toLowerCase();
+  if (shouldSkip(line)) return true;
+  return MP_SKIP_EXTRA.some(p => l.includes(p));
+}
+
+function inferMercadoPagoYear(txMonth: number, billingMonth: number, billingYear: number): number {
+  // If the transaction month is strictly greater than the billing month,
+  // it must belong to the previous year (e.g. Oct purchase in April invoice → year - 1).
+  // Allow equal months (current billing cycle) and earlier months (prior months same year).
+  if (txMonth > billingMonth) return billingYear - 1;
+  return billingYear;
+}
 
 function parseMercadoPago(lines: string[], year: number): ParsedTransaction[] {
+  // Detect the billing month from the PDF content (look for "fatura de <month>" or "Consumos de DD/MM a DD/MM")
+  let billingMonth = -1;
+
+  // Try to find billing month from "Consumos de DD/MM a DD/MM" pattern
+  for (const line of lines) {
+    const mConsume = line.match(/consumos\s+de\s+\d{2}\/(\d{2})\s+a\s+\d{2}\/(\d{2})/i);
+    if (mConsume) {
+      // Use the end month of the consumption period as billing month
+      billingMonth = parseInt(mConsume[2]) - 1; // 0-indexed
+      break;
+    }
+    // Try "fatura de <month name>"
+    const mFatura = line.match(/fatura\s+de\s+(janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)/i);
+    if (mFatura) {
+      const monthNames: Record<string, number> = {
+        janeiro: 0, fevereiro: 1, 'março': 2, abril: 3, maio: 4, junho: 5,
+        julho: 6, agosto: 7, setembro: 8, outubro: 9, novembro: 10, dezembro: 11,
+      };
+      const mn = mFatura[1].toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+      const normalized: Record<string, number> = {
+        janeiro: 0, fevereiro: 1, marco: 2, abril: 3, maio: 4, junho: 5,
+        julho: 6, agosto: 7, setembro: 8, outubro: 9, novembro: 10, dezembro: 11,
+      };
+      if (normalized[mn] !== undefined) { billingMonth = normalized[mn]; break; }
+      if (monthNames[mFatura[1].toLowerCase()] !== undefined) { billingMonth = monthNames[mFatura[1].toLowerCase()]; break; }
+    }
+    // Try "Vencimento: DD/MM/YYYY" or "Vence em DD/MM/YYYY"
+    const mVenc = line.match(/(?:vencimento|vence\s+em)[:\s]+\d{2}\/(\d{2})\/\d{4}/i);
+    if (mVenc) {
+      // Billing month is the month before the due date
+      billingMonth = parseInt(mVenc[1]) - 2; // 0-indexed, one month before
+      if (billingMonth < 0) billingMonth = 11;
+      break;
+    }
+  }
+
+  // Fallback: use current month based on most frequent transaction month
+  // We'll collect all candidate months first, then decide
   const reWithRS   = /^(\d{2})\/(\d{2})\s+(.+?)\s+R\$\s*(-?\d{1,3}(?:\.\d{3})*,\d{2})$/i;
   const reFallback = /^(\d{2})\/(\d{2})\s+(.+?)\s+(-?\d{1,3}(?:\.\d{3})*,\d{2})$/;
 
-  return lines.filter(l => !shouldSkip(l)).flatMap(line => {
+  // If billing month still unknown, count months from non-skipped lines
+  if (billingMonth === -1) {
+    const monthCounts: Record<number, number> = {};
+    for (const line of lines) {
+      if (shouldSkipMP(line)) continue;
+      const n = line.replace(/\s{2,}/g, ' ').trim();
+      const m = n.match(reWithRS) ?? n.match(reFallback);
+      if (m) {
+        const mo = parseInt(m[2]) - 1;
+        monthCounts[mo] = (monthCounts[mo] ?? 0) + 1;
+      }
+    }
+    // Most frequent month = billing month
+    let maxCount = 0;
+    for (const [mo, cnt] of Object.entries(monthCounts)) {
+      if (cnt > maxCount) { maxCount = cnt; billingMonth = parseInt(mo); }
+    }
+  }
+
+  // If still unknown, default to current month
+  if (billingMonth === -1) billingMonth = new Date().getMonth();
+
+  const results: ParsedTransaction[] = [];
+
+  for (const line of lines) {
+    if (shouldSkipMP(line)) continue;
     const n = line.replace(/\s{2,}/g, ' ').trim();
     const m = n.match(reWithRS) ?? n.match(reFallback);
-    if (!m) return [];
+    if (!m) continue;
+
     const amount = parseAmount(m[4]);
-    if (isNaN(amount) || amount <= 0) return [];
+    if (isNaN(amount) || amount <= 0) continue;
+
+    const txMonth = parseInt(m[2]) - 1; // 0-indexed
+    const txYear = inferMercadoPagoYear(txMonth, billingMonth, year);
+
     const { description, installments } = splitInstallments(m[3]);
-    return [{ id: makeId(), originalText: line, installments,
-      date: buildDate(year, parseInt(m[2]) - 1, parseInt(m[1])), description, amount }];
-  });
+    results.push({
+      id: makeId(),
+      originalText: line,
+      installments,
+      date: buildDate(txYear, txMonth, parseInt(m[1])),
+      description,
+      amount,
+    });
+  }
+
+  return results;
 }
 
 export function parseBankTransactions(lines: string[], year: number, bankHint?: BankId): ParseResult {
