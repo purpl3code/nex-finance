@@ -268,28 +268,31 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       toast.error('Selecione pelo menos uma compra para importar.');
       return;
     }
-    
+
     let totalInstallmentsCreated = 0;
 
     toImport.forEach(tx => {
       const inst = parseInstallmentStr(tx.installments);
 
       if (inst && inst.total > 1) {
-        // Parcelas restantes a criar (da atual até a última)
-        const remaining = inst.total - inst.current + 1;
-        // tx.amount já é o valor de UMA parcela; reconstruímos o total para que
-        // addCreditCardTransaction divida igualmente entre as parcelas restantes.
-        const totalAmount = tx.amount * remaining;
-        onAddTransaction({
-          cardId: selectedCardId,
-          amount: totalAmount,
-          date: tx.date,
-          categoryId: tx.categoryId,
-          description: tx.description,
-        }, remaining, inst.current, inst.total);
-        totalInstallmentsCreated += remaining;
+        // Cria TODAS as parcelas a partir da data original da compra no PDF.
+        // Ex: 31/10/2025 Parcela 6/24 → cria 24 parcelas começando em 31/10/2025.
+        const totalAmount = tx.amount * inst.total;
+        onAddTransaction(
+          {
+            cardId: selectedCardId,
+            amount: totalAmount,
+            date: tx.date,     // data original da compra
+            categoryId: tx.categoryId,
+            description: tx.description,
+          },
+          inst.total,   // cria TODAS as parcelas
+          1,            // sempre começa da parcela 1
+          inst.total
+        );
+        totalInstallmentsCreated += inst.total;
       } else {
-        // Compra à vista ou parcela única
+        // Compra à vista
         onAddTransaction({
           cardId: selectedCardId,
           amount: tx.amount,

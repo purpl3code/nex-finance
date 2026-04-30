@@ -333,36 +333,57 @@ export const useFinance = () => {
   }, [touchData]);
 
   const addCreditCardTransaction = useCallback((
-    tx: Omit<CreditCardTransaction, 'id' | 'createdAt' | 'installment' | 'type'>, 
+    tx: Omit<CreditCardTransaction, 'id' | 'createdAt' | 'installment' | 'type'>,
     installments: number,
     installmentStart: number = 1,
     installmentTotal: number = installments
   ) => {
-    // installmentStart: the number of the first installment being created (default 1)
-    // installmentTotal: the real total number of installments in the purchase (default = installments count)
-    // Example: importing "Parcela 6 de 24" with 19 remaining:
-    //   installments = 19, installmentStart = 6, installmentTotal = 24
-    //   → creates transactions labeled 6/24, 7/24, ..., 24/24
-    const baseDate = new Date(tx.date + 'T12:00:00');
+    const card       = creditCards.find(c => c.id === tx.cardId);
+    const closingDay = card?.closingDay ?? 15;
+    const dueDay     = card?.dueDay    ?? 10;
+    const baseDate   = new Date(tx.date + 'T12:00:00');
+
+    // Step 1: find which invoice the purchase date belongs to
+    let firstInvMonth = baseDate.getMonth();
+    let firstInvYear  = baseDate.getFullYear();
+
+    for (let attempt = 0; attempt < 4; attempt++) {
+      let cM = firstInvMonth, cY = firstInvYear;
+      if (dueDay < closingDay) { cM--; if (cM < 0) { cM = 11; cY--; } }
+      const days = getDaysInMonth(new Date(cY, cM, 1));
+      const cd   = new Date(cY, cM, Math.min(closingDay, days), 23, 59);
+      if (cd >= baseDate) break;
+      firstInvMonth++;
+      if (firstInvMonth > 11) { firstInvMonth = 0; firstInvYear++; }
+    }
+
+    // Step 2: create one transaction per invoice month, using day 15
+    // of the closing month. Day 15 always falls inside the invoice window.
     const newTxs: CreditCardTransaction[] = [];
-    const amountPerInstallment = tx.amount / installments;
+    const amt = tx.amount / installments;
 
     for (let i = 0; i < installments; i++) {
-      const txDate = addMonths(baseDate, i);
-      const dateStr = format(txDate, 'yyyy-MM-dd');
+      const total = firstInvMonth + i;
+      const invYear  = firstInvYear + Math.floor(total / 12);
+      const invMonth = total % 12;
+
+      // The closing month for this invoice
+      let cM = invMonth, cY = invYear;
+      if (dueDay < closingDay) { cM--; if (cM < 0) { cM = 11; cY--; } }
+
+      const dateStr = format(new Date(cY, cM, 15), 'yyyy-MM-dd');
+
       newTxs.push({
-        ...tx,
-        type: 'purchase',
-        date: dateStr,
-        amount: amountPerInstallment, 
+        ...tx, type: 'purchase', date: dateStr, amount: amt,
         installment: { current: installmentStart + i, total: installmentTotal },
-        id: crypto.randomUUID(),
-        createdAt: Date.now() + i,
+        id: crypto.randomUUID(), createdAt: Date.now() + i,
       });
     }
     setCreditCardTransactions(prev => [...newTxs, ...prev]);
     touchData();
-  }, [touchData]);
+  }, [creditCards, touchData]);
+
+
 
   // New: Edit Credit Card Transaction
   const editCreditCardTransaction = useCallback((id: string, updates: Partial<CreditCardTransaction>) => {
