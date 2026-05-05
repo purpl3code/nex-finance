@@ -21,7 +21,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   const baseStyles = `
     relative inline-flex items-center justify-center rounded-xl font-semibold 
     transition-all duration-200 active:scale-[0.97] outline-none 
-    disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group
+    disabled:opacity-50 disabled:cursor-not-allowed group
     focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent
   `;
   
@@ -37,7 +37,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
     secondary: `
       glass-sm hover:bg-white/10 
       text-slate-200 
-      border border-white/12 hover:border-white/22
+      border border-white/10 hover:border-white/20
       hover:shadow-lg
       focus-visible:ring-white/40
     `,
@@ -56,7 +56,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       focus-visible:ring-emerald-500/50
     `,
     ghost: `
-      hover:bg-white/6 
+      hover:bg-white/5 
       text-slate-400 hover:text-white
       focus-visible:ring-white/30
     `,
@@ -75,23 +75,23 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       disabled={disabled || isLoading}
       {...props}
     >
-      {/* Shimmer sweep on hover (primary only) */}
+      {/* Decorative effects clipped to button shape */}
       {variant === 'primary' && (
-        <span 
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent 
-                     -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"
-        />
-      )}
-
-      {/* Top highlight line */}
-      {variant === 'primary' && (
-        <span className="absolute top-0 inset-x-4 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+        <span className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+          {/* Shimmer sweep on hover */}
+          <span 
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent 
+                       -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+          />
+          {/* Top highlight line */}
+          <span className="absolute top-0 inset-x-4 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        </span>
       )}
       
       {isLoading ? (
-        <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+        <Loader2 className="h-4 w-4 animate-spin shrink-0 relative z-10" />
       ) : icon ? (
-        <span className="shrink-0 flex items-center">{icon}</span>
+        <span className="shrink-0 flex items-center relative z-10">{icon}</span>
       ) : null}
       
       {children && (
