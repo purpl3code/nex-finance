@@ -201,8 +201,42 @@ export const SettingsView: React.FC = () => {
     }
   };
 
-  const handleClearAllData = () => {
-    localStorage.clear();
+  const handleClearAllData = async () => {
+    // 1. Clear local storage immediately
+    StorageService.clear();
+
+    // 2. If the user is logged in, also wipe their cloud data so that
+    //    SyncService.initialize() on the next load doesn't restore the old data.
+    try {
+      if (!isDemoMode()) {
+        const { data: authData } = await supabase.auth.getSession();
+        if (authData?.session) {
+          const { SyncService } = await import('../services/syncService');
+          const { INITIAL_CATEGORIES, INITIAL_ACCOUNTS } = await import('../constants');
+          const emptyData = {
+            version: 11,
+            transactions: [],
+            categories: INITIAL_CATEGORIES,
+            accounts: INITIAL_ACCOUNTS,
+            creditCards: [],
+            creditCardTransactions: [],
+            creditCardInvoices: [],
+            transfers: [],
+            recurringRules: [],
+            budgets: [],
+            investmentAccounts: [],
+            assets: [],
+            positions: [],
+            investmentMovements: [],
+            goals: [],
+          } as any;
+          await SyncService.pushToCloud(emptyData, authData.session.user.id);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not clear cloud data:', e);
+    }
+
     window.location.reload();
   };
 
