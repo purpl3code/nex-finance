@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { Transaction, Category, Account, Transfer } from '../types';
 import { Trash2, Edit2, Search, ArrowRightLeft, Repeat, AlertTriangle } from 'lucide-react';
+import { EmptyState } from './ui/EmptyState';
 import { GlassCard } from './ui/GlassCard';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
@@ -36,13 +37,11 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
 
   if (transactions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center text-slate-500">
-        <div className="bg-white/5 p-4 rounded-full mb-4 border border-white/5">
-          <Search size={32} className="opacity-50" />
-        </div>
-        <h3 className="text-lg font-medium text-slate-300 mb-1">Nenhuma movimentação encontrada</h3>
-        <p className="max-w-xs mx-auto">Tente ajustar os filtros ou adicione uma nova transação.</p>
-      </div>
+      <EmptyState
+        variant="transactions"
+        title="Nenhuma movimentação encontrada"
+        description="Tente ajustar os filtros ou adicione uma nova transação para começar."
+      />
     );
   }
 

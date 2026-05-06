@@ -8,6 +8,7 @@ import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GoalCard } from './GoalCard';
 import { Plus, Target, AlertTriangle } from 'lucide-react';
+import { EmptyState } from './ui/EmptyState';
 
 interface GoalManagerProps {
   goals: Goal[];
@@ -123,17 +124,19 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
 
       <div className="border-b border-white/10 mb-4">
          <div className="flex gap-4">
-            <button onClick={() => setActiveTab('active')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'active' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Em Aberto</button>
-            <button onClick={() => setActiveTab('archived')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'archived' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Arquivadas</button>
+            <button onClick={() => setActiveTab('active')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'active' ? 'border-[rgb(var(--c-primary-500))] text-[rgb(var(--c-primary-400))]' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Em Aberto</button>
+            <button onClick={() => setActiveTab('archived')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'archived' ? 'border-[rgb(var(--c-primary-500))] text-[rgb(var(--c-primary-400))]' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Arquivadas</button>
          </div>
       </div>
 
       {displayedGoals.length === 0 ? (
-        <div className="text-center py-20 bg-white/5 border border-white/10 border-dashed rounded-2xl backdrop-blur-md">
-           <Target size={48} className="mx-auto text-slate-500 mb-4 opacity-50" />
-           <p className="text-slate-300 text-lg font-medium">Nenhuma meta {activeTab === 'active' ? 'ativa' : 'arquivada'} encontrada.</p>
-           {activeTab === 'active' && <p className="text-slate-400 text-sm mt-1">Crie sua primeira meta para começar a poupar.</p>}
-        </div>
+        <EmptyState
+          variant="goals"
+          title={`Nenhuma meta ${activeTab === 'active' ? 'ativa' : 'arquivada'} encontrada.`}
+          description={activeTab === 'active' ? 'Defina metas de poupança e acompanhe seu progresso até conquistá-las.' : undefined}
+          actionLabel={activeTab === 'active' ? 'Criar Primeira Meta' : undefined}
+          onAction={activeTab === 'active' ? () => handleOpenForm() : undefined}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayedGoals.map(goal => (
@@ -209,7 +212,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
                <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1 ml-1">Descrição (Opcional)</label>
                   <textarea 
-                     className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white h-20 resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                     className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white h-20 resize-none focus:border-[rgb(var(--c-primary-500))] focus:ring-1 focus:ring-[rgb(var(--c-primary-500))] outline-none transition-all" 
                      value={formData.description} 
                      onChange={e => setFormData({...formData, description: e.target.value})} 
                   />
@@ -226,7 +229,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
       <ModalShell isOpen={isAddValueModalOpen} onClose={() => setIsAddValueModalOpen(false)} title="Adicionar Valor">
          <ModalBody>
             <form id="add-value-form" onSubmit={handleSubmitAddValue} className="space-y-4">
-               <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-200">
+               <div className="p-4 bg-[rgb(var(--c-primary-500)/0.1)] border border-[rgb(var(--c-primary-500)/0.2)] rounded-xl text-sm text-[rgb(var(--c-primary-200))]">
                   Isso apenas atualiza o saldo da meta. Não cria uma transação no extrato.
                </div>
                <GlassInput 

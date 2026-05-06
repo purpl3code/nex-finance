@@ -10,6 +10,7 @@ import { MobileFab } from './ui/MobileFab';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
 import { PieChart, Trash2, Edit2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
+import { EmptyState } from './ui/EmptyState';
 
 interface BudgetManagerProps {
   budgets: Budget[];
@@ -172,7 +173,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                          </div>
                       </div>
                    </div>
-                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button onClick={() => openModal(budget)} className="p-2 text-blue-400 hover:bg-white/10 rounded-lg transition-colors"><Edit2 size={16}/></button>
                       <button onClick={() => setDeletingBudgetId(budget.id)} className="p-2 text-red-400 hover:bg-white/10 rounded-lg transition-colors"><Trash2 size={16}/></button>
                    </div>
@@ -197,11 +198,13 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
       </div>
       
       {sortedBudgets.length === 0 && (
-         <div className="text-center py-20 bg-white/5 border border-white/10 border-dashed rounded-2xl backdrop-blur-md">
-            <PieChart size={48} className="mx-auto mb-4 opacity-50 text-slate-500" />
-            <p className="text-lg font-medium text-slate-300">Nenhum orçamento definido para este mês.</p>
-            <p className="text-sm text-slate-400 mt-1">Crie orçamentos para acompanhar seus gastos por categoria.</p>
-         </div>
+         <EmptyState
+           variant="budgets"
+           title="Nenhum orçamento definido para este mês."
+           description="Defina limites de gastos por categoria e acompanhe visualmente o quanto já usou."
+           actionLabel="Criar Primeiro Orçamento"
+           onAction={() => openModal()}
+         />
       )}
 
       {/* Modal */}

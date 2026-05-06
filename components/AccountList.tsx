@@ -9,6 +9,7 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { Building2, Wallet, Banknote, Edit2, Trash2, Plus, Lock, AlertTriangle } from 'lucide-react';
+import { EmptyState } from './ui/EmptyState';
 
 interface AccountListProps {
   accounts: Account[];
@@ -79,6 +80,14 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
     }
   };
 
+  const getAccentColor = (type: AccountType) => {
+    switch (type) {
+      case 'bank': return 'border-t-blue-500/40';
+      case 'cash': return 'border-t-emerald-500/40';
+      default: return 'border-t-violet-500/40';
+    }
+  };
+
   return (
     <PageShell>
       <PageHeader 
@@ -93,7 +102,7 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         {accounts.map(acc => {
           const balance = getBalance(acc.id);
           return (
-            <GlassCard key={acc.id} className="flex flex-col justify-between group hover:border-white/20 transition-colors">
+            <GlassCard key={acc.id} className={`flex flex-col justify-between group hover:border-white/20 transition-colors border-t-2 ${getAccentColor(acc.type)}`}>
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-white/5 rounded-xl shadow-inner border border-white/5">

@@ -42,7 +42,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
   const getEventIcon = (type: string) => {
     switch(type) {
       case 'transaction': return <div className="p-1.5 bg-white/10 rounded text-slate-300"><Calendar size={14} /></div>;
-      case 'recurring': return <div className="p-1.5 bg-blue-500/10 rounded text-blue-400"><Repeat size={14} /></div>;
+      case 'recurring': return <div className="p-1.5 bg-[rgb(var(--c-primary-500)/0.1)] rounded text-[rgb(var(--c-primary-400))]"><Repeat size={14} /></div>;
       case 'invoice': return <div className="p-1.5 bg-red-500/10 rounded text-red-400"><CreditCard size={14} /></div>;
       case 'transfer_out': return <div className="p-1.5 bg-white/10 rounded text-slate-400"><ArrowRight size={14} /></div>;
       case 'transfer_in': return <div className="p-1.5 bg-white/10 rounded text-slate-400"><ArrowRight size={14} className="rotate-180" /></div>;
@@ -106,23 +106,23 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
               <AreaChart data={forecastData.dailyData}>
                  <defs>
                     <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                       <stop offset="5%" stopColor="rgb(var(--c-primary-400))" stopOpacity={0.3}/>
+                       <stop offset="95%" stopColor="rgb(var(--c-primary-400))" stopOpacity={0}/>
                     </linearGradient>
                  </defs>
-                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
                  <XAxis 
                    dataKey="formattedDate" 
-                   tick={{fontSize: 12, fill: '#94a3b8'}} 
+                   tick={{fontSize: 12, fill: 'rgb(var(--c-text-500))'}} 
                    axisLine={false}
                    tickLine={false}
                    minTickGap={30}
                  />
                  <YAxis 
-                   tick={{fontSize: 12, fill: '#94a3b8'}} 
+                   tick={{fontSize: 12, fill: 'rgb(var(--c-text-500))'}} 
                    axisLine={false}
                    tickLine={false}
-                   tickFormatter={(val) => `R$${val/1000}k`}
+                   tickFormatter={(val) => val === 0 ? 'R$ 0' : Math.abs(val) >= 1000 ? `R$ ${(val/1000).toFixed(0)}k` : `R$ ${val}`}
                  />
                  <Tooltip 
                    contentStyle={{backgroundColor: 'rgb(var(--c-bg-900) / 0.8)', backdropFilter: 'blur(8px)', borderColor: 'rgb(var(--c-text-100) / 0.1)', borderRadius: '12px'}}
@@ -133,7 +133,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                  <Area 
                    type="monotone" 
                    dataKey="balance" 
-                   stroke="#3b82f6" 
+                   stroke="rgb(var(--c-primary-400))" 
                    strokeWidth={3}
                    fillOpacity={1} 
                    fill="url(#colorBalance)" 

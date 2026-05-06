@@ -237,8 +237,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                 className="h-[300px] sm:h-[350px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-xl bg-white/[0.02]"
               >
                 <div className="relative w-24 h-24 mb-4">
-                  <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-soft-pulse"></div>
-                  <Wallet size={48} className="absolute inset-0 m-auto text-blue-400 opacity-80" />
+                  <div className="absolute inset-0 bg-[rgb(var(--c-primary-500)/0.2)] rounded-full animate-soft-pulse"></div>
+                  <Wallet size={48} className="absolute inset-0 m-auto text-[rgb(var(--c-primary-400))] opacity-80" />
                 </div>
                 <p className="font-semibold text-slate-300">Nenhuma despesa ainda!</p>
                 <p className="text-xs text-slate-400 mt-1 max-w-[200px] text-center">Que tal começar a registrar suas finanças neste mês?</p>

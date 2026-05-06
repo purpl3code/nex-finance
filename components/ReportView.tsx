@@ -20,6 +20,7 @@ import {
   BarChart3, Calendar, ArrowUpRight, ArrowDownRight, 
   DollarSign, Activity, Target, Printer
 } from 'lucide-react';
+import { AnimatedNumber } from './ui/AnimatedNumber';
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -266,7 +267,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Entradas</p>
-                <h3 className="text-2xl font-bold text-emerald-400 mt-1">{formatCurrency(stats.income)}</h3>
+                <h3 className="text-2xl font-bold text-emerald-400 mt-1"><AnimatedNumber value={stats.income} format={(v) => formatCurrency(v)} /></h3>
                 <div className={`flex items-center gap-1 mt-2 text-xs ${incomeChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {incomeChange >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                   <span>{Math.abs(incomeChange).toFixed(1)}% vs mês ant.</span>
@@ -282,7 +283,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Saídas</p>
-                <h3 className="text-2xl font-bold text-red-400 mt-1">{formatCurrency(stats.expense)}</h3>
+                <h3 className="text-2xl font-bold text-red-400 mt-1"><AnimatedNumber value={stats.expense} format={(v) => formatCurrency(v)} /></h3>
                 <div className={`flex items-center gap-1 mt-2 text-xs ${expenseChange <= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {expenseChange <= 0 ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
                   <span>{Math.abs(expenseChange).toFixed(1)}% vs mês ant.</span>
@@ -294,16 +295,16 @@ export const ReportView: React.FC<ReportViewProps> = ({
             </div>
           </GlassCard>
 
-          <GlassCard className="p-4 border-l-4 border-blue-500">
+          <GlassCard className="p-4 border-l-4 border-[rgb(var(--c-primary-500))]">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Resultado</p>
-                <h3 className={`text-2xl font-bold mt-1 ${stats.balance >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
-                  {formatCurrency(stats.balance)}
+                <h3 className={`text-2xl font-bold mt-1 ${stats.balance >= 0 ? 'text-[rgb(var(--c-primary-400))]' : 'text-red-400'}`}>
+                  <AnimatedNumber value={stats.balance} format={(v) => formatCurrency(v)} />
                 </h3>
                 <p className="text-[10px] text-slate-500 mt-2">Diferença entre entrada e saída</p>
               </div>
-              <div className="p-2 bg-blue-500/10 rounded-lg">
+              <div className="p-2 bg-[rgb(var(--c-primary-500)/0.1)] rounded-lg">
                 <Activity size={20} className="text-blue-500" />
               </div>
             </div>
@@ -313,7 +314,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Saldo Final</p>
-                <h3 className="text-2xl font-bold text-amber-400 mt-1">{formatCurrency(finalBalance)}</h3>
+                <h3 className="text-2xl font-bold text-amber-400 mt-1"><AnimatedNumber value={finalBalance} format={(v) => formatCurrency(v)} /></h3>
                 <p className="text-[10px] text-slate-500 mt-2">Total em contas no fim do mês</p>
               </div>
               <div className="p-2 bg-amber-500/10 rounded-lg">
@@ -367,7 +368,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
           {/* Expenses by Category */}
           <GlassCard className="p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-6">
-              <PieChartIcon size={20} className="text-blue-400" />
+              <PieChartIcon size={20} className="text-[rgb(var(--c-primary-400))]" />
               <h3 className="text-lg font-semibold text-white">Gastos por Categoria</h3>
             </div>
             {categoryData.length > 0 ? (
@@ -493,7 +494,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
           {/* Top 5 Categories */}
           <GlassCard className="p-8">
             <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-              <PieChartIcon size={20} className="text-blue-400" />
+              <PieChartIcon size={20} className="text-[rgb(var(--c-primary-400))]" />
               Maiores Gastos por Categoria
             </h3>
             <div className="space-y-4">
@@ -549,10 +550,10 @@ export const ReportView: React.FC<ReportViewProps> = ({
         </div>
 
         {/* Financial Health Tip */}
-        <GlassCard className="p-6 bg-gradient-to-br from-blue-600/20 to-purple-600/20 border-blue-500/30">
+        <GlassCard className="p-6 bg-gradient-to-br from-[rgb(var(--c-primary-600)/0.2)] to-purple-600/20 border-[rgb(var(--c-primary-500)/0.3)]">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-500/20 rounded-2xl">
-              <Target size={32} className="text-blue-400" />
+            <div className="p-3 bg-[rgb(var(--c-primary-500)/0.2)] rounded-2xl">
+              <Target size={32} className="text-[rgb(var(--c-primary-400))]" />
             </div>
             <div>
               <h3 className="text-xl font-bold text-white">Saúde Financeira</h3>

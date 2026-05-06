@@ -11,6 +11,7 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { Repeat, Plus, Trash2, Edit2, Play, CheckCircle, AlertCircle, ToggleLeft, ToggleRight, Calendar, AlertTriangle } from 'lucide-react';
+import { EmptyState } from './ui/EmptyState';
 import { toast } from 'sonner';
 
 interface RecurringManagerProps {
@@ -167,7 +168,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
         {rules.map(rule => (
           <GlassCard key={rule.id} className={`p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition-all ${!rule.isActive ? 'opacity-60' : ''}`}>
              <div className="flex items-center gap-5">
-                <button onClick={() => onToggleRule(rule.id)} className={`transition-colors ${rule.isActive ? 'text-blue-400 hover:text-blue-300' : 'text-slate-600 hover:text-slate-500'}`}>
+                <button onClick={() => onToggleRule(rule.id)} className={`transition-colors ${rule.isActive ? 'text-[rgb(var(--c-primary-400))] hover:text-[rgb(var(--c-primary-300))]' : 'text-slate-600 hover:text-slate-500'}`}>
                    {rule.isActive ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
                 </button>
                 <div>
@@ -199,11 +200,13 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
         ))}
 
         {rules.length === 0 && (
-          <GlassCard className="text-center py-10 border-dashed border-2 border-white/10 bg-transparent">
-             <Repeat size={48} className="mx-auto mb-4 text-slate-600" />
-             <p className="text-lg font-medium text-slate-300">Nenhuma regra cadastrada.</p>
-             <p className="text-sm text-slate-500">Crie regras para lançar contas fixas automaticamente.</p>
-          </GlassCard>
+          <EmptyState
+            variant="recurring"
+            title="Nenhuma regra cadastrada."
+            description="Automatize salários, assinaturas e contas fixas para não precisar lançar todo mês."
+            actionLabel="Criar Primeira Regra"
+            onAction={() => handleOpenForm()}
+          />
         )}
       </div>
 
@@ -338,7 +341,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
          <ModalBody>
             <div className="space-y-4">
                <GlassCard className="flex gap-4 items-center justify-center p-6 bg-white/5 border-white/10">
-                  <Calendar className="text-blue-400" size={24} />
+                  <Calendar className="text-[rgb(var(--c-primary-400))]" size={24} />
                   <div className="flex gap-2 w-full">
                     <div className="flex-1">
                       <GlassSelect 

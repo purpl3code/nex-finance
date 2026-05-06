@@ -25,6 +25,7 @@ import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft, Wal
 import { LoginScreen } from './components/auth/LoginScreen';
 import { MobileFab } from './components/ui/MobileFab';
 import { Toaster } from 'sonner';
+import { useUserProfile } from './hooks/useUserProfile';
 
 // Define valid tabs for type safety
 type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals' | 'reports';
@@ -35,6 +36,7 @@ const VALID_TABS: AppTab[] = [
 
 const App: React.FC = () => {
   const { session, loading: authLoading } = useAuth();
+  const { profile } = useUserProfile();
 
   const { 
     transactions, // Added to props
@@ -359,7 +361,7 @@ const App: React.FC = () => {
               {activeTab === 'dashboard' && (
                 <PageShell>
                   <PageHeader 
-                    title="Dashboard" 
+                    title={(() => { const h = new Date().getHours(); const g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; return profile.displayName && profile.displayName !== 'Usuário' ? `${g}, ${profile.displayName.split(' ')[0]}` : g; })()}
                     subtitle="Visão geral das suas finanças neste mês."
                     actions={
                       <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={18} />} className="hidden md:flex">

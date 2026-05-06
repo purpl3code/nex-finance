@@ -203,7 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-30 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}

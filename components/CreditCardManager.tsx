@@ -13,6 +13,7 @@ import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check, UploadCloud, FileDown, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { EmptyState } from './ui/EmptyState';
 import {
   parseInvoiceFile,
   parseBankTransactions,
@@ -611,7 +612,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  <div className="text-4xl font-bold text-white">
                    {formatCurrency(invoiceInfo?.amount || 0)}
                  </div>
-                 <p className={`text-sm mt-2 font-bold uppercase tracking-wider ${invoiceInfo?.isPaid ? 'text-emerald-400' : 'text-blue-400'}`}>
+                 <p className={`text-sm mt-2 font-bold uppercase tracking-wider ${invoiceInfo?.isPaid ? 'text-emerald-400' : 'text-[rgb(var(--c-primary-400))]'}`}>
                    {invoiceInfo?.isPaid ? 'Fatura Paga' : 'Fatura Aberta'}
                  </p>
                </div>
@@ -1248,7 +1249,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(card => (
-          <GlassCard key={card.id} onClick={() => handleSelectCard(card.id)} className="cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56 hover:border-blue-500/30">
+          <GlassCard key={card.id} onClick={() => handleSelectCard(card.id)} className="cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56 hover:border-[rgb(var(--c-primary-500)/0.3)]">
              {/* Decorative Background */}
              <div className="absolute top-0 right-0 p-6 opacity-[0.03] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
                 <CardIcon size={160} />
@@ -1261,7 +1262,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      {card.color && (
                        <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: card.color }} />
                      )}
-                     <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors">{card.name}</h3>
+                     <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-[rgb(var(--c-primary-400))] transition-colors">{card.name}</h3>
                    </div>
                    <div className="flex gap-2 text-xs text-slate-400 mt-1">
                       <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded">Fecha dia {card.closingDay}</span>
@@ -1280,7 +1281,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
              </div>
                
              <div className="relative z-10 mt-auto pt-4 border-t border-white/5">
-                <span className="text-sm font-semibold text-blue-400 group-hover:text-blue-300 flex items-center gap-1 transition-colors">
+                <span className="text-sm font-semibold text-[rgb(var(--c-primary-400))] group-hover:text-[rgb(var(--c-primary-300))] flex items-center gap-1 transition-colors">
                   Ver Fatura e Lançamentos <ChevronRight size={16}/>
                 </span>
              </div>
@@ -1288,12 +1289,16 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         ))}
         
         {cards.length === 0 && (
-           <div className="col-span-full text-center py-10 text-slate-500 border-2 border-dashed border-white/10 rounded-2xl bg-white/5">
-             <CardIcon size={48} className="mx-auto mb-4 opacity-20" />
-             <p className="text-lg font-medium">Nenhum cartão cadastrado.</p>
-             <p className="text-sm opacity-70">Adicione um cartão para controlar seus gastos a crédito.</p>
-           </div>
-        )}
+           <div className="col-span-full">
+              <EmptyState
+                variant="cards"
+                title="Nenhum cartão cadastrado."
+                description="Adicione um cartão de crédito para acompanhar faturas, limites e compras parceladas."
+                actionLabel="Adicionar Primeiro Cartão"
+                onAction={() => openCardModal()}
+              />
+            </div>
+         )}
       </div>
 
       {/* Add/Edit Card Modal */}

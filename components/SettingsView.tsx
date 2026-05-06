@@ -30,7 +30,7 @@ const SectionCard = ({ title, description, icon, children, danger = false }: any
     className={`overflow-hidden ${danger ? 'border-red-500/30 shadow-red-900/10' : ''}`}
   >
     <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
-      <div className={`shrink-0 p-2.5 sm:p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10'}`}>
+      <div className={`shrink-0 p-2.5 sm:p-3 rounded-xl backdrop-blur-md ${danger ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10' : 'bg-[rgb(var(--c-primary-500)/0.2)] text-[rgb(var(--c-primary-400))] shadow-lg shadow-[rgb(var(--c-primary-500)/0.1)]'}`}>
         {icon}
       </div>
       <div>

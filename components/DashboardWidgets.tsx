@@ -135,7 +135,7 @@ export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities
                         {item.color && (
                           <div className="w-2 h-2 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: item.color }} />
                         )}
-                        <span className={`truncate font-medium ${item.isCard ? 'text-violet-400' : 'text-blue-400'}`}>{item.source}</span>
+                        <span className={`truncate font-medium ${item.isCard ? 'text-violet-400' : 'text-[rgb(var(--c-primary-400))]'}`}>{item.source}</span>
                       </div>
                     </div>
                   </div>
@@ -220,7 +220,7 @@ export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) =>
           className={`p-3.5 rounded-xl border flex gap-3 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 ${
             insight.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15 hover:border-emerald-500/30' :
             insight.type === 'warning' ? 'bg-amber-500/10  border-amber-500/20  hover:bg-amber-500/15  hover:border-amber-500/30' :
-            'bg-blue-500/10   border-blue-500/20   hover:bg-blue-500/15   hover:border-blue-500/30'
+            'bg-[rgb(var(--c-primary-500)/0.1)]   border-[rgb(var(--c-primary-500)/0.2)]   hover:bg-[rgb(var(--c-primary-500)/0.15)]   hover:border-[rgb(var(--c-primary-500)/0.3)]'
           }`}
           style={{ animationDelay: `${idx * 60}ms` }}
         >
