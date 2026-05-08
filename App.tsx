@@ -12,6 +12,7 @@ import { ForecastView } from './components/ForecastView';
 import { BudgetManager } from './components/BudgetManager';
 import { SettingsView } from './components/SettingsView';
 import { GoalManager } from './components/GoalManager';
+import { DebtManager } from './components/DebtManager';
 import { ReportView } from './components/ReportView';
 import { Sidebar } from './components/Sidebar';
 import { ModalShell } from './components/ui/ModalShell';
@@ -28,10 +29,10 @@ import { Toaster } from 'sonner';
 import { useUserProfile } from './hooks/useUserProfile';
 
 // Define valid tabs for type safety
-type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals' | 'reports';
+type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals' | 'reports' | 'debts';
 
 const VALID_TABS: AppTab[] = [
-  'dashboard', 'list', 'accounts', 'cards', 'recurring', 'forecast', 'budgets', 'settings', 'goals', 'reports'
+  'dashboard', 'list', 'accounts', 'cards', 'recurring', 'forecast', 'budgets', 'settings', 'goals', 'reports', 'debts'
 ];
 
 const App: React.FC = () => {
@@ -90,6 +91,14 @@ const App: React.FC = () => {
     toggleArchiveGoal,
     addValueToGoal,
     deleteGoal,
+    // Debts
+    debts,
+    addDebt,
+    editDebt,
+    payDebt,
+    settleDebt,
+    deleteDebt,
+    getTotalActiveDebts,
     loading: dataLoading
   } = useFinance();
 
@@ -383,6 +392,7 @@ const App: React.FC = () => {
                     accounts={accounts}
                     getAccountBalance={getAccountBalance}
                     creditCardStats={creditCardStats}
+                    totalDebts={getTotalActiveDebts()}
                     budgets={budgets}
                     getCategorySpending={getCategorySpending}
                     onNavigateToBudgets={() => setActiveTab('budgets')}
@@ -535,6 +545,17 @@ const App: React.FC = () => {
                   onArchiveGoal={toggleArchiveGoal}
                   onAddValueToGoal={addValueToGoal}
                   onDeleteGoal={deleteGoal}
+                />
+              )}
+
+              {activeTab === 'debts' && (
+                <DebtManager
+                  debts={debts}
+                  onAddDebt={addDebt}
+                  onEditDebt={editDebt}
+                  onPayDebt={payDebt}
+                  onSettleDebt={settleDebt}
+                  onDeleteDebt={deleteDebt}
                 />
               )}
 

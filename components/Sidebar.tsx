@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, List, Wallet, CreditCard, Repeat, 
   TrendingUp, PieChart, Settings, 
-  ChevronDown, X, Target, BarChart3
+  ChevronDown, X, Target, BarChart3, AlertTriangle
 } from 'lucide-react';
 import { SidebarHeader } from './SidebarHeader';
 import { useUserProfile } from '../hooks/useUserProfile';
@@ -182,6 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
       items: [
         { id: 'cards',     label: 'Cartões',     icon: CreditCard },
         { id: 'goals',     label: 'Metas',       icon: Target },
+        { id: 'debts',     label: 'Dívidas',     icon: AlertTriangle },
         { id: 'recurring', label: 'Recorrências', icon: Repeat },
         { id: 'budgets',   label: 'Orçamentos',  icon: PieChart },
         { id: 'forecast',  label: 'Previsão',    icon: TrendingUp },

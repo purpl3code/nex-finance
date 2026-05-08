@@ -71,7 +71,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                     </td>
                     <td className="py-3 whitespace-nowrap">
                       {isTransfer ? (
-                         <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-medium">
+                         <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[rgb(var(--c-primary-500)/0.1)] text-[rgb(var(--c-primary-400))] border border-[rgb(var(--c-primary-500)/0.2)] text-xs font-medium">
                            <ArrowRightLeft size={12} />
                            <span>Transferência</span>
                          </span>
@@ -93,7 +93,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                       ) : (
                         <div className="flex items-center gap-2">
                           {item.generatedByRuleId && (
-                             <span title="Gerado automaticamente" className="text-blue-400"><Repeat size={12} /></span>
+                             <span title="Gerado automaticamente" className="text-[rgb(var(--c-primary-400))]"><Repeat size={12} /></span>
                           )}
                           <span title={item.description} className="text-slate-200">{item.description || '-'}</span>
                         </div>
@@ -108,7 +108,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                       <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => onEdit(item)}
-                          className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
+                          className="p-2 text-[rgb(var(--c-primary-400))] hover:bg-[rgb(var(--c-primary-500)/0.2)] rounded-lg transition-colors"
                           title="Editar"
                         >
                           <Edit2 size={16} />
@@ -137,7 +137,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
           const category = !isTransfer ? getCategory(item.categoryId) : null;
           
           return (
-            <GlassCard key={item.id} className={`p-4 ${isTransfer ? 'border-blue-500/20 bg-blue-500/5' : ''}`}>
+            <GlassCard key={item.id} className={`p-4 ${isTransfer ? 'border-[rgb(var(--c-primary-500)/0.2)] bg-[rgb(var(--c-primary-500)/0.05)]' : ''}`}>
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl bg-white/5 p-2 rounded-xl border border-white/5">
@@ -177,7 +177,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                     variant="ghost"
                     size="sm"
                     onClick={() => onEdit(item)}
-                    className="text-blue-400 hover:text-blue-300 h-8 px-3"
+                    className="text-[rgb(var(--c-primary-400))] hover:text-[rgb(var(--c-primary-300))] h-8 px-3"
                   >
                     <Edit2 size={14} className="mr-1.5" /> Editar
                   </GlassButton>

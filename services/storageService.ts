@@ -3,7 +3,7 @@ import { AppData } from '../types';
 import { STORAGE_KEY, INITIAL_CATEGORIES, INITIAL_ACCOUNTS } from '../constants';
 import { LocalStorageAdapter } from './storageAdapter';
 
-const CURRENT_VERSION = 11;
+const CURRENT_VERSION = 12;
 
 const DEFAULT_DATA: AppData = {
   version: CURRENT_VERSION,
@@ -21,6 +21,7 @@ const DEFAULT_DATA: AppData = {
   positions: [],
   investmentMovements: [],
   goals: [],
+  debts: [],
 };
 
 // We use the adapter instead of direct localStorage calls
@@ -141,6 +142,11 @@ export const StorageService = {
             isSystem: c.isSystem || systemIds.has(c.id),
             color: c.color || undefined
           }));
+        }
+
+        // V11 -> V12 Migration (Debts)
+        if (parsed.version < 12) {
+          parsed.debts = [];
         }
 
         parsed.version = CURRENT_VERSION;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Account, AccountType } from '../types';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
@@ -98,11 +99,12 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-4" initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } }}>
         {accounts.map(acc => {
           const balance = getBalance(acc.id);
           return (
-            <GlassCard key={acc.id} className={`flex flex-col justify-between group hover:border-white/20 transition-colors border-t-2 ${getAccentColor(acc.type)}`}>
+            <motion.div key={acc.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } } }}>
+            <GlassCard className={`flex flex-col justify-between group hover:border-white/20 transition-colors border-t-2 ${getAccentColor(acc.type)}`}>
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-white/5 rounded-xl shadow-inner border border-white/5">
@@ -124,7 +126,7 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                    <button 
                      type="button"
                      onClick={(e) => { e.stopPropagation(); openModal(acc); }} 
-                     className="p-2 text-slate-400 hover:text-blue-400 hover:bg-white/5 rounded-lg transition-colors"
+                     className="p-2 text-slate-400 hover:text-[rgb(var(--c-primary-400))] hover:bg-white/5 rounded-lg transition-colors"
                      title="Editar"
                    >
                      <Edit2 size={16} />
@@ -151,9 +153,10 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                 </p>
               </div>
             </GlassCard>
+            </motion.div>
           )
         })}
-      </div>
+      </motion.div>
 
       <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingAcc ? 'Editar Conta' : 'Nova Conta'}>
         <ModalBody>

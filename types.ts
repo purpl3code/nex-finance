@@ -197,6 +197,22 @@ export interface Goal {
   createdAt: number;
 }
 
+// --- Debt Types (New) ---
+
+export interface Debt {
+  id: string;
+  title: string;
+  description?: string;
+  creditor?: string; // Nome do credor (banco, pessoa, loja, etc.)
+  totalAmount: number; // Valor original da dívida
+  paidAmount: number; // Quanto já foi pago (começa em 0)
+  monthlyPayment: number; // Parcela mensal estimada
+  startDate: string; // YYYY-MM-DD (data de registro)
+  dueDate?: string; // YYYY-MM-DD (prazo final — opcional)
+  isSettled: boolean; // Se já foi quitada
+  createdAt: number;
+}
+
 // -------------------------
 
 export interface AppData {
@@ -219,6 +235,9 @@ export interface AppData {
 
   // Goals
   goals: Goal[];
+
+  // Debts
+  debts: Debt[];
 }
 
 export interface BackupFile {

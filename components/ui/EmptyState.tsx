@@ -4,13 +4,13 @@ import { GlassButton } from './GlassButton';
 import { 
   Search, CreditCard, Target, Repeat, PieChart, 
   TrendingUp, Wallet, List, BarChart3, Settings,
-  Plus
+  Plus, AlertTriangle
 } from 'lucide-react';
 
 type EmptyStateVariant = 
   | 'transactions' | 'cards' | 'goals' | 'recurring' 
   | 'budgets' | 'forecast' | 'accounts' | 'reports' 
-  | 'generic';
+  | 'debts' | 'generic';
 
 interface EmptyStateProps {
   variant?: EmptyStateVariant;
@@ -30,11 +30,12 @@ const iconMap: Record<EmptyStateVariant, React.ReactNode> = {
   forecast: <TrendingUp size={40} />,
   accounts: <Wallet size={40} />,
   reports: <BarChart3 size={40} />,
+  debts: <AlertTriangle size={40} />,
   generic: <Search size={40} />,
 };
 
 const decorativeColors: Record<EmptyStateVariant, { ring: string; glow: string; icon: string }> = {
-  transactions: { ring: 'border-blue-500/20', glow: 'shadow-blue-500/10', icon: 'text-blue-400' },
+  transactions: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[rgb(var(--c-primary-500)/0.1)]', icon: 'text-[rgb(var(--c-primary-400))]' },
   cards: { ring: 'border-violet-500/20', glow: 'shadow-violet-500/10', icon: 'text-violet-400' },
   goals: { ring: 'border-amber-500/20', glow: 'shadow-amber-500/10', icon: 'text-amber-400' },
   recurring: { ring: 'border-cyan-500/20', glow: 'shadow-cyan-500/10', icon: 'text-cyan-400' },
@@ -42,6 +43,7 @@ const decorativeColors: Record<EmptyStateVariant, { ring: string; glow: string; 
   forecast: { ring: 'border-indigo-500/20', glow: 'shadow-indigo-500/10', icon: 'text-indigo-400' },
   accounts: { ring: 'border-teal-500/20', glow: 'shadow-teal-500/10', icon: 'text-teal-400' },
   reports: { ring: 'border-sky-500/20', glow: 'shadow-sky-500/10', icon: 'text-sky-400' },
+  debts: { ring: 'border-rose-500/20', glow: 'shadow-rose-500/10', icon: 'text-rose-400' },
   generic: { ring: 'border-slate-500/20', glow: 'shadow-slate-500/10', icon: 'text-slate-400' },
 };
 

@@ -55,8 +55,8 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
 };
 
 // --- 2. FORECAST CARD ---
-export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBalance: number, creditCardUsedLimit: number }> = ({ summary, totalCurrentBalance, creditCardUsedLimit }) => {
-  const predicted = totalCurrentBalance - summary.pendingRecurring - creditCardUsedLimit;
+export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBalance: number, creditCardUsedLimit: number, totalDebts?: number }> = ({ summary, totalCurrentBalance, creditCardUsedLimit, totalDebts = 0 }) => {
+  const predicted = totalCurrentBalance - summary.pendingRecurring - creditCardUsedLimit - totalDebts;
   const isPositive = predicted >= 0;
 
   return (
@@ -88,7 +88,7 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
           </div>
           <div className="flex justify-between items-center text-xs bg-red-500/5 px-3 py-2 rounded-lg border border-red-500/15 backdrop-blur-sm">
             <span className="text-slate-400">Dívidas e Cartões</span>
-            <span className="text-red-400 font-bold">- {formatCurrency(summary.pendingRecurring + creditCardUsedLimit)}</span>
+            <span className="text-red-400 font-bold">- {formatCurrency(summary.pendingRecurring + creditCardUsedLimit + totalDebts)}</span>
           </div>
         </div>
       </div>

@@ -44,6 +44,7 @@ interface DashboardProps {
   month: number;
   year: number;
   onCardClick?: (cardId: string) => void;
+  totalDebts?: number;
 }
 
 export const Dashboard: React.FC<DashboardProps> = React.memo(({ 
@@ -60,7 +61,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   month,
   year,
   onCardClick,
-  creditCardStats
+  creditCardStats,
+  totalDebts = 0
 }) => {
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -156,7 +158,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
       {/* 1. PREMIUM HEADER: MAIN CARDS */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RemainingBalanceCard summary={monthlySummary} />
-        <ForecastCard summary={forecast} totalCurrentBalance={totalBalance} creditCardUsedLimit={creditCardStats.usedLimit} />
+        <ForecastCard summary={forecast} totalCurrentBalance={totalBalance} creditCardUsedLimit={creditCardStats.usedLimit} totalDebts={totalDebts} />
       </motion.div>
 
       {/* 2. MIDDLE SECTION: GRAPH & INSIGHTS */}

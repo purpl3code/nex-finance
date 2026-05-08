@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { RecurringRule, Category, Account, TransactionType, CreditCard } from '../types';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
@@ -164,9 +165,10 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
         }
       />
 
-      <div className="grid grid-cols-1 gap-4">
+      <motion.div className="grid grid-cols-1 gap-4" initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } }}>
         {rules.map(rule => (
-          <GlassCard key={rule.id} className={`p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition-all ${!rule.isActive ? 'opacity-60' : ''}`}>
+          <motion.div key={rule.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } } }}>
+          <GlassCard className={`p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition-all ${!rule.isActive ? 'opacity-60' : ''}`}>
              <div className="flex items-center gap-5">
                 <button onClick={() => onToggleRule(rule.id)} className={`transition-colors ${rule.isActive ? 'text-[rgb(var(--c-primary-400))] hover:text-[rgb(var(--c-primary-300))]' : 'text-slate-600 hover:text-slate-500'}`}>
                    {rule.isActive ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
@@ -197,6 +199,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                 </div>
              </div>
           </GlassCard>
+          </motion.div>
         ))}
 
         {rules.length === 0 && (
@@ -208,7 +211,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
             onAction={() => handleOpenForm()}
           />
         )}
-      </div>
+      </motion.div>
 
       {/* CREATE/EDIT MODAL */}
       <ModalShell isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={editingRuleId ? 'Editar Regra' : 'Nova Regra'}>

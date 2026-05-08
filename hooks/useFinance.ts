@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement, Goal } from '../types';
+import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement, Goal, Debt } from '../types';
 import { StorageService } from '../services/storageService';
 import { SyncService } from '../services/syncService';
 import { useAuth } from './useAuth';
@@ -31,6 +31,9 @@ export const useFinance = () => {
   // Goals State
   const [goals, setGoals] = useState<Goal[]>([]);
 
+  // Debts State
+  const [debts, setDebts] = useState<Debt[]>([]);
+
   const [loading, setLoading] = useState(true);
 
   // --- PERSISTENCE ---
@@ -53,6 +56,7 @@ export const useFinance = () => {
     setPositions(data.positions || []);
     setInvestmentMovements(data.investmentMovements || []);
     setGoals(data.goals || []);
+    setDebts(data.debts || []);
     setLoading(false);
 
     // Then try to sync with cloud (if logged in)
@@ -75,6 +79,7 @@ export const useFinance = () => {
         setPositions(newData.positions || []);
         setInvestmentMovements(newData.investmentMovements || []);
         setGoals(newData.goals || []);
+        setDebts(newData.debts || []);
       }
     });
   }, [session]);
@@ -83,7 +88,7 @@ export const useFinance = () => {
   useEffect(() => {
     if (!loading && dataVersion > 0) {
       const data = {
-        version: 11, // Current version from StorageService logic
+        version: 12, // Current version from StorageService logic
         transactions,
         categories,
         accounts,
@@ -97,7 +102,8 @@ export const useFinance = () => {
         assets,
         positions,
         investmentMovements,
-        goals
+        goals,
+        debts
       };
       
       // Use SyncService to save locally AND trigger cloud sync
@@ -603,6 +609,53 @@ export const useFinance = () => {
     touchData();
   }, [touchData]);
 
+  // --- DEBTS (New) ---
+  const addDebt = useCallback((debt: Omit<Debt, 'id' | 'createdAt' | 'isSettled'>) => {
+    const newDebt: Debt = {
+      ...debt,
+      id: crypto.randomUUID(),
+      isSettled: false,
+      createdAt: Date.now()
+    };
+    setDebts(prev => [newDebt, ...prev]);
+    touchData();
+  }, [touchData]);
+
+  const editDebt = useCallback((id: string, updates: Partial<Debt>) => {
+    setDebts(prev => prev.map(d => d.id === id ? { ...d, ...updates } : d));
+    touchData();
+  }, [touchData]);
+
+  const payDebt = useCallback((id: string, amount: number) => {
+    setDebts(prev => prev.map(d => {
+      if (d.id !== id) return d;
+      const newPaid = d.paidAmount + amount;
+      const isNowSettled = newPaid >= d.totalAmount;
+      return {
+        ...d,
+        paidAmount: Math.min(newPaid, d.totalAmount),
+        isSettled: isNowSettled
+      };
+    }));
+    touchData();
+  }, [touchData]);
+
+  const settleDebt = useCallback((id: string) => {
+    setDebts(prev => prev.map(d => d.id === id ? { ...d, isSettled: !d.isSettled } : d));
+    touchData();
+  }, [touchData]);
+
+  const deleteDebt = useCallback((id: string) => {
+    setDebts(prev => prev.filter(d => d.id !== id));
+    touchData();
+  }, [touchData]);
+
+  const getTotalActiveDebts = useCallback(() => {
+    return debts
+      .filter(d => !d.isSettled)
+      .reduce((sum, d) => sum + Math.max(0, d.totalAmount - d.paidAmount), 0);
+  }, [debts]);
+
   // --- HEAVY CALCULATORS (Memoized) ---
 
   const getInvestmentAccountBalance = useCallback((accountId: string) => {
@@ -1002,6 +1055,7 @@ export const useFinance = () => {
     transactions, transfers, recurringRules, budgets, categories, accounts,
     creditCards, creditCardTransactions, investmentAccounts, assets, positions, investmentMovements,
     goals,
+    debts,
     loading,
     
     // Actions
@@ -1021,6 +1075,9 @@ export const useFinance = () => {
     
     // Goal Actions
     addGoal, editGoal, toggleArchiveGoal, addValueToGoal, deleteGoal,
+
+    // Debt Actions
+    addDebt, editDebt, payDebt, settleDebt, deleteDebt, getTotalActiveDebts,
 
     // Selectors / Calculators
     getAccountBalance,

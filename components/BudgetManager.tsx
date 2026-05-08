@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { Budget, Category } from '../types';
 import { GlassInput } from './ui/GlassInput';
@@ -143,7 +144,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                  <button key={s.category.id} onClick={() => { setForm({...form, categoryId: s.category.id}); openModal(); }} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-3 py-2 rounded-xl text-sm text-slate-200 transition-colors border border-white/5">
                     <span><AppleEmoji emoji={s.category.emoji} /> {s.category.name}</span>
                     <span className="text-slate-400 text-xs bg-black/20 px-1.5 py-0.5 rounded-md">Gastou: {formatCurrency(s.spent)}</span>
-                    <Plus size={14} className="text-blue-400 ml-1"/>
+                    <Plus size={14} className="text-[rgb(var(--c-primary-400))] ml-1"/>
                  </button>
               ))}
            </div>
@@ -151,7 +152,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
       )}
 
       {/* Budgets List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } }}>
         {sortedBudgets.map(budget => {
            const category = getCategory(budget.categoryId);
            const spent = getCategorySpending(budget.categoryId, selectedMonth, selectedYear);
@@ -160,7 +161,8 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
            const isWarning = percent >= budget.alertAtPercent && !isDanger;
            
            return (
-             <GlassCard key={budget.id} className="p-6 relative group hover:border-white/10 transition-colors">
+             <motion.div key={budget.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } } }}>
+              <GlassCard className="p-6 relative group hover:border-white/10 transition-colors">
                 <div className="flex justify-between items-start mb-4">
                    <div className="flex items-center gap-4">
                       <div className="text-3xl bg-white/5 p-2 rounded-xl border border-white/5"><AppleEmoji emoji={category?.emoji} /></div>
@@ -174,7 +176,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                       </div>
                    </div>
                    <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openModal(budget)} className="p-2 text-blue-400 hover:bg-white/10 rounded-lg transition-colors"><Edit2 size={16}/></button>
+                      <button onClick={() => openModal(budget)} className="p-2 text-[rgb(var(--c-primary-400))] hover:bg-white/10 rounded-lg transition-colors"><Edit2 size={16}/></button>
                       <button onClick={() => setDeletingBudgetId(budget.id)} className="p-2 text-red-400 hover:bg-white/10 rounded-lg transition-colors"><Trash2 size={16}/></button>
                    </div>
                 </div>
@@ -193,9 +195,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                    <div className="text-right text-xs text-slate-500 font-medium">{percent.toFixed(0)}% utilizado</div>
                 </div>
              </GlassCard>
+              </motion.div>
            );
         })}
-      </div>
+      </motion.div>
       
       {sortedBudgets.length === 0 && (
          <EmptyState
