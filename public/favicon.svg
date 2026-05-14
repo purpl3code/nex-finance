@@ -2,13 +2,13 @@
   <!-- Black rounded background -->
   <rect width="512" height="512" rx="115" fill="#000000"/>
 
-  <!-- Main wallet rectangle -->
-  <rect x="96" y="188" width="320" height="200" rx="30" fill="none" stroke="#ffffff" stroke-width="26" stroke-linejoin="round"/>
-
-  <!-- Wallet top flap / card area -->
-  <rect x="144" y="130" width="196" height="106" rx="22" fill="none" stroke="#ffffff" stroke-width="22" stroke-linejoin="round"/>
-
-  <!-- Coin pocket / clasp on right side -->
-  <circle cx="360" cy="288" r="34" fill="none" stroke="#ffffff" stroke-width="22"/>
-  <circle cx="360" cy="288" r="12" fill="#ffffff"/>
+  <!-- Wallet icon (matching Lucide Wallet style) -->
+  <g transform="translate(256,256) scale(1)" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Wallet body -->
+    <rect x="-140" y="-80" width="280" height="190" rx="24" stroke-width="24"/>
+    <!-- Wallet flap -->
+    <path d="M-100,-80 L-100,-110 Q-100,-135 -75,-135 L75,-135 Q100,-135 100,-110 L100,-80" stroke-width="24"/>
+    <!-- Card slot / clasp -->
+    <circle cx="100" cy="15" r="18" stroke-width="20"/>
+  </g>
 </svg>
