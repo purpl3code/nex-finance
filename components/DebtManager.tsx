@@ -344,7 +344,7 @@ export const DebtManager: React.FC<DebtManagerProps> = ({
         </ModalFooter>
       </ModalShell>
 
-      <MobileFab actions={[{ id: 'add-debt', label: 'Nova Dívida', icon: <Plus size={24} />, onClick: () => handleOpenForm() }]} />
+      <MobileFab visible={!isFormModalOpen && !isPayModalOpen && !deletingDebtId} actions={[{ id: 'add-debt', label: 'Nova Dívida', icon: <Plus size={24} />, onClick: () => handleOpenForm() }]} />
     </PageShell>
   );
 };

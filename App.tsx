@@ -297,6 +297,8 @@ const App: React.FC = () => {
         case 'budgets': return 'Orçamentos';
         case 'settings': return 'Configurações';
         case 'goals': return 'Metas';
+        case 'debts': return 'Dívidas';
+        case 'reports': return 'Relatórios';
         default: return 'Nex Finance';
      }
   };
