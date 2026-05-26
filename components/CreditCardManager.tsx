@@ -164,6 +164,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [rawLines, setRawLines] = useState<string[]>([]);
   const [rawCsvText, setRawCsvText] = useState<string>('');
   const [fileFormat, setFileFormat] = useState<'pdf' | 'csv' | null>(null);
+  const [isIEMenuOpen, setIsIEMenuOpen] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -586,17 +587,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <GlassButton onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</GlassButton>
               <GlassButton onClick={() => setDeletingCardId(selectedCard.id)} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" icon={<Trash2 size={16}/>}>Excluir</GlassButton>
-              <div className="relative group/ie">
-                <GlassButton variant="secondary" icon={<ArrowUpDown size={16}/>}>Importar/Exportar</GlassButton>
-                <div className="absolute right-0 top-full mt-1 min-w-[200px] bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden opacity-0 invisible group-hover/ie:opacity-100 group-hover/ie:visible transition-all duration-200 z-50">
-                  <button type="button" onClick={() => setIsImportModalOpen(true)} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition-colors">
-                    <UploadCloud size={16} className="text-[rgb(var(--c-primary-400))]" /> Importar PDF
-                  </button>
-                  <button type="button" onClick={handleExportCsv} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition-colors border-t border-white/5">
-                    <FileDown size={16} className="text-[rgb(var(--c-primary-400))]" /> Exportar CSV
-                  </button>
-                </div>
-              </div>
+              <GlassButton variant="secondary" icon={<ArrowUpDown size={16}/>} onClick={() => setIsIEMenuOpen(true)}>Importar/Exportar</GlassButton>
               <GlassButton onClick={() => openTxModal()} icon={<Plus size={16}/>} className="hidden md:flex">Nova Compra</GlassButton>
             </div>
           </div>
@@ -1124,6 +1115,39 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             <GlassButton type="button" variant="ghost" onClick={() => setDeletingCardId(null)}>Cancelar</GlassButton>
             <GlassButton type="button" variant="danger" onClick={confirmDeleteCard}>Confirmar Exclusão</GlassButton>
           </ModalFooter>
+        </ModalShell>
+
+        <ModalShell isOpen={isIEMenuOpen} onClose={() => setIsIEMenuOpen(false)} title="Importar/Exportar">
+          <ModalBody>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => { setIsIEMenuOpen(false); setIsImportModalOpen(true); }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors text-left"
+              >
+                <div className="p-3 rounded-xl bg-[rgb(var(--c-primary-500)/0.1)] border border-[rgb(var(--c-primary-500)/0.2)]">
+                  <UploadCloud size={22} className="text-[rgb(var(--c-primary-400))]" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold">Importar PDF</p>
+                  <p className="text-slate-400 text-xs mt-0.5">Importar fatura do banco como PDF ou CSV</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => { handleExportCsv(); setIsIEMenuOpen(false); }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors text-left"
+              >
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                  <FileDown size={22} className="text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold">Exportar CSV</p>
+                  <p className="text-slate-400 text-xs mt-0.5">Baixar transações da fatura atual</p>
+                </div>
+              </button>
+            </div>
+          </ModalBody>
         </ModalShell>
 
         <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
