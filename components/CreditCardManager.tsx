@@ -1,4 +1,4 @@
-﻿
+
 
 import React, { useState } from 'react';
 import { AppleEmoji } from './ui/AppleEmoji';
@@ -164,7 +164,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [rawLines, setRawLines] = useState<string[]>([]);
   const [rawCsvText, setRawCsvText] = useState<string>('');
   const [fileFormat, setFileFormat] = useState<'pdf' | 'csv' | null>(null);
-  const [isIEMenuOpen, setIsIEMenuOpen] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -179,7 +178,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         setRawCsvText(text);
         setRawLines([]);
       } else {
-        setRawLines([]); // PDF lines not needed â€” re-read from file if needed
+        setRawLines([]); // PDF lines not needed — re-read from file if needed
         setRawCsvText('');
       }
       setDetectedBank(result.bank);
@@ -187,7 +186,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       if (result.transactions.length === 0) {
         toast.error('Nenhuma compra encontrada. Tente selecionar o banco manualmente ou outro arquivo.');
       } else {
-        toast.success(`${result.transactions.length} compras encontradas â€” ${result.bankName}`);
+        toast.success(`${result.transactions.length} compras encontradas — ${result.bankName}`);
         setImportedTransactions(result.transactions.map(p => ({ ...p, selected: true, categoryId: '' })));
       }
     } catch (err: any) {
@@ -205,7 +204,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (rawCsvText) {
       const result = parseBankCsv(rawCsvText, currentDate.getFullYear(), bankId);
       if (result.transactions.length === 0) {
-        toast.warning('Nenhuma transaÃ§Ã£o encontrada. Tente outro banco.');
+        toast.warning('Nenhuma transação encontrada. Tente outro banco.');
         setImportedTransactions([]);
       } else {
         toast.success(`${result.transactions.length} compras com parser ${result.bankName}`);
@@ -216,7 +215,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (rawLines.length > 0) {
       const result = parseBankTransactions(rawLines, currentDate.getFullYear(), bankId);
       if (result.transactions.length === 0) {
-        toast.warning('Nenhuma transaÃ§Ã£o encontrada. Tente outro banco.');
+        toast.warning('Nenhuma transação encontrada. Tente outro banco.');
         setImportedTransactions([]);
       } else {
         toast.success(`${result.transactions.length} compras com parser ${result.bankName}`);
@@ -239,7 +238,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (!invoiceInfo || !selectedCard) return;
     const txs = (invoiceInfo.transactions as any[]) || [];
     if (txs.length === 0) {
-      toast.error('Nenhuma transaÃ§Ã£o para exportar.');
+      toast.error('Nenhuma transação para exportar.');
       return;
     }
     const mapped = txs.map((tx: any) => ({
@@ -278,7 +277,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
       if (inst && inst.total > 1) {
         // Cria TODAS as parcelas a partir da data original da compra no PDF.
-        // Ex: 31/10/2025 Parcela 6/24 â†’ cria 24 parcelas comeÃ§ando em 31/10/2025.
+        // Ex: 31/10/2025 Parcela 6/24 → cria 24 parcelas começando em 31/10/2025.
         const totalAmount = tx.amount * inst.total;
         onAddTransaction(
           {
@@ -289,12 +288,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             description: tx.description,
           },
           inst.total,   // cria TODAS as parcelas
-          1,            // sempre comeÃ§a da parcela 1
+          1,            // sempre começa da parcela 1
           inst.total
         );
         totalInstallmentsCreated += inst.total;
       } else {
-        // Compra Ã  vista
+        // Compra à vista
         onAddTransaction({
           cardId: selectedCardId,
           amount: tx.amount,
@@ -469,7 +468,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (refundingTx && onAddRefund) {
       const amt = parseFloat(refundForm.amount);
       if (amt > refundingTx.amount) {
-        toast.error('O valor do estorno nÃ£o pode ser maior que o valor da compra.');
+        toast.error('O valor do estorno não pode ser maior que o valor da compra.');
         return;
       }
       onAddRefund(refundingTx, amt, refundForm.date, refundForm.description);
@@ -562,7 +561,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     return (
       <PageShell>
         <button onClick={handleBack} className="flex items-center text-slate-400 hover:text-white mb-4 transition-colors">
-          <ChevronLeft size={16} className="mr-1" /> Voltar para CartÃµes
+          <ChevronLeft size={16} className="mr-1" /> Voltar para Cartões
         </button>
 
         {/* Card Header */}
@@ -579,7 +578,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                 <p className="text-slate-400">Limite: <span className="text-slate-200 font-medium">{formatCurrency(selectedCard.limit)}</span></p>
                 {selectedCard.defaultPaymentAccountId && (
                   <p className="text-slate-500">
-                    Conta PadrÃ£o: {accounts.find(a => a.id === selectedCard.defaultPaymentAccountId)?.name}
+                    Conta Padrão: {accounts.find(a => a.id === selectedCard.defaultPaymentAccountId)?.name}
                   </p>
                 )}
               </div>
@@ -587,21 +586,16 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <GlassButton onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</GlassButton>
               <GlassButton onClick={() => setDeletingCardId(selectedCard.id)} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" icon={<Trash2 size={16}/>}>Excluir</GlassButton>
-              <div className="relative">
-                <GlassButton variant="secondary" icon={<ArrowUpDown size={16}/>} onClick={() => setIsIEMenuOpen(!isIEMenuOpen)}>Importar/Exportar</GlassButton>
-                {isIEMenuOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsIEMenuOpen(false)} />
-                    <div className="absolute right-0 top-full mt-1 min-w-[200px] bg-[rgb(var(--c-bg-900))] backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                      <button type="button" onClick={() => { setIsImportModalOpen(true); setIsIEMenuOpen(false); }} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 active:bg-white/15 transition-colors">
-                        <UploadCloud size={16} className="text-[rgb(var(--c-primary-400))]" /> Importar PDF
-                      </button>
-                      <button type="button" onClick={() => { handleExportCsv(); setIsIEMenuOpen(false); }} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 active:bg-white/15 transition-colors border-t border-white/5">
-                        <FileDown size={16} className="text-[rgb(var(--c-primary-400))]" /> Exportar CSV
-                      </button>
-                    </div>
-                  </>
-                )}
+              <div className="relative group/ie">
+                <GlassButton variant="secondary" icon={<ArrowUpDown size={16}/>}>Importar/Exportar</GlassButton>
+                <div className="absolute right-0 top-full mt-1 min-w-[200px] bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden opacity-0 invisible group-hover/ie:opacity-100 group-hover/ie:visible transition-all duration-200 z-50">
+                  <button type="button" onClick={() => setIsImportModalOpen(true)} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition-colors">
+                    <UploadCloud size={16} className="text-[rgb(var(--c-primary-400))]" /> Importar PDF
+                  </button>
+                  <button type="button" onClick={handleExportCsv} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition-colors border-t border-white/5">
+                    <FileDown size={16} className="text-[rgb(var(--c-primary-400))]" /> Exportar CSV
+                  </button>
+                </div>
               </div>
               <GlassButton onClick={() => openTxModal()} icon={<Plus size={16}/>} className="hidden md:flex">Nova Compra</GlassButton>
             </div>
@@ -651,7 +645,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    <p className="text-lg font-bold">{formatCurrency(selectedCard.positiveBalance || 0)}</p>
                  </div>
                  <p className="text-xs opacity-80 max-w-[200px] text-right">
-                   Este valor serÃ¡ abatido automaticamente no pagamento da prÃ³xima fatura.
+                   Este valor será abatido automaticamente no pagamento da próxima fatura.
                  </p>
                </div>
              )}
@@ -659,7 +653,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
            {/* Transaction List */}
            <div className="p-6 space-y-4">
-             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">TransaÃ§Ãµes da Fatura</h3>
+             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Transações da Fatura</h3>
              {invoiceInfo?.transactions && (invoiceInfo.transactions as any[]).length > 0 ? (
                (invoiceInfo.transactions as any[]).map((tx: CreditCardTransaction) => {
                  const isRefund = tx.type === 'refund';
@@ -667,7 +661,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   <div key={tx.id} className={`flex justify-between items-center py-2 border-b border-white/5 last:border-0 hover:bg-white/5 px-3 -mx-3 rounded-lg transition-colors group ${isRefund ? 'opacity-80' : ''}`}>
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={`p-2.5 rounded-xl text-xl shadow-inner border border-white/5 shrink-0 ${isRefund ? 'bg-red-500/10 text-red-400' : 'bg-white/5'}`}>
-                        {isRefund ? <RotateCcw size={20}/> : <AppleEmoji emoji={categories.find(c => c.id === tx.categoryId)?.emoji || 'ðŸ›’'} />}
+                        {isRefund ? <RotateCcw size={20}/> : <AppleEmoji emoji={categories.find(c => c.id === tx.categoryId)?.emoji || '🛒'} />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className={`text-sm font-semibold truncate ${isRefund ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
@@ -675,7 +669,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                         </p>
                         <p className="text-slate-500 text-xs mt-0.5 truncate">
                           {new Date(tx.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
-                          {!isRefund && tx.installment.total > 1 && ` â€¢ Parcela ${tx.installment.current}/${tx.installment.total}`}
+                          {!isRefund && tx.installment.total > 1 && ` • Parcela ${tx.installment.current}/${tx.installment.total}`}
                         </p>
                       </div>
                     </div>
@@ -728,10 +722,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  <div className="bg-[rgb(var(--c-primary-500)/0.08)] border border-[rgb(var(--c-primary-500)/0.2)] text-[rgb(var(--c-primary-300))] p-4 rounded-xl text-sm flex gap-3 items-start">
                    <Sparkles size={20} className="shrink-0 mt-0.5" />
                    <div>
-                     <p className="font-bold mb-0.5">Leitura local â€” sem envio de dados</p>
+                     <p className="font-bold mb-0.5">Leitura local — sem envio de dados</p>
                      <p className="opacity-80 text-xs leading-relaxed">
                        Importe a fatura do seu banco como <strong>PDF</strong> (fatura fechada) ou <strong>CSV</strong> (fatura aberta ou fechada).
-                       CompatÃ­vel com <strong>Nubank, ItaÃº, Bradesco, Santander, C6, Inter</strong> e outros.
+                       Compatível com <strong>Nubank, Itaú, Bradesco, Santander, C6, Inter</strong> e outros.
                      </p>
                    </div>
                  </div>
@@ -739,7 +733,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  {/* Bank selector */}
                  <div>
                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-0.5">
-                     Banco do CartÃ£o <span className="text-slate-600 font-normal">(opcional â€” detectado automaticamente)</span>
+                     Banco do Cartão <span className="text-slate-600 font-normal">(opcional — detectado automaticamente)</span>
                    </label>
                    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-2">
                      {SUPPORTED_BANKS.map(bank => (
@@ -760,7 +754,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                    </div>
                  </div>
 
-                 {/* Drag & drop zone â€” mobile-safe */}
+                 {/* Drag & drop zone — mobile-safe */}
                  {/* Hidden real file input (works on all platforms) */}
                  <input
                    id="invoice-file-input"
@@ -807,7 +801,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                        <Sparkles size={11} />
                        {SUPPORTED_BANKS.find(b => b.id === detectedBank)?.label ?? 'Auto'}
                        {detectedBank !== selectedBank && (
-                         <span className="text-slate-500 font-normal">Ã¢â€ â€™ {SUPPORTED_BANKS.find(b => b.id === selectedBank)?.label}</span>
+                         <span className="text-slate-500 font-normal">â†’ {SUPPORTED_BANKS.find(b => b.id === selectedBank)?.label}</span>
                        )}
                      </span>
                      <p className="text-xs text-slate-500 truncate">
@@ -916,7 +910,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                {editingTx && (
                   <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 mb-4">
                      <AlertTriangle size={14} />
-                     <span>Editando apenas esta parcela. O limite total nÃ£o serÃ¡ recalculado automaticamente para outras parcelas.</span>
+                     <span>Editando apenas esta parcela. O limite total não será recalculado automaticamente para outras parcelas.</span>
                   </div>
                )}
                <GlassInput 
@@ -945,7 +939,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   required
                />
                <GlassInput 
-                  label="DescriÃ§Ã£o"
+                  label="Descrição"
                   value={txForm.description} 
                   onChange={e => setTxForm({...txForm, description: e.target.value})} 
                />
@@ -954,7 +948,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                       label="Parcelas"
                       value={txForm.installments}
                       onChange={e => setTxForm({...txForm, installments: e.target.value})}
-                      options={Array.from({length: 24}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(Ã€ vista)' : ''}` }))}
+                      options={Array.from({length: 24}, (_, i) => i + 1).map(i => ({ value: i, label: `${i}x ${i === 1 ? '(À vista)' : ''}` }))}
                    />
                )}
             </form>
@@ -983,7 +977,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                        onChange={e => setRefundForm({...refundForm, amount: e.target.value})} 
                        required 
                     />
-                    <p className="text-xs text-slate-500 mt-1 ml-1">O valor serÃ¡ subtraÃ­do da fatura.</p>
+                    <p className="text-xs text-slate-500 mt-1 ml-1">O valor será subtraído da fatura.</p>
                  </div>
                  <GlassInput 
                     label="Data do Estorno"
@@ -993,7 +987,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                     required 
                  />
                  <GlassInput 
-                    label="DescriÃ§Ã£o"
+                    label="Descrição"
                     value={refundForm.description} 
                     onChange={e => setRefundForm({...refundForm, description: e.target.value})} 
                  />
@@ -1011,8 +1005,8 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="text-sm text-slate-300 mb-2">
                   {selectedCard?.anticipationBehavior === 'discount' 
-                    ? 'Ao antecipar, vocÃª pode receber um desconto. O valor pago + desconto serÃ¡ abatido da sua fatura atual.' 
-                    : 'O valor pago serÃ¡ adicionado como Saldo Positivo no cartÃ£o e abaterÃ¡ automaticamente as prÃ³ximas faturas.'}
+                    ? 'Ao antecipar, você pode receber um desconto. O valor pago + desconto será abatido da sua fatura atual.' 
+                    : 'O valor pago será adicionado como Saldo Positivo no cartão e abaterá automaticamente as próximas faturas.'}
                 </p>
               </div>
               <GlassInput 
@@ -1046,7 +1040,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
           </ModalBody>
           <ModalFooter>
              <GlassButton type="button" variant="ghost" onClick={() => setIsAnticipateModalOpen(false)}>Cancelar</GlassButton>
-             <GlassButton type="submit" form="anticipate-form">Confirmar AntecipaÃ§Ã£o</GlassButton>
+             <GlassButton type="submit" form="anticipate-form">Confirmar Antecipação</GlassButton>
           </ModalFooter>
         </ModalShell>
 
@@ -1101,42 +1095,42 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               <div>
                 <p className="text-lg text-slate-200">Tem certeza que deseja excluir esta compra?</p>
                 <p className="text-sm text-slate-400 mt-2">
-                  Se houver estornos vinculados, eles tambÃ©m serÃ£o removidos.
+                  Se houver estornos vinculados, eles também serão removidos.
                 </p>
               </div>
             </div>
           </ModalBody>
           <ModalFooter>
             <GlassButton type="button" variant="ghost" onClick={() => setDeletingTxId(null)}>Cancelar</GlassButton>
-            <GlassButton type="button" variant="danger" onClick={confirmDeleteTx}>Confirmar ExclusÃ£o</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={confirmDeleteTx}>Confirmar Exclusão</GlassButton>
           </ModalFooter>
         </ModalShell>
 
-        <ModalShell isOpen={!!deletingCardId} onClose={() => setDeletingCardId(null)} title="Excluir CartÃ£o">
+        <ModalShell isOpen={!!deletingCardId} onClose={() => setDeletingCardId(null)} title="Excluir Cartão">
           <ModalBody>
             <div className="text-center space-y-4 py-4">
               <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
                  <AlertTriangle size={32} className="text-red-500" />
               </div>
               <div>
-                <p className="text-lg text-slate-200">Tem certeza que deseja excluir este cartÃ£o?</p>
+                <p className="text-lg text-slate-200">Tem certeza que deseja excluir este cartão?</p>
                 <p className="text-sm text-slate-400 mt-2">
-                  Todas as compras, estornos e faturas vinculadas a este cartÃ£o tambÃ©m serÃ£o removidas permanentemente.
+                  Todas as compras, estornos e faturas vinculadas a este cartão também serão removidas permanentemente.
                 </p>
               </div>
             </div>
           </ModalBody>
           <ModalFooter>
             <GlassButton type="button" variant="ghost" onClick={() => setDeletingCardId(null)}>Cancelar</GlassButton>
-            <GlassButton type="button" variant="danger" onClick={confirmDeleteCard}>Confirmar ExclusÃ£o</GlassButton>
+            <GlassButton type="button" variant="danger" onClick={confirmDeleteCard}>Confirmar Exclusão</GlassButton>
           </ModalFooter>
         </ModalShell>
 
-        <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar CartÃ£o' : 'Novo CartÃ£o'}>
+        <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
             <ModalBody>
                <form id="card-form-details" onSubmit={handleCardSubmit} className="space-y-4">
                   <GlassInput 
-                     label="Nome do CartÃ£o"
+                     label="Nome do Cartão"
                      value={cardForm.name} 
                      onChange={e => setCardForm({...cardForm, name: e.target.value})} 
                      placeholder="Ex: Nubank, Inter..." 
@@ -1171,7 +1165,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   </div>
                   <div>
                      <GlassSelect
-                        label="Conta PadrÃ£o de Pagamento (Opcional)"
+                        label="Conta Padrão de Pagamento (Opcional)"
                         value={cardForm.defaultPaymentAccountId}
                         onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
                         options={[
@@ -1183,7 +1177,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                   </div>
                   <div>
                      <GlassSelect
-                        label="Comportamento de AntecipaÃ§Ã£o"
+                        label="Comportamento de Antecipação"
                         value={cardForm.anticipationBehavior}
                         onChange={e => setCardForm({...cardForm, anticipationBehavior: e.target.value as 'credit' | 'discount'})}
                         options={[
@@ -1193,7 +1187,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do CartÃ£o</label>
+                    <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do Cartão</label>
                     <div className="flex flex-wrap gap-2 px-1">
                       {CARD_COLORS.map(color => (
                         <button
@@ -1212,7 +1206,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             </ModalBody>
             <ModalFooter>
               <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
-              <GlassButton type="submit" form="card-form-details">Salvar CartÃ£o</GlassButton>
+              <GlassButton type="submit" form="card-form-details">Salvar Cartão</GlassButton>
             </ModalFooter>
         </ModalShell>
 
@@ -1255,10 +1249,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   return (
     <PageShell>
       <PageHeader 
-        title="Meus CartÃµes" 
-        subtitle="Gerencie faturas e limites dos seus cartÃµes de crÃ©dito."
+        title="Meus Cartões" 
+        subtitle="Gerencie faturas e limites dos seus cartões de crédito."
         actions={
-          <GlassButton onClick={() => openCardModal()} icon={<Plus size={18}/>} className="hidden md:flex">Novo CartÃ£o</GlassButton>
+          <GlassButton onClick={() => openCardModal()} icon={<Plus size={18}/>} className="hidden md:flex">Novo Cartão</GlassButton>
         }
       />
 
@@ -1297,7 +1291,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                
              <div className="relative z-10 mt-auto pt-4 border-t border-white/5">
                 <span className="text-sm font-semibold text-[rgb(var(--c-primary-400))] group-hover:text-[rgb(var(--c-primary-300))] flex items-center gap-1 transition-colors">
-                  Ver Fatura e LanÃ§amentos <ChevronRight size={16}/>
+                  Ver Fatura e Lançamentos <ChevronRight size={16}/>
                 </span>
              </div>
           </GlassCard>
@@ -1307,9 +1301,9 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
            <div className="col-span-full">
               <EmptyState
                 variant="cards"
-                title="Nenhum cartÃ£o cadastrado."
-                description="Adicione um cartÃ£o de crÃ©dito para acompanhar faturas, limites e compras parceladas."
-                actionLabel="Adicionar Primeiro CartÃ£o"
+                title="Nenhum cartão cadastrado."
+                description="Adicione um cartão de crédito para acompanhar faturas, limites e compras parceladas."
+                actionLabel="Adicionar Primeiro Cartão"
                 onAction={() => openCardModal()}
               />
             </div>
@@ -1317,11 +1311,11 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       </div>
 
       {/* Add/Edit Card Modal */}
-      <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar CartÃ£o' : 'Novo CartÃ£o'}>
+      <ModalShell isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={editingCard ? 'Editar Cartão' : 'Novo Cartão'}>
         <ModalBody>
            <form id="card-form-list" onSubmit={handleCardSubmit} className="space-y-4">
               <GlassInput 
-                 label="Nome do CartÃ£o"
+                 label="Nome do Cartão"
                  value={cardForm.name} 
                  onChange={e => setCardForm({...cardForm, name: e.target.value})} 
                  placeholder="Ex: Nubank, Inter..." 
@@ -1356,7 +1350,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               </div>
               <div>
                  <GlassSelect
-                    label="Conta PadrÃ£o de Pagamento (Opcional)"
+                    label="Conta Padrão de Pagamento (Opcional)"
                     value={cardForm.defaultPaymentAccountId}
                     onChange={e => setCardForm({...cardForm, defaultPaymentAccountId: e.target.value})}
                     options={[
@@ -1368,7 +1362,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               </div>
               <div>
                  <GlassSelect
-                    label="Comportamento de AntecipaÃ§Ã£o"
+                    label="Comportamento de Antecipação"
                     value={cardForm.anticipationBehavior}
                     onChange={e => setCardForm({...cardForm, anticipationBehavior: e.target.value as 'credit' | 'discount'})}
                     options={[
@@ -1378,7 +1372,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do CartÃ£o</label>
+                <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Cor do Cartão</label>
                 <div className="flex flex-wrap gap-2 px-1">
                   {CARD_COLORS.map(color => (
                     <button
@@ -1397,7 +1391,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         </ModalBody>
         <ModalFooter>
            <GlassButton type="button" variant="ghost" onClick={() => setIsCardModalOpen(false)}>Cancelar</GlassButton>
-           <GlassButton type="submit" form="card-form-list">Salvar CartÃ£o</GlassButton>
+           <GlassButton type="submit" form="card-form-list">Salvar Cartão</GlassButton>
         </ModalFooter>
       </ModalShell>
 
@@ -1406,7 +1400,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         actions={[
           { 
             id: 'new-card', 
-            label: 'Novo CartÃ£o', 
+            label: 'Novo Cartão', 
             icon: <Plus size={24} />, 
             onClick: () => openCardModal() 
           }
