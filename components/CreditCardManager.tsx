@@ -11,7 +11,7 @@ import { GlassCard } from './ui/GlassCard';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
-import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check, UploadCloud, FileDown, Sparkles } from 'lucide-react';
+import { CreditCard as CardIcon, Plus, Trash2, ChevronLeft, ChevronRight, Edit2, RotateCcw, AlertTriangle, Banknote, Check, UploadCloud, FileDown, Sparkles, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { EmptyState } from './ui/EmptyState';
 import {
@@ -586,8 +586,17 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <GlassButton onClick={() => openCardModal(selectedCard)} variant="ghost" icon={<Edit2 size={16}/>}>Editar</GlassButton>
               <GlassButton onClick={() => setDeletingCardId(selectedCard.id)} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" icon={<Trash2 size={16}/>}>Excluir</GlassButton>
-              <GlassButton onClick={() => setIsImportModalOpen(true)} icon={<UploadCloud size={16}/>} variant="secondary">Importar PDF</GlassButton>
-              <GlassButton onClick={handleExportCsv} icon={<FileDown size={16}/>} variant="secondary">Exportar CSV</GlassButton>
+              <div className="relative group/ie">
+                <GlassButton variant="secondary" icon={<ArrowUpDown size={16}/>}>Importar/Exportar</GlassButton>
+                <div className="absolute right-0 top-full mt-1 min-w-[200px] bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden opacity-0 invisible group-hover/ie:opacity-100 group-hover/ie:visible transition-all duration-200 z-50">
+                  <button type="button" onClick={() => setIsImportModalOpen(true)} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition-colors">
+                    <UploadCloud size={16} className="text-[rgb(var(--c-primary-400))]" /> Importar PDF
+                  </button>
+                  <button type="button" onClick={handleExportCsv} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-slate-200 hover:bg-white/10 transition-colors border-t border-white/5">
+                    <FileDown size={16} className="text-[rgb(var(--c-primary-400))]" /> Exportar CSV
+                  </button>
+                </div>
+              </div>
               <GlassButton onClick={() => openTxModal()} icon={<Plus size={16}/>} className="hidden md:flex">Nova Compra</GlassButton>
             </div>
           </div>
