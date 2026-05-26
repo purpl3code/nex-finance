@@ -146,9 +146,9 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
               </button>
             </div>
 
-            {/* Options List */}
+            {/* Options List — groups take priority over flat options to prevent duplication */}
             <div className="overflow-y-auto p-2">
-              {options && options.map(opt => (
+              {(!groups || groups.length === 0) && options && options.map(opt => (
                 <button
                   key={opt.value}
                   type="button"
@@ -172,7 +172,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
 
               {groups && groups.map((group, idx) => (
                 <div key={idx} className="mb-2 last:mb-0">
-                  <div className="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-white/5 backdrop-blur-md z-10 border-b border-white/5">
+                  <div className="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider bg-white/5 border-b border-white/5">
                     {group.label}
                   </div>
                   {group.options.map(opt => (

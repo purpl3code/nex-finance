@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { RecurringRule, Category, Account, TransactionType, CreditCard } from '../types';
@@ -271,10 +271,6 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                      options: creditCards.map(c => ({ value: c.id, label: c.name, color: c.color }))
                    }] : [])
                  ]}
-                 options={!(formData.type === 'expense' && creditCards.length > 0) ? [
-                   { value: '', label: 'Selecione...' },
-                   ...accounts.map(a => ({ value: a.id, label: a.name }))
-                 ] : undefined}
                />
 
                <GlassInput 

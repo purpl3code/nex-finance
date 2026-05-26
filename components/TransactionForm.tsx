@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer, CreditCard } from '../types';
@@ -286,10 +286,6 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                     options: creditCards.map(card => ({ value: card.id, label: card.name, color: card.color }))
                   }] : [])
                 ]}
-                options={(!isEditingCreditCard && !(mode === 'expense' && creditCards && creditCards.length > 0 && !isEditingRegular)) ? [
-                  { value: '', label: 'Selecione...' },
-                  ...accounts.map(acc => ({ value: acc.id, label: acc.name }))
-                ] : undefined}
               />
             </div>
           )}
