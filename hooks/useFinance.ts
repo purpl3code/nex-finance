@@ -626,7 +626,24 @@ export const useFinance = () => {
     touchData();
   }, [touchData]);
 
-  const payDebt = useCallback((id: string, amount: number) => {
+  const payDebt = useCallback((id: string, amount: number, accountId?: string) => {
+    // Create an expense transaction if an account is provided
+    if (accountId) {
+      const debt = debts.find(d => d.id === id);
+      const newTx: Transaction = {
+        id: crypto.randomUUID(),
+        type: 'expense',
+        amount: amount,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        categoryId: 'cat_debt',
+        accountId: accountId,
+        description: `Pgto Dívida${debt ? ` - ${debt.title}` : ''}`,
+        createdAt: Date.now()
+      };
+      setTransactions(prev => [newTx, ...prev]);
+    }
+
+    // Update the debt's paid amount
     setDebts(prev => prev.map(d => {
       if (d.id !== id) return d;
       const newPaid = d.paidAmount + amount;
@@ -638,7 +655,7 @@ export const useFinance = () => {
       };
     }));
     touchData();
-  }, [touchData]);
+  }, [debts, touchData]);
 
   const settleDebt = useCallback((id: string) => {
     setDebts(prev => prev.map(d => d.id === id ? { ...d, isSettled: !d.isSettled } : d));

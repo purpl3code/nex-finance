@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Debt } from '../types';
+import { Debt, Account } from '../types';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { GlassInput } from './ui/GlassInput';
 import { CurrencyInput } from './ui/CurrencyInput';
 import { GlassButton } from './ui/GlassButton';
+import { GlassSelect } from './ui/GlassSelect';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { DebtCard } from './DebtCard';
 import { EmptyState } from './ui/EmptyState';
@@ -16,15 +17,17 @@ import { AnimatedNumber } from './ui/AnimatedNumber';
 
 interface DebtManagerProps {
   debts: Debt[];
+  accounts: Account[];
   onAddDebt: (debt: any) => void;
   onEditDebt: (id: string, updates: any) => void;
-  onPayDebt: (id: string, amount: number) => void;
+  onPayDebt: (id: string, amount: number, accountId?: string) => void;
   onSettleDebt: (id: string) => void;
   onDeleteDebt: (id: string) => void;
 }
 
 export const DebtManager: React.FC<DebtManagerProps> = ({
   debts,
+  accounts,
   onAddDebt,
   onEditDebt,
   onPayDebt,
@@ -52,6 +55,7 @@ export const DebtManager: React.FC<DebtManagerProps> = ({
   // Pay Modal State
   const [payTargetId, setPayTargetId] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState('');
+  const [payAccountId, setPayAccountId] = useState<string>(accounts[0]?.id || '');
 
   const displayedDebts = debts.filter(d => d.isSettled === (activeTab === 'settled'));
 
@@ -113,13 +117,14 @@ export const DebtManager: React.FC<DebtManagerProps> = ({
   const handleOpenPay = (id: string) => {
     setPayTargetId(id);
     setPayAmount('');
+    setPayAccountId(accounts[0]?.id || '');
     setIsPayModalOpen(true);
   };
 
   const handleSubmitPay = (e: React.FormEvent) => {
     e.preventDefault();
     if (payTargetId && parseFloat(payAmount) > 0) {
-      onPayDebt(payTargetId, parseFloat(payAmount));
+      onPayDebt(payTargetId, parseFloat(payAmount), payAccountId || undefined);
     }
     setIsPayModalOpen(false);
   };
@@ -304,6 +309,21 @@ export const DebtManager: React.FC<DebtManagerProps> = ({
               onChange={val => setPayAmount(val)}
               required
             />
+            <GlassSelect
+              label="Descontar da Conta"
+              value={payAccountId}
+              onChange={e => setPayAccountId(e.target.value)}
+              options={[
+                { value: '', label: 'Não descontar (apenas registrar)' },
+                ...accounts.map(a => ({ value: a.id, label: a.name }))
+              ]}
+            />
+            {payAccountId && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-400 flex items-center gap-2">
+                <DollarSign size={14} className="shrink-0" />
+                <span>O valor será registrado como despesa na conta selecionada.</span>
+              </div>
+            )}
           </form>
         </ModalBody>
         <ModalFooter>

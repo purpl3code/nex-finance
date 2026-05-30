@@ -553,6 +553,7 @@ const App: React.FC = () => {
               {activeTab === 'debts' && (
                 <DebtManager
                   debts={debts}
+                  accounts={accounts}
                   onAddDebt={addDebt}
                   onEditDebt={editDebt}
                   onPayDebt={payDebt}
