@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { Budget, Category } from '../types';
 import { GlassInput } from './ui/GlassInput';
+import { CurrencyInput } from './ui/CurrencyInput';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { PageShell } from './ui/PageShell';
@@ -225,12 +226,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                     ...categories.filter(c => c.kind === 'expense').map(c => ({ value: c.id, label: <span className="flex items-center gap-1.5"><AppleEmoji emoji={c.emoji}/> {c.name}</span> }))
                   ]}
                />
-               <GlassInput 
+               <CurrencyInput 
                   label="Limite (R$)" 
-                  type="number" 
-                  step="0.01" 
                   value={form.amountLimit} 
-                  onChange={e => setForm({...form, amountLimit: e.target.value})} 
+                  onChange={val => setForm({...form, amountLimit: val})} 
                   required 
                />
                <div>

@@ -4,6 +4,7 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { GlassInput } from './ui/GlassInput';
+import { CurrencyInput } from './ui/CurrencyInput';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GoalCard } from './GoalCard';
@@ -165,31 +166,25 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
                />
                
                <div className="grid grid-cols-2 gap-4">
-                  <GlassInput 
-                     label="Valor Alvo (R$)" 
-                     type="number" 
-                     step="0.01" 
-                     value={formData.targetAmount} 
-                     onChange={e => setFormData({...formData, targetAmount: e.target.value})} 
-                     required 
-                  />
-                  <GlassInput 
-                     label="Já Tenho (R$)" 
-                     type="number" 
-                     step="0.01" 
-                     value={formData.currentAmount} 
-                     onChange={e => setFormData({...formData, currentAmount: e.target.value})} 
-                  />
+                  <CurrencyInput 
+                      label="Valor Alvo (R$)" 
+                      value={formData.targetAmount} 
+                      onChange={val => setFormData({...formData, targetAmount: val})} 
+                      required 
+                   />
+                  <CurrencyInput 
+                      label="Já Tenho (R$)" 
+                      value={formData.currentAmount} 
+                      onChange={val => setFormData({...formData, currentAmount: val})} 
+                   />
                </div>
 
                <div>
-                  <GlassInput 
-                     label="Aporte Mensal Estimado (R$)" 
-                     type="number" 
-                     step="0.01" 
-                     value={formData.monthlyContribution} 
-                     onChange={e => setFormData({...formData, monthlyContribution: e.target.value})} 
-                  />
+                  <CurrencyInput 
+                      label="Aporte Mensal Estimado (R$)" 
+                      value={formData.monthlyContribution} 
+                      onChange={val => setFormData({...formData, monthlyContribution: val})} 
+                   />
                   <p className="text-xs text-slate-500 mt-1 ml-1">Usado para calcular quando você atingirá a meta.</p>
                </div>
 
@@ -232,16 +227,14 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
                <div className="p-4 bg-[rgb(var(--c-primary-500)/0.1)] border border-[rgb(var(--c-primary-500)/0.2)] rounded-xl text-sm text-[rgb(var(--c-primary-200))]">
                   Isso apenas atualiza o saldo da meta. Não cria uma transação no extrato.
                </div>
-               <GlassInput 
-                  label="Valor a adicionar (R$)" 
-                  type="number" 
-                  step="0.01" 
-                  value={addAmount} 
-                  onChange={e => setAddAmount(e.target.value)} 
-                  autoFocus 
-                  required 
-                  className="text-lg font-bold"
-               />
+                <CurrencyInput 
+                   label="Valor a adicionar (R$)" 
+                   value={addAmount} 
+                   onChange={val => setAddAmount(val)} 
+                   autoFocus 
+                   required 
+                   className="text-lg font-bold"
+                />
             </form>
          </ModalBody>
          <ModalFooter>

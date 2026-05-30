@@ -1,10 +1,11 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { RecurringRule, Category, Account, TransactionType, CreditCard } from '../types';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassButton } from './ui/GlassButton';
 import { GlassInput } from './ui/GlassInput';
+import { CurrencyInput } from './ui/CurrencyInput';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
 import { GlassBadge } from './ui/GlassBadge';
@@ -235,14 +236,12 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                        { value: 'income', label: 'Entrada' }
                      ]}
                   />
-                  <GlassInput 
-                     label="Valor" 
-                     type="number" 
-                     step="0.01" 
-                     value={formData.amount} 
-                     onChange={e => setFormData({...formData, amount: e.target.value})} 
-                     required 
-                  />
+                   <CurrencyInput 
+                      label="Valor" 
+                      value={formData.amount} 
+                      onChange={val => setFormData({...formData, amount: val})} 
+                      required 
+                   />
                </div>
 
                <GlassSelect 

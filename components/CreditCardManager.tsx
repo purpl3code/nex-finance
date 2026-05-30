@@ -6,6 +6,7 @@ import { CreditCard, CreditCardInvoice, Category, Account, CreditCardTransaction
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassInput } from './ui/GlassInput';
+import { CurrencyInput } from './ui/CurrencyInput';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
 import { PageShell } from './ui/PageShell';
@@ -904,12 +905,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      <span>Editando apenas esta parcela. O limite total não será recalculado automaticamente para outras parcelas.</span>
                   </div>
                )}
-               <GlassInput 
+               <CurrencyInput 
                   label="Valor"
-                  type="number" 
-                  step="0.01" 
                   value={txForm.amount} 
-                  onChange={e => setTxForm({...txForm, amount: e.target.value})} 
+                  onChange={val => setTxForm({...txForm, amount: val})} 
                   required 
                />
                <GlassInput 
@@ -959,13 +958,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                     Valor original: <span className="text-white font-bold">{formatCurrency(refundingTx?.amount || 0)}</span>
                  </div>
                  <div>
-                    <GlassInput 
+                    <CurrencyInput 
                        label="Valor do Estorno (R$)"
-                       type="number" 
-                       step="0.01" 
-                       max={refundingTx?.amount} 
                        value={refundForm.amount} 
-                       onChange={e => setRefundForm({...refundForm, amount: e.target.value})} 
+                       onChange={val => setRefundForm({...refundForm, amount: val})} 
                        required 
                     />
                     <p className="text-xs text-slate-500 mt-1 ml-1">O valor será subtraído da fatura.</p>
@@ -1000,21 +996,17 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                     : 'O valor pago será adicionado como Saldo Positivo no cartão e abaterá automaticamente as próximas faturas.'}
                 </p>
               </div>
-              <GlassInput 
+              <CurrencyInput 
                  label="Valor a Pagar"
-                 type="number" 
-                 step="0.01" 
                  value={anticipateForm.amount} 
-                 onChange={e => setAnticipateForm({...anticipateForm, amount: e.target.value})} 
+                 onChange={val => setAnticipateForm({...anticipateForm, amount: val})} 
                  required 
               />
               {selectedCard?.anticipationBehavior === 'discount' && (
-                <GlassInput 
+                <CurrencyInput 
                    label="Desconto Recebido (Opcional)"
-                   type="number" 
-                   step="0.01" 
                    value={anticipateForm.discount} 
-                   onChange={e => setAnticipateForm({...anticipateForm, discount: e.target.value})} 
+                   onChange={val => setAnticipateForm({...anticipateForm, discount: val})} 
                 />
               )}
               <GlassSelect
@@ -1160,13 +1152,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      placeholder="Ex: Nubank, Inter..." 
                      required 
                   />
-                  <GlassInput 
-                     label="Limite Total"
-                     type="number" 
-                     value={cardForm.limit} 
-                     onChange={e => setCardForm({...cardForm, limit: e.target.value})} 
-                     required 
-                  />
+                  <CurrencyInput 
+                      label="Limite Total"
+                      value={cardForm.limit} 
+                      onChange={val => setCardForm({...cardForm, limit: val})} 
+                      required 
+                   />
                   <div className="grid grid-cols-2 gap-4">
                     <GlassInput 
                        label="Dia Fechamento"
@@ -1345,13 +1336,12 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                  placeholder="Ex: Nubank, Inter..." 
                  required 
               />
-              <GlassInput 
-                 label="Limite Total"
-                 type="number" 
-                 value={cardForm.limit} 
-                 onChange={e => setCardForm({...cardForm, limit: e.target.value})} 
-                 required 
-              />
+              <CurrencyInput 
+                  label="Limite Total"
+                  value={cardForm.limit} 
+                  onChange={val => setCardForm({...cardForm, limit: val})} 
+                  required 
+               />
               <div className="grid grid-cols-2 gap-4">
                 <GlassInput 
                    label="Dia Fechamento"

@@ -5,6 +5,7 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { GlassInput } from './ui/GlassInput';
+import { CurrencyInput } from './ui/CurrencyInput';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { DebtCard } from './DebtCard';
@@ -241,34 +242,22 @@ export const DebtManager: React.FC<DebtManagerProps> = ({
               placeholder="Ex: Banco X, João..."
             />
             <div className="grid grid-cols-2 gap-3">
-              <GlassInput
+              <CurrencyInput
                 label="Valor Total da Dívida"
-                type="number"
                 value={formData.totalAmount}
-                onChange={e => setFormData(prev => ({ ...prev, totalAmount: e.target.value }))}
-                placeholder="R$ 0,00"
-                min="0"
-                step="0.01"
+                onChange={val => setFormData(prev => ({ ...prev, totalAmount: val }))}
                 required
               />
-              <GlassInput
+              <CurrencyInput
                 label="Já Pago"
-                type="number"
                 value={formData.paidAmount}
-                onChange={e => setFormData(prev => ({ ...prev, paidAmount: e.target.value }))}
-                placeholder="R$ 0,00"
-                min="0"
-                step="0.01"
+                onChange={val => setFormData(prev => ({ ...prev, paidAmount: val }))}
               />
             </div>
-            <GlassInput
+            <CurrencyInput
               label="Parcela Mensal Estimada"
-              type="number"
               value={formData.monthlyPayment}
-              onChange={e => setFormData(prev => ({ ...prev, monthlyPayment: e.target.value }))}
-              placeholder="R$ 0,00"
-              min="0"
-              step="0.01"
+              onChange={val => setFormData(prev => ({ ...prev, monthlyPayment: val }))}
             />
             <div className="grid grid-cols-2 gap-3">
               <GlassInput
@@ -309,16 +298,11 @@ export const DebtManager: React.FC<DebtManagerProps> = ({
             </div>
           )}
           <form id="pay-form" onSubmit={handleSubmitPay} className="space-y-3">
-            <GlassInput
+            <CurrencyInput
               label="Valor do Pagamento"
-              type="number"
               value={payAmount}
-              onChange={e => setPayAmount(e.target.value)}
-              placeholder="R$ 0,00"
-              min="0.01"
-              step="0.01"
+              onChange={val => setPayAmount(val)}
               required
-              icon={<DollarSign size={16} />}
             />
           </form>
         </ModalBody>

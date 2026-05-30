@@ -5,6 +5,7 @@ import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GlassCard } from './ui/GlassCard';
 import { GlassInput } from './ui/GlassInput';
+import { CurrencyInput } from './ui/CurrencyInput';
 import { GlassSelect } from './ui/GlassSelect';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
@@ -179,16 +180,14 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                  { value: 'other', label: 'Outro' }
                ]}
              />
-             <div>
-               <GlassInput
-                 label="Saldo Inicial"
-                 type="number"
-                 step="0.01"
-                 value={initialBalance}
-                 onChange={e => setInitialBalance(e.target.value)}
-               />
-               <p className="text-xs text-slate-500 mt-1 pl-1">O saldo atual será calculado a partir deste valor + transações.</p>
-             </div>
+              <div>
+                <CurrencyInput
+                  label="Saldo Inicial"
+                  value={initialBalance}
+                  onChange={val => setInitialBalance(val)}
+                />
+                <p className="text-xs text-slate-500 mt-1 pl-1">O saldo atual será calculado a partir deste valor + transações.</p>
+              </div>
           </form>
         </ModalBody>
         <ModalFooter>

@@ -1,6 +1,7 @@
-﻿
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppleEmoji } from './ui/AppleEmoji';
+import { CurrencyInput } from './ui/CurrencyInput';
 import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer, CreditCard } from '../types';
 import { GlassButton } from './ui/GlassButton';
 import { GlassInput } from './ui/GlassInput';
@@ -215,13 +216,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           </div>
 
           {/* Amount */}
-          <GlassInput 
+          <CurrencyInput 
             label="Valor"
-            type="number" 
-            step="0.01" 
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            icon={<span className="text-sm font-semibold">R$</span>}
+            onChange={(val) => setAmount(val)}
             placeholder="0,00"
           />
 
