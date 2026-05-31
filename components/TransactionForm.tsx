@@ -314,10 +314,17 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                 label="Parcelas"
                 value={installments}
                 onChange={(e) => setInstallments(parseInt(e.target.value))}
-                options={Array.from({ length: 24 }, (_, i) => i + 1).map(num => ({
-                  value: num,
-                  label: `${num}x ${num > 1 ? `(R$ ${(parseFloat(amount || '0') / num).toFixed(2)})` : ''}`
-                }))}
+                options={Array.from({ length: 24 }, (_, i) => i + 1).map(num => {
+                  const total = parseFloat(amount || '0');
+                  const perInstallment = total > 0 ? total / num : 0;
+                  const formatted = perInstallment.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  return {
+                    value: num,
+                    label: num === 1
+                      ? `1x (à vista${total > 0 ? ` – R$ ${formatted}` : ''})`
+                      : `${num}x de R$ ${formatted}`
+                  };
+                })}
               />
             </div>
           )}
