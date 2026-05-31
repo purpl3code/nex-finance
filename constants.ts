@@ -68,12 +68,39 @@ export const INITIAL_CATEGORIES: Category[] = [
 ];
 
 export const COLORS = [
-  '#3b82f6', // blue
-  '#8b5cf6', // violet
-  '#10b981', // emerald
-  '#f59e0b', // amber
-  '#ef4444', // red
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#84cc16', // lime
+  // Reds & Oranges
+  '#FF3B30', // vivid red
+  '#FF6B6B', // coral red
+  '#FF6D00', // vivid orange
+  '#FF9500', // bright orange
+
+  // Yellows & Greens
+  '#FFCC00', // vivid yellow
+  '#C8E600', // electric lime
+  '#34C759', // vivid green
+  '#00C853', // neon green
+
+  // Teals & Cyans
+  '#00BFA5', // vivid teal
+  '#00D4AA', // mint
+  '#00BCD4', // vivid cyan
+  '#18DCFF', // electric cyan
+
+  // Blues
+  '#2979FF', // vivid blue
+  '#448AFF', // bright blue
+  '#536DFE', // indigo blue
+  '#304FFE', // deep blue
+
+  // Purples
+  '#7C4DFF', // vivid purple
+  '#B388FF', // lavender
+  '#AA00FF', // electric purple
+  '#D500F9', // vivid magenta
+
+  // Pinks & Rose
+  '#FF4081', // hot pink
+  '#FF80AB', // rose pink
+  '#F50057', // vivid rose
+  '#E91E63', // magenta pink
 ];

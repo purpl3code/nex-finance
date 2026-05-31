@@ -1,5 +1,6 @@
-﻿
+
 import React, { useState } from 'react';
+import { COLORS } from '../constants';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { Category, CategoryGroup, TransactionType } from '../types';
 import { GlassButton } from './ui/GlassButton';
@@ -39,19 +40,19 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [targetCategory, setTargetCategory] = useState<Category | null>(null);
-  const [form, setForm] = useState({ name: '', emoji: '', group: 'Personalizado' as CategoryGroup, type: 'expense' as TransactionType, color: '#3b82f6' });
+  const [form, setForm] = useState({ name: '', emoji: '', group: 'Personalizado' as CategoryGroup, type: 'expense' as TransactionType, color: COLORS[0] });
   const [usageCount, setUsageCount] = useState(0);
   const [reassignId, setReassignId] = useState('');
   const [deleteReassignId, setDeleteReassignId] = useState('');
 
   const displayedCategories = categories.filter(c => c.kind === activeTab && (showArchived ? true : !c.isArchived));
   const groups: CategoryGroup[] = ['Essencial', 'Estilo de Vida', 'Investimentos e D\u00edvidas', 'Renda', 'Personalizado'];
-  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+  const colors = COLORS;
 
-  const resetForm = () => { setForm({ name: '', emoji: 'e', group: 'Personalizado', type: activeTab, color: '#3b82f6' }); setEditingCategory(null); };
+  const resetForm = () => { setForm({ name: '', emoji: 'e', group: 'Personalizado', type: activeTab, color: COLORS[0] }); setEditingCategory(null); };
 
   const handleOpenModal = (cat?: Category) => {
-    if (cat) { setEditingCategory(cat); setForm({ name: cat.name, emoji: cat.emoji, group: cat.group, type: cat.kind, color: cat.color || '#3b82f6' }); }
+    if (cat) { setEditingCategory(cat); setForm({ name: cat.name, emoji: cat.emoji, group: cat.group, type: cat.kind, color: cat.color || COLORS[0] }); }
     else { resetForm(); }
     setIsModalOpen(true);
   };
@@ -159,13 +160,26 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                   <GlassSelect label="Grupo" value={form.group} onChange={e => setForm({...form, group: e.target.value as any})} options={groups.map(g => ({ value: g, label: g }))} />
                </div>
                <div>
-                  <label className="block text-sm text-slate-300 mb-2">Cor</label>
-                  <div className="flex flex-wrap gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
-                     {colors.map(c => (
-                        <button type="button" key={c} onClick={() => setForm({...form, color: c})} className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${form.color === c ? 'border-white ring-2 ring-white/20' : 'border-transparent hover:border-white/50'}`} style={{ backgroundColor: c }} />
-                     ))}
-                  </div>
-               </div>
+                   <label className="block text-sm text-slate-300 mb-2">Cor</label>
+                   <div className="grid grid-cols-8 gap-2 p-3 bg-white/5 rounded-xl border border-white/10">
+                      {colors.map(c => (
+                         <button
+                           type="button"
+                           key={c}
+                           onClick={() => setForm({...form, color: c})}
+                           className={`w-7 h-7 rounded-full border-2 transition-all duration-200 hover:scale-125 hover:shadow-lg ${
+                             form.color === c
+                               ? 'border-white ring-2 ring-white/30 scale-110 shadow-lg'
+                               : 'border-transparent hover:border-white/50'
+                           }`}
+                           style={{
+                             backgroundColor: c,
+                             boxShadow: form.color === c ? `0 0 12px ${c}80` : undefined
+                           }}
+                         />
+                      ))}
+                   </div>
+                </div>
             </form>
          </ModalBody>
          <ModalFooter>
