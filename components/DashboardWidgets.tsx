@@ -254,7 +254,7 @@ export const CreditCardSummaryItem: React.FC<{ card: CreditCardType, usedAmount:
   
   return (
     <div 
-      className="bg-white/4 border border-white/8 p-4 rounded-xl flex items-center justify-between hover:bg-white/8 hover:border-white/15 transition-all duration-200 cursor-pointer group hover:-translate-y-0.5"
+      className="bg-white/4 p-4 rounded-xl flex items-center justify-between hover:bg-white/8 transition-all duration-200 cursor-pointer group hover:-translate-y-0.5"
       onClick={onClick}
     >
       <div className="flex items-center gap-3">
