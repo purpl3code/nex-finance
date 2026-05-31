@@ -11,7 +11,7 @@ import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
-import { PieChart, Trash2, Edit2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Trash2, Edit2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
 import { EmptyState } from './ui/EmptyState';
 
 interface BudgetManagerProps {

@@ -8,7 +8,7 @@ import { CurrencyInput } from './ui/CurrencyInput';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GoalCard } from './GoalCard';
-import { Plus, Target, AlertTriangle } from 'lucide-react';
+import { Plus, AlertTriangle } from 'lucide-react';
 import { EmptyState } from './ui/EmptyState';
 
 interface GoalManagerProps {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { Transaction, Category, Account, Transfer } from '../types';
-import { Trash2, Edit2, Search, ArrowRightLeft, Repeat, AlertTriangle } from 'lucide-react';
+import { Trash2, Edit2, ArrowRightLeft, Repeat, AlertTriangle } from 'lucide-react';
 import { EmptyState } from './ui/EmptyState';
 import { GlassCard } from './ui/GlassCard';
 import { GlassButton } from './ui/GlassButton';

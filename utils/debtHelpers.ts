@@ -1,5 +1,5 @@
 import { Debt } from '../types';
-import { addMonths, differenceInMonths, parseISO } from 'date-fns';
+import { addMonths, parseISO } from 'date-fns';
 
 export interface DebtStats {
   remaining: number;

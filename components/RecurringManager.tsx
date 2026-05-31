@@ -12,7 +12,7 @@ import { GlassBadge } from './ui/GlassBadge';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
-import { Repeat, Plus, Trash2, Edit2, Play, CheckCircle, AlertCircle, ToggleLeft, ToggleRight, Calendar, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Edit2, Play, CheckCircle, AlertCircle, ToggleLeft, ToggleRight, Calendar, AlertTriangle } from 'lucide-react';
 import { EmptyState } from './ui/EmptyState';
 import { toast } from 'sonner';
 

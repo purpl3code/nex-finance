@@ -5,7 +5,7 @@ import { StorageService } from '../services/storageService';
 import { SyncService } from '../services/syncService';
 import { useAuth } from './useAuth';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
-import { addMonths, isAfter, endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth, parseISO } from 'date-fns';
+import { isAfter, endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth, parseISO } from 'date-fns';
 
 export const useFinance = () => {
   const { session } = useAuth();

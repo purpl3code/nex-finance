@@ -22,7 +22,7 @@ import { PageShell } from './components/ui/PageShell';
 import { PageHeader } from './components/ui/PageHeader';
 import { ThemeService } from './services/themeService';
 import { FilterState } from './types';
-import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft, Wallet, LayoutDashboard, List as ListIcon } from 'lucide-react';
+import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft, Wallet } from 'lucide-react';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { MobileFab } from './components/ui/MobileFab';
 import { Toaster } from 'sonner';

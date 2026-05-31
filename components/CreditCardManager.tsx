@@ -20,7 +20,6 @@ import {
   parseBankTransactions,
   parseBankCsv,
   exportInvoiceAsCsv,
-  detectBank,
   ParsedTransaction,
   BankId,
   SUPPORTED_BANKS,
@@ -164,7 +163,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [rawLines, setRawLines] = useState<string[]>([]);
   const [rawCsvText, setRawCsvText] = useState<string>('');
-  const [fileFormat, setFileFormat] = useState<'pdf' | 'csv' | null>(null);
   const [isIEMenuOpen, setIsIEMenuOpen] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,7 +171,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     setIsImporting(true);
     try {
       const result = await parseInvoiceFile(file, currentDate.getFullYear(), selectedBank === 'generic' ? undefined : selectedBank);
-      setFileFormat(result.format);
       // store raw data for re-parse
       if (result.format === 'csv') {
         const text = await file.text().catch(async () => new TextDecoder('iso-8859-1').decode(await file.arrayBuffer()));
@@ -231,7 +228,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     setImportedTransactions([]);
     setRawLines([]);
     setRawCsvText('');
-    setFileFormat(null);
     setDetectedBank('generic');
     setSelectedBank('generic');
   };

@@ -12,8 +12,6 @@ interface CurrencyInputProps {
   required?: boolean;
   autoFocus?: boolean;
   className?: string;
-  min?: string;
-  max?: string | number;
   icon?: React.ReactNode;
 }
 
@@ -72,8 +70,6 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   required,
   autoFocus,
   className = '',
-  min,
-  max,
   icon,
 }) => {
   // Convert parent's raw value to cents for internal state

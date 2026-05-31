@@ -11,7 +11,6 @@ import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { Building2, Wallet, Banknote, Edit2, Trash2, Plus, Lock, AlertTriangle } from 'lucide-react';
-import { EmptyState } from './ui/EmptyState';
 
 interface AccountListProps {
   accounts: Account[];

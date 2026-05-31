@@ -608,7 +608,6 @@ export function parseBankCsv(text: string, year: number, bankHint?: BankId): Par
     const dateIdx = headers.indexOf('date');
     const titleIdx = headers.indexOf('title');
     const amtIdx = headers.indexOf('amount');
-    const catIdx = headers.indexOf('category');
 
     const transactions: ParsedTransaction[] = [];
     for (let i = 1; i < nonEmpty.length; i++) {
@@ -622,7 +621,6 @@ export function parseBankCsv(text: string, year: number, bankHint?: BankId): Par
       const amount = parseCsvAmount(rawAmt);
       if (isNaN(amount) || amount <= 0) continue; // skip payments (negative)
       const { description, installments } = splitInstallments(rawDesc);
-      const _ = catIdx >= 0 ? cols[catIdx] : undefined; // category available but not used here
       transactions.push({ id: makeId(), date, description, amount, installments, originalText: nonEmpty[i] });
     }
     return { bank, bankName: bankInfo.name, transactions, rawLineCount: nonEmpty.length, format: 'csv' };

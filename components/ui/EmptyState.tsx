@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { GlassButton } from './GlassButton';
 import { 
   Search, CreditCard, Target, Repeat, PieChart, 
-  TrendingUp, Wallet, List, BarChart3, Settings,
+  TrendingUp, Wallet, List, BarChart3,
   Plus, AlertTriangle
 } from 'lucide-react';
 
