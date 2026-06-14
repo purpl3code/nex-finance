@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { Transaction, Category, Account, Transfer } from '../types';
-import { Trash2, Edit2, ArrowRightLeft, Repeat, AlertTriangle } from 'lucide-react';
+import { Trash2, Edit2, Copy, ArrowRightLeft, Repeat, AlertTriangle } from 'lucide-react';
 import { EmptyState } from './ui/EmptyState';
 import { GlassCard } from './ui/GlassCard';
 import { GlassButton } from './ui/GlassButton';
@@ -13,6 +13,7 @@ interface TransactionListProps {
   accounts: Account[]; // Needed for resolving Transfer names
   onEdit: (item: any) => void;
   onDelete: (id: string, isTransfer: boolean) => void;
+  onDuplicate?: (item: any) => void;
 }
 
 export const TransactionList: React.FC<TransactionListProps> = React.memo(({ 
@@ -20,7 +21,8 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
   categories,
   accounts,
   onEdit, 
-  onDelete 
+  onDelete,
+  onDuplicate
 }) => {
   const [deletingItem, setDeletingItem] = useState<any>(null);
 
@@ -113,6 +115,15 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                         >
                           <Edit2 size={16} />
                         </button>
+                        {onDuplicate && !isTransfer && (
+                          <button 
+                            onClick={() => onDuplicate(item)}
+                            className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            title="Duplicar"
+                          >
+                            <Copy size={16} />
+                          </button>
+                        )}
                         <button 
                           onClick={() => setDeletingItem(item)}
                           className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
@@ -181,6 +192,16 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                   >
                     <Edit2 size={14} className="mr-1.5" /> Editar
                   </GlassButton>
+                  {onDuplicate && !isTransfer && (
+                    <GlassButton 
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDuplicate(item)}
+                      className="text-slate-400 hover:text-white h-8 px-3"
+                    >
+                      <Copy size={14} className="mr-1.5" /> Duplicar
+                    </GlassButton>
+                  )}
                   <GlassButton 
                     variant="ghost"
                     size="sm"

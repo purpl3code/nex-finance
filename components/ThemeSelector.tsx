@@ -16,6 +16,7 @@ interface ThemeOption {
 }
 
 const THEMES: ThemeOption[] = [
+
   { 
     id: 'dark', 
     name: 'Padrão Dark', 
@@ -95,7 +96,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
                 : 'hover:scale-[1.01]'}
             `}
             style={{ 
-              '--tw-ring-color': theme.colors.primary + '80',
+              '--tw-ring-color': displayColors.primary + '80',
             } as React.CSSProperties}
           >
             {/* Card */}
@@ -106,39 +107,39 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
                   ? 'border-white/20 shadow-lg' 
                   : 'border-white/8 hover:border-white/15'}
               `}
-              style={{ backgroundColor: theme.colors.surface }}
+              style={{ backgroundColor: displayColors.surface }}
             >
               {/* Top gradient bar */}
               <div 
                 className="absolute top-0 left-0 right-0 h-[2px] opacity-80"
-                style={{ background: `linear-gradient(90deg, transparent, ${theme.colors.primary}90, transparent)` }}
+                style={{ background: `linear-gradient(90deg, transparent, ${displayColors.primary}90, transparent)` }}
               />
 
               {/* Color palette preview */}
               <div 
                 className="w-full h-14 rounded-xl mb-3 relative overflow-hidden border border-white/5"
-                style={{ backgroundColor: theme.colors.bg }}
+                style={{ backgroundColor: displayColors.bg }}
               >
                 {/* Mini UI mockup inside */}
                 <div className="absolute inset-2 flex gap-1.5">
                   {/* Mini sidebar */}
                   <div 
                     className="w-3 h-full rounded-md opacity-70"
-                    style={{ backgroundColor: theme.colors.surface }}
+                    style={{ backgroundColor: displayColors.surface }}
                   />
                   {/* Mini content */}
                   <div className="flex-1 flex flex-col gap-1 justify-center">
                     <div 
                       className="h-1.5 rounded-full w-3/4"
-                      style={{ backgroundColor: theme.colors.primary, opacity: 0.9 }}
+                      style={{ backgroundColor: displayColors.primary, opacity: 0.9 }}
                     />
                     <div 
                       className="h-1 rounded-full w-full opacity-30"
-                      style={{ backgroundColor: theme.colors.text }}
+                      style={{ backgroundColor: displayColors.text }}
                     />
                     <div 
                       className="h-1 rounded-full w-1/2 opacity-20"
-                      style={{ backgroundColor: theme.colors.text }}
+                      style={{ backgroundColor: displayColors.text }}
                     />
                   </div>
                 </div>
@@ -147,8 +148,8 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
                 <div 
                   className="absolute bottom-2 right-2 w-4 h-4 rounded-full shadow-lg"
                   style={{ 
-                    backgroundColor: theme.colors.primary,
-                    boxShadow: `0 0 8px ${theme.colors.primary}80`
+                    backgroundColor: displayColors.primary,
+                    boxShadow: `0 0 8px ${displayColors.primary}80`
                   }}
                 />
               </div>
@@ -158,19 +159,19 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
                 <div>
                   <p 
                     className="text-xs font-bold leading-tight"
-                    style={{ color: theme.colors.text === theme.colors.primary ? '#fff' : theme.colors.text }}
+                    style={{ color: displayColors.text === displayColors.primary ? '#fff' : displayColors.text }}
                   >
                     {theme.name}
                   </p>
                   <p 
                     className="text-[10px] mt-0.5 opacity-60"
-                    style={{ color: theme.colors.text }}
+                    style={{ color: displayColors.text }}
                   >
-                    {theme.description}
+                    {displayDescription}
                   </p>
                 </div>
                 {theme.icon && (
-                  <span style={{ color: theme.colors.primary }} className="opacity-60 mt-0.5">{theme.icon}</span>
+                  <span style={{ color: displayColors.primary }} className="opacity-60 mt-0.5">{theme.icon}</span>
                 )}
               </div>
 
@@ -178,7 +179,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
               {isActive && (
                 <div 
                   className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
-                  style={{ backgroundColor: theme.colors.primary }}
+                  style={{ backgroundColor: displayColors.primary }}
                 >
                   <Check size={10} strokeWidth={3} style={{ color: theme.id === 'pure-white' ? '#fff' : '#000' }} />
                 </div>

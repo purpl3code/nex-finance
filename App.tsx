@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useFinance } from './hooks/useFinance';
 import { useAuth } from './hooks/useAuth';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { Dashboard } from './components/Dashboard';
 import { TransactionList } from './components/TransactionList';
 import { TransactionForm } from './components/TransactionForm';
@@ -22,10 +23,11 @@ import { PageShell } from './components/ui/PageShell';
 import { PageHeader } from './components/ui/PageHeader';
 import { ThemeService } from './services/themeService';
 import { FilterState } from './types';
-import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft, Wallet } from 'lucide-react';
+import { Plus, Search, Menu, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft, Wallet, Download } from 'lucide-react';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { MobileFab } from './components/ui/MobileFab';
 import { Toaster } from 'sonner';
+import { exportTransactionsToCSV } from './utils/csvExport';
 import { useUserProfile } from './hooks/useUserProfile';
 
 // Define valid tabs for type safety
@@ -226,6 +228,21 @@ const App: React.FC = () => {
     handleCloseModal();
   };
 
+  const handleDuplicate = (item: any) => {
+    // Copy all fields but strip identifying info so a new transaction is created
+    const { id, createdAt, generatedByRuleId, generatedKey, linkedInvoiceId, ...rest } = item;
+    const duplicated = {
+      ...rest,
+      date: new Date().toISOString().split('T')[0], // Reset date to today
+      description: rest.description ? `${rest.description} (cópia)` : '(cópia)',
+    };
+    handleOpenModal(duplicated);
+  };
+
+  const handleExportCSV = () => {
+    exportTransactionsToCSV(unifiedList, categories, accounts);
+  };
+
   const handleDeleteItem = (id: string, isTransfer: boolean) => {
     if (isTransfer) {
       deleteTransfer(id);
@@ -233,6 +250,14 @@ const App: React.FC = () => {
       deleteTransaction(id);
     }
   };
+
+  // --- KEYBOARD SHORTCUTS ---
+  useKeyboardShortcuts({
+    onNewTransaction: () => handleOpenModal(),
+    onNavigate: setActiveTab,
+    onCloseModal: handleCloseModal,
+    isModalOpen,
+  });
 
   // --- AUTH LOADING STATE ---
   if (authLoading) {
@@ -459,6 +484,16 @@ const App: React.FC = () => {
                               className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none placeholder-slate-500 hover:border-white/20 transition-all"
                             />
                           </div>
+                          <div className="h-6 w-px bg-white/10 mx-1 hidden md:block"></div>
+                          <GlassButton 
+                            onClick={handleExportCSV}
+                            icon={<Download size={16} />}
+                            variant="secondary"
+                            size="sm"
+                            className="hidden md:flex"
+                          >
+                            CSV
+                          </GlassButton>
                         </>
                       }
                    />
@@ -468,6 +503,7 @@ const App: React.FC = () => {
                     accounts={accounts}
                     onEdit={handleOpenModal}
                     onDelete={handleDeleteItem}
+                    onDuplicate={handleDuplicate}
                   />
                 </PageShell>
               )}

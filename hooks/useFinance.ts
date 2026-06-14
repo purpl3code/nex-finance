@@ -5,7 +5,7 @@ import { StorageService } from '../services/storageService';
 import { SyncService } from '../services/syncService';
 import { useAuth } from './useAuth';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
-import { isAfter, endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth, parseISO } from 'date-fns';
+import { endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth, parseISO } from 'date-fns';
 
 export const useFinance = () => {
   const { session } = useAuth();
@@ -338,6 +338,22 @@ export const useFinance = () => {
     touchData();
   }, [touchData]);
 
+  /**
+   * Helper: Given an invoice reference month (the month the due date falls in),
+   * returns the month/year where the closing date actually falls.
+   * 
+   * Rule: if dueDay >= closingDay, closing is in the same month as due.
+   *       if dueDay < closingDay, closing is in the month before due.
+   */
+  const getClosingMonthForInvoice = useCallback((invMonth: number, invYear: number, closingDay: number, dueDay: number) => {
+    let cM = invMonth, cY = invYear;
+    if (dueDay < closingDay) {
+      cM--;
+      if (cM < 0) { cM = 11; cY--; }
+    }
+    return { closingMonth: cM, closingYear: cY };
+  }, []);
+
   const addCreditCardTransaction = useCallback((
     tx: Omit<CreditCardTransaction, 'id' | 'createdAt' | 'installment' | 'type'>,
     installments: number,
@@ -349,35 +365,73 @@ export const useFinance = () => {
     const dueDay     = card?.dueDay    ?? 10;
     const baseDate   = new Date(tx.date + 'T12:00:00');
 
-    // Step 1: find which invoice the purchase date belongs to
-    let firstInvMonth = baseDate.getMonth();
-    let firstInvYear  = baseDate.getFullYear();
+    // Step 1: Find which invoice the purchase date belongs to.
+    // Strategy: find the earliest closing date >= purchase date.
+    // Start from the purchase's own month and scan forward.
+    let searchMonth = baseDate.getMonth();
+    let searchYear  = baseDate.getFullYear();
+    let firstInvMonth: number;
+    let firstInvYear: number;
 
-    for (let attempt = 0; attempt < 4; attempt++) {
-      let cM = firstInvMonth, cY = firstInvYear;
-      if (dueDay < closingDay) { cM--; if (cM < 0) { cM = 11; cY--; } }
-      const days = getDaysInMonth(new Date(cY, cM, 1));
-      const cd   = new Date(cY, cM, Math.min(closingDay, days), 23, 59);
-      if (cd >= baseDate) break;
-      firstInvMonth++;
-      if (firstInvMonth > 11) { firstInvMonth = 0; firstInvYear++; }
+    // We try up to 3 months forward (should never need more than 1)
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const m = searchMonth + attempt;
+      const y = searchYear + Math.floor(m / 12);
+      const mNorm = ((m % 12) + 12) % 12;
+
+      const daysInM = getDaysInMonth(new Date(y, mNorm, 1));
+      const actualClosing = Math.min(closingDay, daysInM);
+      const closingDate = new Date(y, mNorm, actualClosing, 23, 59, 59);
+
+      if (closingDate >= baseDate) {
+        // This closing date covers our purchase.
+        // Now derive the invoice reference month from this closing month.
+        // Inverse of getClosingMonthForInvoice:
+        //   if dueDay >= closingDay: invMonth = closingMonth
+        //   if dueDay < closingDay:  invMonth = closingMonth + 1
+        let invM = mNorm, invY = y;
+        if (dueDay < closingDay) {
+          invM++;
+          if (invM > 11) { invM = 0; invY++; }
+        }
+        firstInvMonth = invM;
+        firstInvYear = invY;
+        break;
+      }
     }
 
-    // Step 2: create one transaction per invoice month, using day 15
-    // of the closing month. Day 15 always falls inside the invoice window.
+    // Fallback (should not happen)
+    firstInvMonth = firstInvMonth! ?? baseDate.getMonth();
+    firstInvYear = firstInvYear! ?? baseDate.getFullYear();
+
+    // Step 2: Create one transaction per installment, each in its corresponding
+    // invoice month. Use a date guaranteed to fall inside the invoice window:
+    // prevClosingDay + 1 of the closing month.
     const newTxs: CreditCardTransaction[] = [];
     const amt = tx.amount / installments;
 
     for (let i = 0; i < installments; i++) {
       const total = firstInvMonth + i;
       const invYear  = firstInvYear + Math.floor(total / 12);
-      const invMonth = total % 12;
+      const invMonth = ((total % 12) + 12) % 12;
 
-      // The closing month for this invoice
-      let cM = invMonth, cY = invYear;
-      if (dueDay < closingDay) { cM--; if (cM < 0) { cM = 11; cY--; } }
+      // Get the closing month for this invoice
+      const { closingMonth: cM, closingYear: cY } = getClosingMonthForInvoice(invMonth, invYear, closingDay, dueDay);
 
-      const dateStr = format(new Date(cY, cM, 15), 'yyyy-MM-dd');
+      // Compute prev closing month
+      let prevCM = cM - 1, prevCY = cY;
+      if (prevCM < 0) { prevCM = 11; prevCY--; }
+      const daysInPrevCM = getDaysInMonth(new Date(prevCY, prevCM, 1));
+      const prevActualClosing = Math.min(closingDay, daysInPrevCM);
+
+      // Use prevClosingDay + 1 in the closing month as the artificial date.
+      // This date is always inside the window (prevClosing, closing].
+      const safeDay = prevActualClosing + 1;
+      // Clamp to valid range for the closing month
+      const daysInCM = getDaysInMonth(new Date(cY, cM, 1));
+      const actualDay = Math.min(safeDay, Math.min(closingDay, daysInCM));
+
+      const dateStr = format(new Date(cY, cM, actualDay), 'yyyy-MM-dd');
 
       newTxs.push({
         ...tx, type: 'purchase', date: dateStr, amount: amt,
@@ -387,7 +441,7 @@ export const useFinance = () => {
     }
     setCreditCardTransactions(prev => [...newTxs, ...prev]);
     touchData();
-  }, [creditCards, touchData]);
+  }, [creditCards, getClosingMonthForInvoice, touchData]);
 
 
 
@@ -797,30 +851,26 @@ export const useFinance = () => {
   }, [touchData]);
 
   // Invoice Logic (Optimization: Memoize result if inputs same)
+  // month/year = the invoice reference month (the month the due date falls in)
   const getCardInvoiceInfo = useCallback((cardId: string, month: number, year: number) => {
     const card = creditCards.find(c => c.id === cardId);
     if (!card) return null;
     const storedInvoice = creditCardInvoices.find(i => i.cardId === cardId && i.month === month && i.year === year);
     if (storedInvoice) return storedInvoice;
 
-    const daysInMonth = getDaysInMonth(new Date(year, month, 1));
-    const actualDueDay = Math.min(card.dueDay, daysInMonth);
+    // Due date is always in the reference month
+    const daysInDueMonth = getDaysInMonth(new Date(year, month, 1));
+    const actualDueDay = Math.min(card.dueDay, daysInDueMonth);
     const dueDate = new Date(year, month, actualDueDay);
     
-    let closingMonth = month;
-    let closingYear = year;
-    if (card.dueDay < card.closingDay) {
-      closingMonth = month - 1;
-      if (closingMonth < 0) {
-        closingMonth = 11;
-        closingYear = year - 1;
-      }
-    }
+    // Closing month: use same helper logic as addCreditCardTransaction
+    const { closingMonth, closingYear } = getClosingMonthForInvoice(month, year, card.closingDay, card.dueDay);
     
     const daysInClosingMonth = getDaysInMonth(new Date(closingYear, closingMonth, 1));
     const actualClosingDay = Math.min(card.closingDay, daysInClosingMonth);
-    const closingDate = new Date(closingYear, closingMonth, actualClosingDay);
+    const closingDate = new Date(closingYear, closingMonth, actualClosingDay, 23, 59, 59);
     
+    // Previous closing (defines the start of the invoice window)
     let prevClosingMonth = closingMonth - 1;
     let prevClosingYear = closingYear;
     if (prevClosingMonth < 0) {
@@ -830,13 +880,14 @@ export const useFinance = () => {
 
     const daysInPrevClosingMonth = getDaysInMonth(new Date(prevClosingYear, prevClosingMonth, 1));
     const actualPrevClosingDay = Math.min(card.closingDay, daysInPrevClosingMonth);
-    const prevMonthClosing = new Date(prevClosingYear, prevClosingMonth, actualPrevClosingDay);
+    const prevMonthClosing = new Date(prevClosingYear, prevClosingMonth, actualPrevClosingDay, 23, 59, 59);
     
-    // Updated: Now includes refunds and purchases
+    // Invoice window: (prevMonthClosing, closingDate]
+    // Transactions with date > prevClosingDay AND date <= closingDay
     const invoiceTxs = creditCardTransactions.filter(t => {
       if (t.cardId !== cardId) return false;
       const tDate = new Date(t.date + 'T12:00:00');
-      return isAfter(tDate, prevMonthClosing) && (tDate <= closingDate);
+      return tDate > prevMonthClosing && tDate <= closingDate;
     });
 
     return {
@@ -851,7 +902,7 @@ export const useFinance = () => {
       isPaid: false,
       transactions: invoiceTxs
     };
-  }, [creditCards, creditCardTransactions, creditCardInvoices]);
+  }, [creditCards, creditCardTransactions, creditCardInvoices, getClosingMonthForInvoice]);
 
   const getCreditCardStats = useCallback(() => {
     const totalLimit = creditCards.reduce((sum, c) => sum + c.limit, 0);
