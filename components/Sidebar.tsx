@@ -216,9 +216,6 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         
-        {/* Subtle top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent pointer-events-none" />
-
         {/* HEADER */}
         <SidebarHeader 
           collapsed={collapsed}

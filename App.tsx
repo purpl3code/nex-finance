@@ -366,8 +366,6 @@ const App: React.FC = () => {
         
         {/* Mobile Header (Hidden on Desktop) */}
         <header className="md:hidden flex items-center justify-between py-3 px-4 glass-lg border-b border-white/8 z-20 relative overflow-hidden">
-          {/* Accent top line */}
-          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent pointer-events-none" />
           <div className="flex items-center gap-3">
              <button 
                onClick={() => setIsMobileSidebarOpen(true)} 
