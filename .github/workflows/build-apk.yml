@@ -48,25 +48,25 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Build Debug APK
-        run: cd android && ./gradlew assembleDebug
+      - name: Build Release APK
+        run: cd android && ./gradlew assembleRelease
 
       - name: Rename APK
         run: |
           VERSION=${GITHUB_REF_NAME:-dev}
-          mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/nex-finance-${VERSION}.apk
+          mv android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/nex-finance-${VERSION}.apk
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: nex-finance-apk
-          path: android/app/build/outputs/apk/debug/nex-finance-*.apk
+          path: android/app/build/outputs/apk/release/nex-finance-*.apk
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: android/app/build/outputs/apk/debug/nex-finance-*.apk
+          files: android/app/build/outputs/apk/release/nex-finance-*.apk
           generate_release_notes: true
           body: |
             ## 📱 Nex Finance ${{ github.ref_name }}
