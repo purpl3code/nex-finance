@@ -9,3 +9,12 @@ dist
 coverage
 supabase/.temp
 supabase/.cache
+
+# Android / Capacitor
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+android/.idea/
+*.apk
+*.aab

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nex Finance</string>
+    <string name="title_activity_main">Nex Finance</string>
+    <string name="package_name">com.nexfinance.app</string>
+    <string name="custom_url_scheme">com.nexfinance.app</string>
+</resources>

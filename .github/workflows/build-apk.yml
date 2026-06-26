@@ -1,0 +1,71 @@
+name: Build Android APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Java (Android SDK requires JDK 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build Debug APK
+        run: cd android && ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: |
+          VERSION=${GITHUB_REF_NAME:-dev}
+          mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/nex-finance-${VERSION}.apk
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nex-finance-apk
+          path: android/app/build/outputs/apk/debug/nex-finance-*.apk
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: android/app/build/outputs/apk/debug/nex-finance-*.apk
+          generate_release_notes: true
+          body: |
+            ## 📱 Nex Finance ${{ github.ref_name }}
+            
+            ### Como instalar
+            1. Baixe o arquivo `.apk` abaixo
+            2. No seu celular Android, abra o arquivo
+            3. Caso peça, habilite "Instalar de fontes desconhecidas"
+            4. Pronto! O app estará instalado
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
