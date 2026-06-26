@@ -385,28 +385,3 @@ path.recharts-sector:focus {
     width: 100% !important;
   }
 }
-
-/* ============================================
-   MOBILE PERFORMANCE OPTIMIZATIONS
-   ============================================ */
-@media (max-width: 768px) {
-  /* Disable GPU-heavy glassmorphism blurs on mobile devices */
-  *, *::before, *::after {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-  
-  /* Make backgrounds more solid on mobile to keep high contrast without blur */
-  .glass-base {
-    background: rgb(var(--c-bg-950) / 0.92) !important;
-  }
-  .glass-sm {
-    background: rgb(var(--c-bg-900) / 0.88) !important;
-  }
-  .glass-lg {
-    background: rgb(var(--c-bg-900) / 0.95) !important;
-  }
-  .glass-inset {
-    background: rgb(var(--c-bg-950) / 0.85) !important;
-  }
-}
