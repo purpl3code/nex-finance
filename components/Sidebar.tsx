@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { SidebarHeader } from './SidebarHeader';
 import { useUserProfile } from '../hooks/useUserProfile';
+import { APP_VERSION } from '../constants';
 
 interface SidebarProps {
   activeTab: string;
@@ -253,7 +254,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           <div className="p-4 border-t border-white/5 animate-in fade-in duration-500">
             <div className="flex items-center justify-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'rgb(var(--c-primary-500) / 0.7)' }} />
-              <p className="text-[10px] text-slate-600 font-semibold tracking-wider">v1.0.0 · Nex Finance</p>
+              <p className="text-[10px] text-slate-600 font-semibold tracking-wider">{APP_VERSION} · Nex Finance</p>
             </div>
           </div>
         )}
