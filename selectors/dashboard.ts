@@ -71,7 +71,24 @@ export const getMonthlySummary = (
     })
     .reduce((sum, t) => sum + t.amount, 0); // Refunds are already negative in the model, so simple sum works
 
+  // 4. Calculate Invoice Payments made this month (to avoid double-counting)
+  // When a user pays a credit card invoice, totalBalance decreases (money leaves the account).
+  // But card purchases are ALSO counted in cardExpenses/totalSpent.
+  // We add invoicePayments back to totalBalance so card spending is only counted once (via totalSpent).
+  const invoicePayments = transactions
+    .filter(t => {
+      const d = new Date(t.date + 'T12:00:00');
+      return (
+        t.type === 'expense' &&
+        t.categoryId === 'cat_invoice_payment' &&
+        d.getMonth() === month &&
+        d.getFullYear() === year
+      );
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
+
   const totalSpent = expenses + cardExpenses;
+  const adjustedBalance = totalBalance + invoicePayments;
 
   return {
     income,
@@ -79,7 +96,7 @@ export const getMonthlySummary = (
     cardExpenses,
     totalSpent,
     totalBalance,
-    remainingBalance: totalBalance - totalSpent
+    remainingBalance: adjustedBalance - totalSpent
   };
 };
 
