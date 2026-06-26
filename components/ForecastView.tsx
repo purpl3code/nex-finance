@@ -213,19 +213,19 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
       >
 
         {/* ═══════════════ STAT CARDS ═══════════════ */}
-        <motion.div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" variants={itemVariants}>
+        <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" variants={itemVariants}>
 
           {/* Saldo Inicial */}
           <GlassCard className="p-4 sm:p-5 relative overflow-hidden">
             <div className="absolute -right-3 -bottom-3 opacity-[0.03]"><Wallet size={72} /></div>
             <div className="flex items-start justify-between relative z-10">
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-500 font-bold mb-1.5">Saldo Inicial</p>
-                <p className="text-lg sm:text-2xl font-bold text-white truncate" title={formatCurrency(forecastData.initialBalance)}>
+                <p className="text-xl sm:text-2xl font-bold text-white truncate" title={formatCurrency(forecastData.initialBalance)}>
                   {formatCurrency(forecastData.initialBalance)}
                 </p>
               </div>
-              <div className="p-2 rounded-xl bg-white/[0.06] border border-white/10 flex-shrink-0">
+              <div className="p-2 rounded-xl bg-white/[0.06] border border-white/10 flex-shrink-0 ml-2">
                 <Wallet size={16} className="text-slate-400" />
               </div>
             </div>
@@ -246,7 +246,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-500 font-bold mb-1.5">Saldo Final</p>
                 <p
-                  className={`text-lg sm:text-2xl font-bold truncate ${forecastData.endBalance >= 0 ? 'value-text-accent' : 'value-text-negative'}`}
+                  className={`text-xl sm:text-2xl font-bold truncate ${forecastData.endBalance >= 0 ? 'value-text-accent' : 'value-text-negative'}`}
                   title={formatCurrency(forecastData.endBalance)}
                 >
                   {formatCurrency(forecastData.endBalance)}
@@ -262,7 +262,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                   </div>
                 )}
               </div>
-              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+              <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-2">
                 <div
                   className={`p-2 rounded-xl border ${
                     forecastData.endBalance >= 0
@@ -274,7 +274,9 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                     ? <TrendingUp size={16} className="text-[rgb(var(--c-primary-400))]" />
                     : <TrendingDown size={16} className="text-red-400" />}
                 </div>
-                <MiniSparkline data={sparklineData} color={forecastData.endBalance >= 0 ? 'rgb(var(--c-primary-400))' : '#f87171'} />
+                <div className="hidden sm:block">
+                  <MiniSparkline data={sparklineData} color={forecastData.endBalance >= 0 ? 'rgb(var(--c-primary-400))' : '#f87171'} />
+                </div>
               </div>
             </div>
           </GlassCard>
@@ -287,10 +289,10 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
           >
             <div className="absolute -right-3 -bottom-3 opacity-[0.03]"><ShieldAlert size={72} /></div>
             <div className="flex items-start justify-between relative z-10">
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-500 font-bold mb-1.5">Pior Cenário</p>
                 <p
-                  className={`text-lg sm:text-2xl font-bold truncate ${forecastData.minBalance >= 0 ? 'text-white' : 'text-amber-400'}`}
+                  className={`text-xl sm:text-2xl font-bold truncate ${forecastData.minBalance >= 0 ? 'text-white' : 'text-amber-400'}`}
                   title={formatCurrency(forecastData.minBalance)}
                 >
                   {formatCurrency(forecastData.minBalance)}
@@ -301,7 +303,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                   </p>
                 )}
               </div>
-              <div className={`p-2 rounded-xl border ${
+              <div className={`p-2 rounded-xl border flex-shrink-0 ml-2 ${
                 forecastData.minBalance >= 0
                   ? 'bg-white/[0.06] border-white/10'
                   : 'bg-amber-500/10 border-amber-500/20'
@@ -323,11 +325,11 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
               {forecastData.riskDate ? <ShieldAlert size={72} /> : <ShieldCheck size={72} />}
             </div>
             <div className="flex items-start justify-between relative z-10">
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-500 font-bold mb-1.5">Risco de Negativo</p>
                 {forecastData.riskDate ? (
                   <div>
-                    <p className="text-lg sm:text-2xl font-bold text-red-400">
+                    <p className="text-xl sm:text-2xl font-bold text-red-400">
                       {format(parseISO(forecastData.riskDate), 'dd/MM')}
                     </p>
                     <p className="text-[10px] text-red-400/70 mt-0.5">Saldo pode ficar negativo</p>
@@ -339,7 +341,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ accounts, onGetForec
                   </div>
                 )}
               </div>
-              <div className={`p-2 rounded-xl border ${
+              <div className={`p-2 rounded-xl border flex-shrink-0 ml-2 ${
                 forecastData.riskDate
                   ? 'bg-red-500/10 border-red-500/20'
                   : 'bg-emerald-500/10 border-emerald-500/20'
