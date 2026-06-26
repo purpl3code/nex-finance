@@ -169,27 +169,29 @@ export const DebtManager: React.FC<DebtManagerProps> = ({
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-xl w-fit border border-white/8">
-        <button
-          onClick={() => setActiveTab('active')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'active'
-              ? 'bg-[rgb(var(--c-primary-500)/0.2)] text-[rgb(var(--c-primary-300))] shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          Em Aberto
-        </button>
-        <button
-          onClick={() => setActiveTab('settled')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'settled'
-              ? 'bg-[rgb(var(--c-primary-500)/0.2)] text-[rgb(var(--c-primary-300))] shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          Quitadas
-        </button>
+      <div className="border-b border-white/10 mb-6">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab('active')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'active'
+                ? 'border-[rgb(var(--c-primary-500))] text-[rgb(var(--c-primary-400))]'
+                : 'border-transparent text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Em Aberto
+          </button>
+          <button
+            onClick={() => setActiveTab('settled')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'settled'
+                ? 'border-[rgb(var(--c-primary-500))] text-[rgb(var(--c-primary-400))]'
+                : 'border-transparent text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Quitadas
+          </button>
+        </div>
       </div>
 
       {/* Debt Cards Grid */}
