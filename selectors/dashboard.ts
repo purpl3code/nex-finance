@@ -9,7 +9,8 @@ export interface MonthlySummary {
   expenses: number; // Direct expenses (excluding invoice payments)
   cardExpenses: number; // Credit card purchases - refunds
   totalSpent: number;
-  remainingBalance: number; // Income - Total Spent
+  totalBalance: number; // Total balance across all accounts
+  remainingBalance: number; // Total Balance - Total Spent (what user really has left)
 }
 
 export interface ForecastSummary {
@@ -38,7 +39,8 @@ export const getMonthlySummary = (
   transactions: Transaction[],
   cardTransactions: CreditCardTransaction[],
   month: number,
-  year: number
+  year: number,
+  totalBalance: number = 0
 ): MonthlySummary => {
   // 1. Calculate Income
   const income = transactions
@@ -76,7 +78,8 @@ export const getMonthlySummary = (
     expenses,
     cardExpenses,
     totalSpent,
-    remainingBalance: income - totalSpent
+    totalBalance,
+    remainingBalance: totalBalance - totalSpent
   };
 };
 

@@ -40,13 +40,13 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
         />
         
         <div className="flex flex-wrap gap-2 text-xs font-medium">
-          <div className="flex items-center gap-1.5 text-slate-200 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 backdrop-blur-sm">
-            <ArrowUp size={11} className="text-emerald-400 shrink-0" />
-            <span className="truncate">Renda: <span className="font-bold text-emerald-300">{formatCurrency(summary.income)}</span></span>
+          <div className="flex items-center gap-1.5 text-slate-200 bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20 backdrop-blur-sm">
+            <ArrowUp size={11} className="text-blue-400 shrink-0" />
+            <span className="truncate">Saldo Total: <span className="font-bold text-blue-300">{formatCurrency(summary.totalBalance)}</span></span>
           </div>
           <div className="flex items-center gap-1.5 text-slate-200 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20 backdrop-blur-sm">
             <ArrowDown size={11} className="text-red-400 shrink-0" />
-            <span className="truncate">Gastos: <span className="font-bold text-red-300">{formatCurrency(summary.totalSpent)}</span></span>
+            <span className="truncate">Gastos do Mês: <span className="font-bold text-red-300">{formatCurrency(summary.totalSpent)}</span></span>
           </div>
         </div>
       </div>

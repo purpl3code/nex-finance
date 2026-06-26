@@ -70,8 +70,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   // --- MEMOIZED CALCULATIONS (PREMIUM FEATURES) ---
 
   const monthlySummary = useMemo(() => 
-    getMonthlySummary(transactions, creditCardTransactions, month, year),
-  [transactions, creditCardTransactions, month, year]);
+    getMonthlySummary(transactions, creditCardTransactions, month, year, totalBalance),
+  [transactions, creditCardTransactions, month, year, totalBalance]);
 
   const invoicesForForecast = useMemo(() => {
     if (!getCardInvoiceInfo) return [];
