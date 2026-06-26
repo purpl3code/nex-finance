@@ -397,3 +397,19 @@ path.recharts-sector:focus {
     width: 100% !important;
   }
 }
+
+/* ============================================
+   MOBILE SAFE AREA / EDGE-TO-EDGE SUPPORT
+   ============================================ */
+@media (max-width: 768px) {
+  /* Push mobile header down so it does not overlap with the status bar clock/icons */
+  header.md\:hidden {
+    padding-top: calc(0.75rem + env(safe-area-inset-top)) !important;
+    height: auto !important;
+  }
+  
+  /* Push mobile sidebar down when open */
+  aside.fixed {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+}

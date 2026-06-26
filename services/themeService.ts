@@ -73,6 +73,16 @@ export const ThemeService = {
   initialize: () => {
     const current = ThemeService.getTheme();
     ThemeService.applyTheme(current);
+
+    // Enable status bar overlay on native apps to allow dynamic background coloring
+    if (Capacitor.isNativePlatform()) {
+      try {
+        StatusBar.setOverlaysWebView({ overlay: true });
+      } catch (e) {
+        console.error('Error setting status bar overlay', e);
+      }
+    }
+
     return current;
   }
 };
