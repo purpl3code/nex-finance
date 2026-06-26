@@ -16,7 +16,7 @@ import { GoalManager } from './components/GoalManager';
 import { DebtManager } from './components/DebtManager';
 import { ReportView } from './components/ReportView';
 import { Sidebar } from './components/Sidebar';
-import { ModalShell } from './components/ui/ModalShell';
+import { ModalShell, ModalBody, ModalFooter } from './components/ui/ModalShell';
 import { GlassButton } from './components/ui/GlassButton';
 import { GlassSelect } from './components/ui/GlassSelect';
 import { PageShell } from './components/ui/PageShell';
@@ -29,6 +29,8 @@ import { MobileFab } from './components/ui/MobileFab';
 import { Toaster } from 'sonner';
 import { exportTransactionsToCSV } from './utils/csvExport';
 import { useUserProfile } from './hooks/useUserProfile';
+import { UpdateService, AppUpdate } from './services/updateService';
+import { APP_VERSION } from './constants';
 
 // Define valid tabs for type safety
 type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals' | 'reports' | 'debts';
@@ -117,6 +119,16 @@ const App: React.FC = () => {
   const [activeTab, setActiveTabState] = useState<AppTab>(getTabFromHash());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [update, setUpdate] = useState<AppUpdate | null>(null);
+
+  // Check for updates
+  useEffect(() => {
+    // Only check after a slight delay to let the app load smoothly
+    const timer = setTimeout(() => {
+      UpdateService.checkForUpdates().then(setUpdate);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -633,6 +645,45 @@ const App: React.FC = () => {
           currentMonth={filters.month}
           currentYear={filters.year}
         />
+      </ModalShell>
+
+      {/* Update Check Modal */}
+      <ModalShell 
+        isOpen={!!update} 
+        onClose={() => setUpdate(null)} 
+        title="Atualização Disponível 🚀"
+      >
+        <ModalBody>
+          <div className="text-center space-y-4 py-4">
+            <div className="bg-[rgb(var(--c-primary-500)/0.1)] p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-[rgb(var(--c-primary-500)/0.2)]">
+               <Download size={32} className="text-[rgb(var(--c-primary-400))]" />
+            </div>
+            <div>
+              <p className="text-lg text-slate-200 font-semibold">Nova versão {update?.version} disponível!</p>
+              <p className="text-sm text-slate-400 mt-2">
+                Uma nova versão do Nex Finance foi encontrada no GitHub Releases.
+              </p>
+            </div>
+            {update?.releaseNotes && (
+              <div className="text-left bg-white/5 border border-white/8 rounded-xl p-3 max-h-32 overflow-y-auto text-xs text-slate-400">
+                <p className="font-semibold text-slate-300 mb-1">Notas da versão:</p>
+                <pre className="font-sans whitespace-pre-wrap">{update.releaseNotes}</pre>
+              </div>
+            )}
+            <p className="text-xs text-slate-500">
+              Versão atual: {APP_VERSION}
+            </p>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <GlassButton type="button" variant="ghost" onClick={() => setUpdate(null)}>Depois</GlassButton>
+          <GlassButton type="button" variant="primary" onClick={() => {
+            if (update) {
+              window.location.href = update.apkUrl;
+              setUpdate(null);
+            }
+          }}>Atualizar Agora</GlassButton>
+        </ModalFooter>
       </ModalShell>
 
       <MobileFab

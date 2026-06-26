@@ -104,3 +104,5 @@ export const COLORS = [
   '#F50057', // vivid rose
   '#E91E63', // magenta pink
 ];
+
+export const APP_VERSION = 'v1.2.1';
