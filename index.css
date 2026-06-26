@@ -84,6 +84,10 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: var(--glass-shadow);
+  
+  /* GPU Hardware Acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .glass-base::before {
@@ -109,6 +113,10 @@ body {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--glass-border);
+  
+  /* GPU Hardware Acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .glass-lg {
@@ -117,6 +125,10 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
+  
+  /* GPU Hardware Acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Card com glow temático ao hover */
@@ -139,6 +151,10 @@ body {
   border: 1px solid rgb(var(--c-text-100) / 0.06);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  
+  /* GPU Hardware Acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* ============================================
