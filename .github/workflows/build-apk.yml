@@ -50,6 +50,9 @@ jobs:
 
       - name: Build Release APK
         run: cd android && ./gradlew assembleRelease
+        env:
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+          ANDROID_VERSION_NAME: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '1.0.0-dev' }}
 
       - name: Rename APK
         run: |
