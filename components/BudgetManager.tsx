@@ -11,7 +11,7 @@ import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
-import { Trash2, Edit2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Trash2, Edit2, Plus, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { EmptyState } from './ui/EmptyState';
 
 interface BudgetManagerProps {
@@ -23,6 +23,8 @@ interface BudgetManagerProps {
   onEditBudget: (id: string, budget: any) => void;
   onDeleteBudget: (id: string) => void;
   getCategorySpending: (categoryId: string, month: number, year: number) => number;
+  transactions: any[];
+  creditCardTransactions: any[];
 }
 
 export const BudgetManager: React.FC<BudgetManagerProps> = ({
@@ -33,13 +35,17 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
   onAddBudget,
   onEditBudget,
   onDeleteBudget,
-  getCategorySpending
+  getCategorySpending,
+  transactions,
+  creditCardTransactions
 }) => {
   const [selectedMonth, setSelectedMonth] = useState(initialMonth);
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingBudgetId, setDeletingBudgetId] = useState<string | null>(null);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
+  const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
+  const [filterPeriod, setFilterPeriod] = useState<'month' | 'all'>('month');
 
   const [form, setForm] = useState({ categoryId: '', amountLimit: '', alertAtPercent: '80' });
 
@@ -59,6 +65,32 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
   });
 
   const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+  const getCategoryTransactions = (catId: string, period: 'month' | 'all') => {
+    const txs = (transactions || [])
+      .filter(t => t.categoryId === catId && t.type === 'expense')
+      .map(t => ({ ...t, source: 'Transação' }));
+      
+    const ccTxs = (creditCardTransactions || [])
+      .filter(t => t.categoryId === catId)
+      .map(t => ({ ...t, source: 'Cartão de Crédito' }));
+      
+    const merged = [...txs, ...ccTxs];
+    
+    if (period === 'month') {
+      return merged.filter(t => {
+        const [year, month] = t.date.split('-').map(Number);
+        return year === selectedYear && (month - 1) === selectedMonth;
+      });
+    }
+    
+    return merged;
+  };
+
+  const formatDate = (dateStr: string) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+  };
 
   const openModal = (budget?: Budget) => {
     if (budget) {
@@ -195,6 +227,19 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                    </div>
                    <div className="text-right text-xs text-slate-500 font-medium">{percent.toFixed(0)}% utilizado</div>
                 </div>
+                <div className="mt-4 pt-3 border-t border-white/5 flex justify-end">
+                    <button
+                      onClick={() => {
+                        if (category) {
+                          setViewingCategory(category);
+                          setFilterPeriod('month');
+                        }
+                      }}
+                      className="text-xs text-[rgb(var(--c-primary-400))] hover:text-[rgb(var(--c-primary-300))] font-semibold flex items-center gap-1.5 transition-colors"
+                    >
+                      <Eye size={13} /> Histórico de Gastos
+                    </button>
+                 </div>
              </GlassCard>
               </motion.div>
            );
@@ -274,6 +319,69 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
               setDeletingBudgetId(null);
             }
           }}>Confirmar Exclusão</GlassButton>
+        </ModalFooter>
+      </ModalShell>
+
+      {/* Modal de Detalhes de Gastos da Categoria */}
+      <ModalShell 
+        isOpen={!!viewingCategory} 
+        onClose={() => setViewingCategory(null)} 
+        title={`Gastos em ${viewingCategory?.name} ${viewingCategory?.emoji || ''}`}
+      >
+        <ModalBody>
+          <div className="space-y-4">
+            {/* Period Selector Tabs */}
+            <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl">
+              <button 
+                onClick={() => setFilterPeriod('month')}
+                className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterPeriod === 'month' ? 'bg-white/10 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Mês Selecionado ({new Date(2000, selectedMonth, 1).toLocaleDateString('pt-BR', {month: 'short'})}/{selectedYear})
+              </button>
+              <button 
+                onClick={() => setFilterPeriod('all')}
+                className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterPeriod === 'all' ? 'bg-white/10 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Todo o Período
+              </button>
+            </div>
+
+            {/* Spending Total Info */}
+            <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center">
+              <span className="text-sm text-slate-300">Total Gasto:</span>
+              <span className="text-lg font-bold text-white">
+                {viewingCategory && formatCurrency(
+                  getCategoryTransactions(viewingCategory.id, filterPeriod).reduce((sum, t) => sum + t.amount, 0)
+                )}
+              </span>
+            </div>
+
+            {/* Transactions List */}
+            <div className="max-h-60 overflow-y-auto space-y-2 pr-1 scrollbar-hide">
+              {viewingCategory && getCategoryTransactions(viewingCategory.id, filterPeriod).length === 0 ? (
+                <p className="text-center text-xs text-slate-500 py-6">Nenhum gasto encontrado neste período.</p>
+              ) : (
+                viewingCategory && [...getCategoryTransactions(viewingCategory.id, filterPeriod)]
+                  .sort((a, b) => b.date.localeCompare(a.date))
+                  .map(t => (
+                    <div key={t.id} className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5 text-sm hover:bg-white/10 transition-colors">
+                      <div className="space-y-0.5">
+                        <p className="font-semibold text-slate-200">{t.description || 'Sem descrição'}</p>
+                        <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
+                          <span>{formatDate(t.date)}</span>
+                          <span>·</span>
+                          <span className="bg-white/5 px-1.5 py-0.2 rounded text-[9px] border border-white/5">{t.source}</span>
+                        </p>
+                      </div>
+                      <span className="font-bold text-red-400">-{formatCurrency(t.amount)}</span>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <GlassButton type="button" variant="ghost" onClick={() => setViewingCategory(null)}>Fechar</GlassButton>
         </ModalFooter>
       </ModalShell>
 

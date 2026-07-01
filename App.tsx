@@ -582,6 +582,8 @@ const App: React.FC = () => {
                   onEditBudget={editBudget}
                   onDeleteBudget={deleteBudget}
                   getCategorySpending={getCategorySpending}
+                  transactions={transactions}
+                  creditCardTransactions={creditCardTransactions}
                 />
               )}
 
