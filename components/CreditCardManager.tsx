@@ -154,6 +154,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
   const [editingTx, setEditingTx] = useState<CreditCardTransaction | null>(null);
   const [refundingTx, setRefundingTx] = useState<CreditCardTransaction | null>(null);
+  const [refundType, setRefundType] = useState<'installment' | 'total'>('total');
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -453,20 +454,41 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
   const openRefundModal = (tx: CreditCardTransaction) => {
     setRefundingTx(tx);
+    const isInstallment = tx.installment && tx.installment.total > 1;
+    const type = isInstallment ? 'total' : 'installment';
+    setRefundType(type);
+    const defaultAmount = type === 'total' ? (tx.amount * tx.installment.total) : tx.amount;
     setRefundForm({
-      amount: tx.amount.toString(), // Default to full amount
+      amount: defaultAmount.toString(),
       date: new Date().toISOString().split('T')[0],
       description: `Estorno: ${tx.description}`
     });
     setIsRefundModalOpen(true);
   };
 
+  const handleRefundTypeChange = (type: 'installment' | 'total') => {
+    if (!refundingTx) return;
+    setRefundType(type);
+    const amt = type === 'total' 
+      ? (refundingTx.amount * refundingTx.installment.total) 
+      : refundingTx.amount;
+    setRefundForm(prev => ({
+      ...prev,
+      amount: amt.toString()
+    }));
+  };
+
   const handleRefundSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (refundingTx && onAddRefund) {
       const amt = parseFloat(refundForm.amount);
-      if (amt > refundingTx.amount) {
-        toast.error('O valor do estorno não pode ser maior que o valor da compra.');
+      const isInstallment = refundingTx.installment && refundingTx.installment.total > 1;
+      const maxAmount = (isInstallment && refundType === 'total')
+        ? (refundingTx.amount * refundingTx.installment.total)
+        : refundingTx.amount;
+
+      if (amt > maxAmount) {
+        toast.error(`O valor do estorno não pode ser maior que o valor da ${isInstallment && refundType === 'total' ? 'compra total' : 'parcela'}.`);
         return;
       }
       onAddRefund(refundingTx, amt, refundForm.date, refundForm.description);
@@ -951,8 +973,50 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
               <form id="refund-form" onSubmit={handleRefundSubmit} className="space-y-4">
                  <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-sm text-slate-400 mb-2">
                     Compra original: <span className="text-white font-bold">{refundingTx?.description}</span> <br/>
-                    Valor original: <span className="text-white font-bold">{formatCurrency(refundingTx?.amount || 0)}</span>
+                    {refundingTx?.installment && refundingTx.installment.total > 1 ? (
+                      <>
+                        Valor da parcela: <span className="text-white font-bold">{formatCurrency(refundingTx.amount)}</span> <span className="text-slate-500 text-xs">({refundingTx.installment.current}/{refundingTx.installment.total})</span> <br/>
+                        Valor total da compra: <span className="text-white font-bold">{formatCurrency(refundingTx.amount * refundingTx.installment.total)}</span>
+                      </>
+                    ) : (
+                      <>
+                        Valor original: <span className="text-white font-bold">{formatCurrency(refundingTx?.amount || 0)}</span>
+                      </>
+                    )}
                  </div>
+
+                 {refundingTx?.installment && refundingTx.installment.total > 1 && (
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-0.5">
+                        Opção de Estorno
+                      </label>
+                      <div className="grid grid-cols-2 gap-2 bg-white/5 p-1 rounded-xl border border-white/5">
+                        <button
+                          type="button"
+                          onClick={() => handleRefundTypeChange('installment')}
+                          className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-150 text-center ${
+                            refundType === 'installment'
+                              ? 'bg-[rgb(var(--c-primary-500)/0.2)] border border-[rgb(var(--c-primary-500)/0.3)] text-[rgb(var(--c-primary-300))]'
+                              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                          }`}
+                        >
+                          Apenas esta parcela ({formatCurrency(refundingTx.amount)})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRefundTypeChange('total')}
+                          className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-150 text-center ${
+                            refundType === 'total'
+                              ? 'bg-[rgb(var(--c-primary-500)/0.2)] border border-[rgb(var(--c-primary-500)/0.3)] text-[rgb(var(--c-primary-300))]'
+                              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                          }`}
+                        >
+                          Compra total ({formatCurrency(refundingTx.amount * refundingTx.installment.total)})
+                        </button>
+                      </div>
+                    </div>
+                 )}
+
                  <div>
                     <CurrencyInput 
                        label="Valor do Estorno (R$)"
