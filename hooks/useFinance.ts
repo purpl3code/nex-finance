@@ -5,7 +5,7 @@ import { StorageService } from '../services/storageService';
 import { SyncService } from '../services/syncService';
 import { useAuth } from './useAuth';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
-import { endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth, parseISO } from 'date-fns';
+import { endOfMonth, eachDayOfInterval, format, lastDayOfMonth, getDay, getDaysInMonth, parseISO, addMonths } from 'date-fns';
 
 export const useFinance = () => {
   const { session } = useAuth();
@@ -360,88 +360,27 @@ export const useFinance = () => {
     installmentStart: number = 1,
     installmentTotal: number = installments
   ) => {
-    const card       = creditCards.find(c => c.id === tx.cardId);
-    const closingDay = card?.closingDay ?? 15;
-    const dueDay     = card?.dueDay    ?? 10;
-    const baseDate   = new Date(tx.date + 'T12:00:00');
-
-    // Step 1: Find which invoice the purchase date belongs to.
-    // Strategy: find the earliest closing date >= purchase date.
-    // Start from the purchase's own month and scan forward.
-    let searchMonth = baseDate.getMonth();
-    let searchYear  = baseDate.getFullYear();
-    let firstInvMonth: number;
-    let firstInvYear: number;
-
-    // We try up to 3 months forward (should never need more than 1)
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const m = searchMonth + attempt;
-      const y = searchYear + Math.floor(m / 12);
-      const mNorm = ((m % 12) + 12) % 12;
-
-      const daysInM = getDaysInMonth(new Date(y, mNorm, 1));
-      const actualClosing = Math.min(closingDay, daysInM);
-      const closingDate = new Date(y, mNorm, actualClosing, 23, 59, 59);
-
-      if (closingDate >= baseDate) {
-        // This closing date covers our purchase.
-        // Now derive the invoice reference month from this closing month.
-        // Inverse of getClosingMonthForInvoice:
-        //   if dueDay >= closingDay: invMonth = closingMonth
-        //   if dueDay < closingDay:  invMonth = closingMonth + 1
-        let invM = mNorm, invY = y;
-        if (dueDay < closingDay) {
-          invM++;
-          if (invM > 11) { invM = 0; invY++; }
-        }
-        firstInvMonth = invM;
-        firstInvYear = invY;
-        break;
-      }
-    }
-
-    // Fallback (should not happen)
-    firstInvMonth = firstInvMonth! ?? baseDate.getMonth();
-    firstInvYear = firstInvYear! ?? baseDate.getFullYear();
-
-    // Step 2: Create one transaction per installment, each in its corresponding
-    // invoice month. Use a date guaranteed to fall inside the invoice window:
-    // prevClosingDay + 1 of the closing month.
+    const baseDate = parseISO(tx.date);
     const newTxs: CreditCardTransaction[] = [];
     const amt = tx.amount / installments;
 
     for (let i = 0; i < installments; i++) {
-      const total = firstInvMonth + i;
-      const invYear  = firstInvYear + Math.floor(total / 12);
-      const invMonth = ((total % 12) + 12) % 12;
-
-      // Get the closing month for this invoice
-      const { closingMonth: cM, closingYear: cY } = getClosingMonthForInvoice(invMonth, invYear, closingDay, dueDay);
-
-      // Compute prev closing month
-      let prevCM = cM - 1, prevCY = cY;
-      if (prevCM < 0) { prevCM = 11; prevCY--; }
-      const daysInPrevCM = getDaysInMonth(new Date(prevCY, prevCM, 1));
-      const prevActualClosing = Math.min(closingDay, daysInPrevCM);
-
-      // Use prevClosingDay + 1 in the closing month as the artificial date.
-      // This date is always inside the window (prevClosing, closing].
-      const safeDay = prevActualClosing + 1;
-      // Clamp to valid range for the closing month
-      const daysInCM = getDaysInMonth(new Date(cY, cM, 1));
-      const actualDay = Math.min(safeDay, Math.min(closingDay, daysInCM));
-
-      const dateStr = format(new Date(cY, cM, actualDay), 'yyyy-MM-dd');
+      const targetDate = addMonths(baseDate, i);
+      const dateStr = format(targetDate, 'yyyy-MM-dd');
 
       newTxs.push({
-        ...tx, type: 'purchase', date: dateStr, amount: amt,
+        ...tx,
+        type: 'purchase',
+        date: dateStr,
+        amount: amt,
         installment: { current: installmentStart + i, total: installmentTotal },
-        id: crypto.randomUUID(), createdAt: Date.now() + i,
+        id: crypto.randomUUID(),
+        createdAt: Date.now() + i,
       });
     }
     setCreditCardTransactions(prev => [...newTxs, ...prev]);
     touchData();
-  }, [creditCards, getClosingMonthForInvoice, touchData]);
+  }, [touchData]);
 
 
 

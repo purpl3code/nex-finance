@@ -2,8 +2,9 @@
 import { AppData } from '../types';
 import { STORAGE_KEY, INITIAL_CATEGORIES, INITIAL_ACCOUNTS } from '../constants';
 import { LocalStorageAdapter } from './storageAdapter';
+import { format, parseISO, addMonths } from 'date-fns';
 
-const CURRENT_VERSION = 12;
+const CURRENT_VERSION = 13;
 
 const DEFAULT_DATA: AppData = {
   version: CURRENT_VERSION,
@@ -147,6 +148,25 @@ export const StorageService = {
         // V11 -> V12 Migration (Debts)
         if (parsed.version < 12) {
           parsed.debts = [];
+        }
+
+        // V12 -> V13 Migration (Auto-repair repeated artificial credit card dates)
+        if (parsed.version < 13) {
+          if (Array.isArray(parsed.creditCardTransactions)) {
+            parsed.creditCardTransactions = parsed.creditCardTransactions.map((tx: any) => {
+              if (!tx.createdAt) return tx;
+              const createdDate = new Date(tx.createdAt);
+              if (isNaN(createdDate.getTime())) return tx;
+
+              const currentInst = tx.installment?.current || 1;
+              const baseDateStr = format(createdDate, 'yyyy-MM-dd');
+              const baseDate = parseISO(baseDateStr);
+              const targetDate = addMonths(baseDate, currentInst - 1);
+              const repairedDateStr = format(targetDate, 'yyyy-MM-dd');
+
+              return { ...tx, date: repairedDateStr };
+            });
+          }
         }
 
         parsed.version = CURRENT_VERSION;
