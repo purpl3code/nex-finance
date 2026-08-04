@@ -10,7 +10,7 @@ export interface MonthlySummary {
   cardExpenses: number; // Credit card purchases - refunds
   totalSpent: number;
   totalBalance: number; // Total balance across all accounts
-  remainingBalance: number; // Total Balance - Total Spent (what user really has left)
+  remainingBalance: number; // Net balance for the month (Income - Total Spent)
 }
 
 export interface ForecastSummary {
@@ -71,24 +71,7 @@ export const getMonthlySummary = (
     })
     .reduce((sum, t) => sum + t.amount, 0); // Refunds are already negative in the model, so simple sum works
 
-  // 4. Calculate Invoice Payments made this month (to avoid double-counting)
-  // When a user pays a credit card invoice, totalBalance decreases (money leaves the account).
-  // But card purchases are ALSO counted in cardExpenses/totalSpent.
-  // We add invoicePayments back to totalBalance so card spending is only counted once (via totalSpent).
-  const invoicePayments = transactions
-    .filter(t => {
-      const d = new Date(t.date + 'T12:00:00');
-      return (
-        t.type === 'expense' &&
-        t.categoryId === 'cat_invoice_payment' &&
-        d.getMonth() === month &&
-        d.getFullYear() === year
-      );
-    })
-    .reduce((sum, t) => sum + t.amount, 0);
-
   const totalSpent = expenses + cardExpenses;
-  const adjustedBalance = totalBalance + invoicePayments;
 
   return {
     income,
@@ -96,7 +79,7 @@ export const getMonthlySummary = (
     cardExpenses,
     totalSpent,
     totalBalance,
-    remainingBalance: adjustedBalance - totalSpent
+    remainingBalance: income - totalSpent
   };
 };
 
@@ -221,7 +204,7 @@ export const getBalanceHistory = (
   // Sum of all transactions BEFORE start of month + initial balances
   let runningBalance = accounts.reduce((sum, acc) => sum + acc.initialBalance, 0);
   
-  const startStr = startDate.toISOString().split('T')[0];
+  const startStr = format(startDate, 'yyyy-MM-dd');
   
   transactions.forEach(t => {
     if (t.date < startStr) {
@@ -256,7 +239,8 @@ export const generateInsights = (
   cardTransactions: CreditCardTransaction[],
   categories: Category[],
   cards: CreditCard[],
-  month: number
+  month: number,
+  year: number
 ): Insight[] => {
   const insights: Insight[] = [];
 
@@ -265,12 +249,18 @@ export const generateInsights = (
   
   // Sum direct expenses
   transactions
-    .filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment' && new Date(t.date).getMonth() === month)
+    .filter(t => {
+      const d = new Date(t.date + 'T12:00:00');
+      return t.type === 'expense' && t.categoryId !== 'cat_invoice_payment' && d.getMonth() === month && d.getFullYear() === year;
+    })
     .forEach(t => categoryTotals[t.categoryId] = (categoryTotals[t.categoryId] || 0) + t.amount);
     
   // Sum card expenses
   cardTransactions
-    .filter(t => new Date(t.date).getMonth() === month)
+    .filter(t => {
+      const d = new Date(t.date + 'T12:00:00');
+      return d.getMonth() === month && d.getFullYear() === year;
+    })
     .forEach(t => categoryTotals[t.categoryId] = (categoryTotals[t.categoryId] || 0) + t.amount);
 
   let topCatId = '';

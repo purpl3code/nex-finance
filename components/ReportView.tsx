@@ -55,17 +55,14 @@ export const ReportView: React.FC<ReportViewProps> = ({
   // --- DATA PROCESSING ---
 
   const monthData = useMemo(() => {
-    const start = startOfMonth(new Date(year, month));
-    const end = endOfMonth(new Date(year, month));
-
     const filteredTransactions = transactions.filter(t => {
-      const d = parseISO(t.date);
-      return d >= start && d <= end;
+      const d = new Date(t.date + 'T12:00:00');
+      return d.getMonth() === month && d.getFullYear() === year;
     });
 
     const filteredCCTransactions = creditCardTransactions.filter(t => {
-      const d = parseISO(t.date);
-      return d >= start && d <= end;
+      const d = new Date(t.date + 'T12:00:00');
+      return d.getMonth() === month && d.getFullYear() === year;
     });
 
     return {
@@ -80,7 +77,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
       .reduce((sum, t) => sum + t.amount, 0);
 
     const expense = monthData.transactions
-      .filter(t => t.type === 'expense')
+      .filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment')
       .reduce((sum, t) => sum + t.amount, 0) +
       monthData.ccTransactions
       .reduce((sum, t) => sum + t.amount, 0);
@@ -123,7 +120,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
     
     // Regular expenses
     monthData.transactions
-      .filter(t => t.type === 'expense')
+      .filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment')
       .forEach(t => {
         map[t.categoryId] = (map[t.categoryId] || 0) + t.amount;
       });
@@ -159,7 +156,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
     return days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
       const dayExpense = monthData.transactions
-        .filter(t => t.type === 'expense' && t.date === dayStr)
+        .filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment' && t.date === dayStr)
         .reduce((sum, t) => sum + t.amount, 0) +
         monthData.ccTransactions
         .filter(t => t.date === dayStr)
@@ -177,21 +174,21 @@ export const ReportView: React.FC<ReportViewProps> = ({
   // Comparison with previous month
   const prevMonthStats = useMemo(() => {
     const prevDate = subMonths(new Date(year, month), 1);
-    const start = startOfMonth(prevDate);
-    const end = endOfMonth(prevDate);
+    const pMonth = prevDate.getMonth();
+    const pYear = prevDate.getFullYear();
 
     const pTxs = transactions.filter(t => {
-      const d = parseISO(t.date);
-      return d >= start && d <= end;
+      const d = new Date(t.date + 'T12:00:00');
+      return d.getMonth() === pMonth && d.getFullYear() === pYear;
     });
 
     const pCCTxs = creditCardTransactions.filter(t => {
-      const d = parseISO(t.date);
-      return d >= start && d <= end;
+      const d = new Date(t.date + 'T12:00:00');
+      return d.getMonth() === pMonth && d.getFullYear() === pYear;
     });
 
     const income = pTxs.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-    const expense = pTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0) +
+    const expense = pTxs.filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment').reduce((sum, t) => sum + t.amount, 0) +
                     pCCTxs.reduce((sum, t) => sum + t.amount, 0);
 
     return { income, expense };
@@ -355,8 +352,8 @@ export const ReportView: React.FC<ReportViewProps> = ({
             <div>
               <p className="text-[10px] font-medium text-slate-500 uppercase">Maior Saída</p>
               <p className="text-lg font-bold text-white">
-                {monthData.transactions.filter(t => t.type === 'expense').length > 0 || monthData.ccTransactions.length > 0 
-                  ? formatCurrency(Math.max(...[...monthData.transactions.filter(t => t.type === 'expense'), ...monthData.ccTransactions].map(t => t.amount))) 
+                {monthData.transactions.filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment').length > 0 || monthData.ccTransactions.length > 0 
+                  ? formatCurrency(Math.max(...[...monthData.transactions.filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment'), ...monthData.ccTransactions].map(t => t.amount))) 
                   : 'R$ 0,00'}
               </p>
             </div>
@@ -525,7 +522,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
               Maiores Transações do Mês
             </h3>
             <div className="space-y-4">
-              {[...monthData.transactions.filter(t => t.type === 'expense'), ...monthData.ccTransactions]
+              {[...monthData.transactions.filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment'), ...monthData.ccTransactions]
                 .sort((a, b) => b.amount - a.amount)
                 .slice(0, 5)
                 .map((tx, i) => (
@@ -542,7 +539,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
                     <p className="text-red-400 font-bold shrink-0">{formatCurrency(tx.amount)}</p>
                   </div>
                 ))}
-              {monthData.transactions.length === 0 && monthData.ccTransactions.length === 0 && (
+              {monthData.transactions.filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment').length === 0 && monthData.ccTransactions.length === 0 && (
                 <p className="text-center text-slate-500 py-4">Nenhuma transação registrada.</p>
               )}
             </div>

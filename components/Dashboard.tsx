@@ -99,8 +99,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   [accounts, transactions, month, year]);
 
   const insights = useMemo(() => 
-    generateInsights(monthlySummary, transactions, creditCardTransactions, categories, creditCards, month),
-  [monthlySummary, transactions, creditCardTransactions, categories, creditCards, month]);
+    generateInsights(monthlySummary, transactions, creditCardTransactions, categories, creditCards, month, year),
+  [monthlySummary, transactions, creditCardTransactions, categories, creditCards, month, year]);
 
   // Chart Data (Existing Logic)
   const comprehensiveChartData = useMemo(() => {
