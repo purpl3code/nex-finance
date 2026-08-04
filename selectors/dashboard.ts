@@ -71,21 +71,7 @@ export const getMonthlySummary = (
     })
     .reduce((sum, t) => sum + t.amount, 0); // Refunds are already negative in the model, so simple sum works
 
-  // 4. Calculate Invoice Payments made this month (to avoid double-counting)
-  const invoicePayments = transactions
-    .filter(t => {
-      const d = new Date(t.date + 'T12:00:00');
-      return (
-        t.type === 'expense' &&
-        t.categoryId === 'cat_invoice_payment' &&
-        d.getMonth() === month &&
-        d.getFullYear() === year
-      );
-    })
-    .reduce((sum, t) => sum + t.amount, 0);
-
   const totalSpent = expenses + cardExpenses;
-  const adjustedBalance = totalBalance + invoicePayments;
 
   return {
     income,
@@ -93,7 +79,7 @@ export const getMonthlySummary = (
     cardExpenses,
     totalSpent,
     totalBalance,
-    remainingBalance: adjustedBalance - totalSpent
+    remainingBalance: totalBalance - totalSpent
   };
 };
 
