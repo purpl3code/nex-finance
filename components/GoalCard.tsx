@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Goal } from '../types';
+import React, { useState, useMemo } from 'react';
+import { Goal, Account, InvestmentAccount } from '../types';
 import { computeGoalStats, formatCurrency } from '../utils/goalHelpers';
-import { Edit2, Plus, Archive, Target, Clock, AlertTriangle, Trash2, CheckCircle2 } from 'lucide-react';
+import { Edit2, Plus, Archive, Target, Clock, AlertTriangle, Trash2, CheckCircle2, Link2, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { GlassCard } from './ui/GlassCard';
@@ -9,14 +9,58 @@ import { motion } from 'framer-motion';
 
 interface GoalCardProps {
   goal: Goal;
+  accounts?: Account[];
+  investmentAccounts?: InvestmentAccount[];
+  getAccountBalance?: (id: string) => number;
+  getInvestmentAccountBalance?: (id: string) => number;
   onEdit: (goal: Goal) => void;
   onArchive: (id: string) => void;
   onAddValue: (id: string, amount: number) => void;
   onDelete: () => void;
 }
 
-export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onAddValue, onDelete }) => {
-  const stats = computeGoalStats(goal);
+export const GoalCard: React.FC<GoalCardProps> = ({ 
+  goal, 
+  accounts = [], 
+  investmentAccounts = [], 
+  getAccountBalance, 
+  getInvestmentAccountBalance, 
+  onEdit, 
+  onArchive, 
+  onAddValue, 
+  onDelete 
+}) => {
+  // Dynamically resolve balance from linked account if available
+  const effectiveCurrentAmount = useMemo(() => {
+    if (goal.linkedAccountId && getAccountBalance) {
+      return getAccountBalance(goal.linkedAccountId);
+    }
+    if (goal.linkedInvestmentAccountId && getInvestmentAccountBalance) {
+      return getInvestmentAccountBalance(goal.linkedInvestmentAccountId);
+    }
+    return goal.currentAmount;
+  }, [goal, getAccountBalance, getInvestmentAccountBalance]);
+
+  const linkedAccountName = useMemo(() => {
+    if (goal.linkedAccountId) {
+      const acc = accounts.find(a => a.id === goal.linkedAccountId);
+      return acc ? acc.name : 'Conta vinculada';
+    }
+    if (goal.linkedInvestmentAccountId) {
+      const invAcc = investmentAccounts.find(a => a.id === goal.linkedInvestmentAccountId);
+      return invAcc ? invAcc.name : 'Investimento vinculado';
+    }
+    return null;
+  }, [goal, accounts, investmentAccounts]);
+
+  const isLinked = Boolean(goal.linkedAccountId || goal.linkedInvestmentAccountId);
+
+  const effectiveGoal = useMemo(() => ({
+    ...goal,
+    currentAmount: effectiveCurrentAmount
+  }), [goal, effectiveCurrentAmount]);
+
+  const stats = computeGoalStats(effectiveGoal);
   const [isHovered, setIsHovered] = useState(false);
 
   const isComplete = stats.progressPercent >= 100;
@@ -58,6 +102,12 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1 min-w-0 pr-2">
+          {linkedAccountName && (
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[rgb(var(--c-primary-500)/0.15)] text-[rgb(var(--c-primary-300))] border border-[rgb(var(--c-primary-500)/0.25)] mb-1.5">
+              <Link2 size={11} className="text-[rgb(var(--c-primary-400))]" />
+              <span className="truncate">{linkedAccountName}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 mb-0.5">
             {isComplete && (
               <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
@@ -96,7 +146,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
 
       {/* Progress amounts */}
       <div className="flex items-end gap-2 mb-1">
-        <span className="text-3xl font-bold text-white tabular-nums">{formatCurrency(goal.currentAmount)}</span>
+        <span className="text-3xl font-bold text-white tabular-nums">{formatCurrency(effectiveCurrentAmount)}</span>
         <span className="text-sm text-slate-500 mb-1.5 font-medium">de {formatCurrency(goal.targetAmount)}</span>
       </div>
 
@@ -172,29 +222,34 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onArchive, onA
       {/* CTA */}
       {!isComplete && (
         <div className="mt-5 pt-4 border-t border-white/6">
-          <button
-            onClick={() => onAddValue(goal.id, 0)}
-            className="
-              w-full relative flex items-center justify-center gap-2
-              py-2.5 px-4 rounded-xl
-              font-semibold text-sm text-white
-              overflow-hidden group/cta
-              transition-all duration-300
-              hover:-translate-y-0.5
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--c-primary-500)/0.6)]
-            "
-            style={{
-              background: 'linear-gradient(135deg, rgb(var(--c-primary-500)) 0%, rgb(var(--c-primary-700)) 100%)',
-              boxShadow: '0 4px 14px rgb(var(--c-primary-600) / 0.4), inset 0 1px 0 rgb(var(--c-primary-300) / 0.25)',
-            }}
-          >
-            {/* Shimmer sweep on hover */}
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 pointer-events-none" />
-            {/* Top highlight */}
-            <span className="absolute top-0 inset-x-4 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
-            <Plus size={15} className="transition-transform duration-200 group-hover/cta:rotate-90" />
-            <span>Adicionar Valor</span>
-          </button>
+          {isLinked ? (
+            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-white/4 border border-white/8 rounded-xl text-xs text-slate-400 font-medium">
+              <RefreshCw size={12} className="text-[rgb(var(--c-primary-400))] animate-pulse shrink-0" />
+              <span className="truncate">Sincronizado automaticamente com a conta</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => onAddValue(goal.id, 0)}
+              className="
+                w-full relative flex items-center justify-center gap-2
+                py-2.5 px-4 rounded-xl
+                font-semibold text-sm text-white
+                overflow-hidden group/cta
+                transition-all duration-300
+                hover:-translate-y-0.5
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--c-primary-500)/0.6)]
+              "
+              style={{
+                background: 'linear-gradient(135deg, rgb(var(--c-primary-500)) 0%, rgb(var(--c-primary-700)) 100%)',
+                boxShadow: '0 4px 14px rgb(var(--c-primary-600) / 0.4), inset 0 1px 0 rgb(var(--c-primary-300) / 0.25)',
+              }}
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 pointer-events-none" />
+              <span className="absolute top-0 inset-x-4 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+              <Plus size={15} className="transition-transform duration-200 group-hover/cta:rotate-90" />
+              <span>Adicionar Valor</span>
+            </button>
+          )}
         </div>
       )}
 

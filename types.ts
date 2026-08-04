@@ -193,6 +193,8 @@ export interface Goal {
   startDate: string; // YYYY-MM-DD
   deadline?: string; // YYYY-MM-DD
   color?: string; // UI Color
+  linkedAccountId?: string; // Links to bank/wallet Account ID for auto sync
+  linkedInvestmentAccountId?: string; // Links to InvestmentAccount ID for auto sync
   isArchived: boolean;
   createdAt: number;
 }

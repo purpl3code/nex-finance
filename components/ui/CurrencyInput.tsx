@@ -10,6 +10,7 @@ interface CurrencyInputProps {
   onChange: (rawValue: string) => void;
   placeholder?: string;
   required?: boolean;
+  disabled?: boolean;
   autoFocus?: boolean;
   className?: string;
   icon?: React.ReactNode;
@@ -68,6 +69,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   onChange,
   placeholder = '0,00',
   required,
+  disabled,
   autoFocus,
   className = '',
   icon,
@@ -195,6 +197,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
           onFocus={handleFocus}
           placeholder={placeholder}
           required={required}
+          disabled={disabled}
           autoFocus={autoFocus}
           className={`
             w-full 
@@ -208,6 +211,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
             focus:ring-2 focus:ring-[var(--ring)]
             focus:border-[rgb(var(--c-primary-500)/0.5)]
             focus:bg-[rgb(var(--c-primary-950)/0.2)]
+            disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-200
             ${error ? 'border-red-500/50 focus:ring-red-500/40 focus:border-red-500/50' : ''}
             ${className}

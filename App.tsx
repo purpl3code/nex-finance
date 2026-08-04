@@ -53,6 +53,8 @@ const App: React.FC = () => {
     recurringRules,
     budgets,
     goals,
+    investmentAccounts,
+    getInvestmentAccountBalance,
     addTransaction, 
     editTransaction, 
     deleteTransaction, 
@@ -590,6 +592,10 @@ const App: React.FC = () => {
               {activeTab === 'goals' && (
                 <GoalManager
                   goals={goals}
+                  accounts={accounts}
+                  investmentAccounts={investmentAccounts}
+                  getAccountBalance={getAccountBalance}
+                  getInvestmentAccountBalance={getInvestmentAccountBalance}
                   onAddGoal={addGoal}
                   onEditGoal={editGoal}
                   onArchiveGoal={toggleArchiveGoal}

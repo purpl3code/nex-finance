@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
-import { Goal } from '../types';
+import { Goal, Account, InvestmentAccount } from '../types';
 import { PageShell } from './ui/PageShell';
 import { PageHeader } from './ui/PageHeader';
 import { MobileFab } from './ui/MobileFab';
 import { GlassInput } from './ui/GlassInput';
 import { CurrencyInput } from './ui/CurrencyInput';
+import { GlassSelect } from './ui/GlassSelect';
 import { GlassButton } from './ui/GlassButton';
 import { ModalShell, ModalBody, ModalFooter } from './ui/ModalShell';
 import { GoalCard } from './GoalCard';
-import { Plus, AlertTriangle } from 'lucide-react';
+import { Plus, AlertTriangle, Link2 } from 'lucide-react';
 import { EmptyState } from './ui/EmptyState';
 
 interface GoalManagerProps {
   goals: Goal[];
+  accounts?: Account[];
+  investmentAccounts?: InvestmentAccount[];
+  getAccountBalance?: (id: string) => number;
+  getInvestmentAccountBalance?: (id: string) => number;
   onAddGoal: (goal: any) => void;
   onEditGoal: (id: string, updates: any) => void;
   onArchiveGoal: (id: string) => void;
@@ -22,6 +27,10 @@ interface GoalManagerProps {
 
 export const GoalManager: React.FC<GoalManagerProps> = ({
   goals,
+  accounts = [],
+  investmentAccounts = [],
+  getAccountBalance,
+  getInvestmentAccountBalance,
   onAddGoal,
   onEditGoal,
   onArchiveGoal,
@@ -42,7 +51,8 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
     monthlyContribution: '',
     startDate: new Date().toISOString().split('T')[0],
     deadline: '',
-    description: ''
+    description: '',
+    linkedAccountKey: '' // '' | 'acc:ID' | 'inv:ID'
   });
 
   // Add Value State
@@ -51,10 +61,18 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
 
   const displayedGoals = goals.filter(g => g.isArchived === (activeTab === 'archived'));
 
+  const getLinkedKey = (goal?: Goal | null) => {
+    if (!goal) return '';
+    if (goal.linkedAccountId) return `acc:${goal.linkedAccountId}`;
+    if (goal.linkedInvestmentAccountId) return `inv:${goal.linkedInvestmentAccountId}`;
+    return '';
+  };
+
   // Handlers
   const handleOpenForm = (goal?: Goal) => {
     if (goal) {
       setEditingGoal(goal);
+      const linkedKey = getLinkedKey(goal);
       setFormData({
         title: goal.title,
         targetAmount: goal.targetAmount.toString(),
@@ -62,7 +80,8 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
         monthlyContribution: goal.monthlyContribution.toString(),
         startDate: goal.startDate,
         deadline: goal.deadline || '',
-        description: goal.description || ''
+        description: goal.description || '',
+        linkedAccountKey: linkedKey
       });
     } else {
       setEditingGoal(null);
@@ -73,14 +92,42 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
         monthlyContribution: '0',
         startDate: new Date().toISOString().split('T')[0],
         deadline: '',
-        description: ''
+        description: '',
+        linkedAccountKey: ''
       });
     }
     setIsFormModalOpen(true);
   };
 
+  const handleAccountKeyChange = (key: string) => {
+    let autoAmount = formData.currentAmount;
+    if (key.startsWith('acc:') && getAccountBalance) {
+      const accId = key.replace('acc:', '');
+      autoAmount = getAccountBalance(accId).toString();
+    } else if (key.startsWith('inv:') && getInvestmentAccountBalance) {
+      const invId = key.replace('inv:', '');
+      autoAmount = getInvestmentAccountBalance(invId).toString();
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      linkedAccountKey: key,
+      currentAmount: autoAmount
+    }));
+  };
+
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
+
+    let linkedAccountId: string | undefined = undefined;
+    let linkedInvestmentAccountId: string | undefined = undefined;
+
+    if (formData.linkedAccountKey.startsWith('acc:')) {
+      linkedAccountId = formData.linkedAccountKey.replace('acc:', '');
+    } else if (formData.linkedAccountKey.startsWith('inv:')) {
+      linkedInvestmentAccountId = formData.linkedAccountKey.replace('inv:', '');
+    }
+
     const payload = {
       title: formData.title,
       targetAmount: parseFloat(formData.targetAmount) || 0,
@@ -88,7 +135,9 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
       monthlyContribution: parseFloat(formData.monthlyContribution) || 0,
       startDate: formData.startDate,
       deadline: formData.deadline || undefined,
-      description: formData.description
+      description: formData.description,
+      linkedAccountId,
+      linkedInvestmentAccountId
     };
 
     if (editingGoal) {
@@ -112,6 +161,12 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
       setIsAddValueModalOpen(false);
     }
   };
+
+  const accountOptions = [
+    { value: '', label: 'Sem vínculo (Gerenciamento Manual de Saldo)' },
+    ...accounts.map(acc => ({ value: `acc:${acc.id}`, label: `🏦 ${acc.name} (Conta Bancária/Carteira)` })),
+    ...investmentAccounts.map(inv => ({ value: `inv:${inv.id}`, label: `📈 ${inv.name} (Conta de Investimento)` }))
+  ];
 
   return (
     <PageShell>
@@ -144,6 +199,10 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
             <GoalCard 
               key={goal.id} 
               goal={goal} 
+              accounts={accounts}
+              investmentAccounts={investmentAccounts}
+              getAccountBalance={getAccountBalance}
+              getInvestmentAccountBalance={getInvestmentAccountBalance}
               onEdit={handleOpenForm}
               onArchive={onArchiveGoal}
               onAddValue={handleOpenAddValue}
@@ -162,8 +221,21 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
                   value={formData.title} 
                   onChange={e => setFormData({...formData, title: e.target.value})} 
                   required 
-                  placeholder="Ex: Viagem para Europa, PS5..." 
+                  placeholder="Ex: Reserva de Emergência, R$ 10 mil na conta..." 
                />
+
+               <GlassSelect 
+                  label="Vincular a uma Conta (Sincronização Automática)"
+                  value={formData.linkedAccountKey}
+                  onChange={e => handleAccountKeyChange(e.target.value)}
+                  options={accountOptions}
+               />
+               {formData.linkedAccountKey ? (
+                 <p className="text-xs text-[rgb(var(--c-primary-300))] bg-[rgb(var(--c-primary-500)/0.1)] p-2.5 rounded-xl border border-[rgb(var(--c-primary-500)/0.2)] flex items-center gap-2">
+                   <Link2 size={14} className="shrink-0" />
+                   O saldo atual da meta será atualizado automaticamente com o saldo dessa conta.
+                 </p>
+               ) : null}
                
                <div className="grid grid-cols-2 gap-4">
                   <CurrencyInput 
@@ -176,6 +248,7 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
                       label="Já Tenho (R$)" 
                       value={formData.currentAmount} 
                       onChange={val => setFormData({...formData, currentAmount: val})} 
+                      disabled={Boolean(formData.linkedAccountKey)}
                    />
                </div>
 
@@ -227,14 +300,14 @@ export const GoalManager: React.FC<GoalManagerProps> = ({
                <div className="p-4 bg-[rgb(var(--c-primary-500)/0.1)] border border-[rgb(var(--c-primary-500)/0.2)] rounded-xl text-sm text-[rgb(var(--c-primary-200))]">
                   Isso apenas atualiza o saldo da meta. Não cria uma transação no extrato.
                </div>
-                <CurrencyInput 
-                   label="Valor a adicionar (R$)" 
-                   value={addAmount} 
-                   onChange={val => setAddAmount(val)} 
-                   autoFocus 
-                   required 
-                   className="text-lg font-bold"
-                />
+                 <CurrencyInput 
+                    label="Valor a adicionar (R$)" 
+                    value={addAmount} 
+                    onChange={val => setAddAmount(val)} 
+                    autoFocus 
+                    required 
+                    className="text-lg font-bold"
+                 />
             </form>
          </ModalBody>
          <ModalFooter>
