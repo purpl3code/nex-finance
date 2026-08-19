@@ -113,11 +113,13 @@ export const BackupService = {
       transfers: mergeCollection(currentData.transfers, newData.transfers || []),
       recurringRules: mergeCollection(currentData.recurringRules, newData.recurringRules || []),
       budgets: mergeCollection(currentData.budgets, newData.budgets || []),
-      // New V9 Collections
+      // New V9, V10, V12 Collections
       investmentAccounts: mergeCollection(currentData.investmentAccounts || [], newData.investmentAccounts || []),
       assets: mergeCollection(currentData.assets || [], newData.assets || []),
       positions: mergeCollection(currentData.positions || [], newData.positions || []),
-      investmentMovements: mergeCollection(currentData.investmentMovements || [], newData.investmentMovements || [])
+      investmentMovements: mergeCollection(currentData.investmentMovements || [], newData.investmentMovements || []),
+      goals: mergeCollection(currentData.goals || [], newData.goals || []),
+      debts: mergeCollection(currentData.debts || [], newData.debts || [])
     };
 
     StorageService.save(mergedData);

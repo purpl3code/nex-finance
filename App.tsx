@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useFinance } from './hooks/useFinance';
 import { useAuth } from './hooks/useAuth';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { format } from 'date-fns';
 import { Dashboard } from './components/Dashboard';
 import { TransactionList } from './components/TransactionList';
 import { TransactionForm } from './components/TransactionForm';
@@ -247,7 +248,7 @@ const App: React.FC = () => {
     const { id, createdAt, generatedByRuleId, generatedKey, linkedInvoiceId, ...rest } = item;
     const duplicated = {
       ...rest,
-      date: new Date().toISOString().split('T')[0], // Reset date to today
+      date: format(new Date(), 'yyyy-MM-dd'), // Reset date to today (local date)
       description: rest.description ? `${rest.description} (cópia)` : '(cópia)',
     };
     handleOpenModal(duplicated);

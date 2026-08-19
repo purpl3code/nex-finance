@@ -4,7 +4,7 @@ import { STORAGE_KEY, INITIAL_CATEGORIES, INITIAL_ACCOUNTS } from '../constants'
 import { LocalStorageAdapter } from './storageAdapter';
 import { format, parseISO, addMonths } from 'date-fns';
 
-const CURRENT_VERSION = 13;
+export const CURRENT_VERSION = 13;
 
 const DEFAULT_DATA: AppData = {
   version: CURRENT_VERSION,

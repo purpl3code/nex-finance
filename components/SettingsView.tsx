@@ -1,7 +1,8 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { BackupService } from '../services/backupService';
-import { StorageService } from '../services/storageService';
+import { StorageService, CURRENT_VERSION } from '../services/storageService';
+import { INITIAL_CATEGORIES, INITIAL_ACCOUNTS } from '../constants';
 import { ThemeService, AppTheme } from '../services/themeService';
 import { SyncService } from '../services/syncService';
 import { supabase, isDemoMode, disableDemoMode } from '../lib/supabase';
@@ -211,10 +212,8 @@ export const SettingsView: React.FC = () => {
       if (!isDemoMode()) {
         const { data: authData } = await supabase.auth.getSession();
         if (authData?.session) {
-          const { SyncService } = await import('../services/syncService');
-          const { INITIAL_CATEGORIES, INITIAL_ACCOUNTS } = await import('../constants');
           const emptyData = {
-            version: 11,
+            version: CURRENT_VERSION,
             transactions: [],
             categories: INITIAL_CATEGORIES,
             accounts: INITIAL_ACCOUNTS,
@@ -229,7 +228,8 @@ export const SettingsView: React.FC = () => {
             positions: [],
             investmentMovements: [],
             goals: [],
-          } as any;
+            debts: []
+          };
           await SyncService.pushToCloud(emptyData, authData.session.user.id);
         }
       }

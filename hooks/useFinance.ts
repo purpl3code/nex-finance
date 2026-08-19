@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Transaction, Category, Account, DashboardStats, FilterState, ChartDataPoint, CreditCard, CreditCardTransaction, CreditCardInvoice, Transfer, RecurringRule, Budget, InvestmentAccount, Asset, Position, InvestmentMovement, Goal, Debt } from '../types';
-import { StorageService } from '../services/storageService';
+import { StorageService, CURRENT_VERSION } from '../services/storageService';
 import { SyncService } from '../services/syncService';
 import { useAuth } from './useAuth';
 import { calculateAllBalances, calculateSpendingMap } from '../selectors';
@@ -88,7 +88,7 @@ export const useFinance = () => {
   useEffect(() => {
     if (!loading && dataVersion > 0) {
       const data = {
-        version: 12, // Current version from StorageService logic
+        version: CURRENT_VERSION,
         transactions,
         categories,
         accounts,
@@ -213,12 +213,20 @@ export const useFinance = () => {
       
       if (txToDelete) {
         if (txToDelete.linkedInvoiceId) {
-          setCreditCardInvoices(invoices => invoices.filter(inv => inv.id !== txToDelete.linkedInvoiceId));
+          setCreditCardInvoices(invoices => invoices.map(inv => 
+            inv.id === txToDelete.linkedInvoiceId 
+              ? { ...inv, isPaid: false, paidAt: undefined } 
+              : inv
+          ));
         } else if (txToDelete.categoryId === 'cat_invoice_payment') {
           setCreditCardInvoices(invoices => {
             const matchingInvoice = invoices.find(inv => inv.isPaid && inv.amount === txToDelete.amount);
             if (matchingInvoice) {
-              return invoices.filter(inv => inv.id !== matchingInvoice.id);
+              return invoices.map(inv => 
+                inv.id === matchingInvoice.id 
+                  ? { ...inv, isPaid: false, paidAt: undefined } 
+                  : inv
+              );
             }
             return invoices;
           });

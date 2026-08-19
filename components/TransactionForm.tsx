@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { format } from 'date-fns';
 import { AppleEmoji } from './ui/AppleEmoji';
 import { CurrencyInput } from './ui/CurrencyInput';
 import { Transaction, Category, Account, TransactionType, CategoryGroup, Transfer, CreditCard } from '../types';
@@ -51,7 +52,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
       }
     }
-    return today.toISOString().split('T')[0];
+    return format(today, 'yyyy-MM-dd');
   });
   const [description, setDescription] = useState<string>(initialData?.description || '');
   
