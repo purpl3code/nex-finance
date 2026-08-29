@@ -488,13 +488,13 @@ const App: React.FC = () => {
                           </div>
 
                           <div className="relative flex-1 min-w-[200px]">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input 
                               type="text" 
                               placeholder="Buscar transação..." 
                               value={filters.search}
                               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none placeholder-slate-500 hover:border-white/20 transition-all"
+                              className="w-full bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.1] hover:border-white/[0.2] rounded-xl pl-10 pr-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-[var(--ring)] focus:border-[rgb(var(--c-primary-400)/0.6)] outline-none transition-all duration-200"
                             />
                           </div>
                           <div className="h-6 w-px bg-white/10 mx-1 hidden md:block"></div>

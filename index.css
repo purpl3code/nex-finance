@@ -7,42 +7,54 @@
   --bg: rgb(var(--c-bg-950));
   --bg-elev: rgb(var(--c-bg-900));
   
-  /* Glass Tokens */
-  --glass-bg: rgb(var(--c-bg-900) / 0.55); 
-  --glass-border: rgb(var(--c-text-100) / 0.08);
-  --glass-highlight: rgb(var(--c-text-100) / 0.12);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  /* Glass Tokens - Apple & Samsung Fluid Glass */
+  --glass-bg: rgb(var(--c-bg-900) / 0.65); 
+  --glass-border: rgb(var(--c-text-100) / 0.09);
+  --glass-border-light: rgb(var(--c-text-100) / 0.16);
+  --glass-highlight: rgb(var(--c-text-100) / 0.15);
+  --glass-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.35), 0 0 0 1px rgb(var(--c-text-100) / 0.05);
+  --glass-shadow-sm: 0 6px 20px -4px rgba(0, 0, 0, 0.25);
+  --glass-shadow-lg: 0 20px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgb(var(--c-text-100) / 0.08);
   
   /* Text */
   --text: rgb(var(--c-text-100));
   --muted: rgb(var(--c-text-400));
   
   /* Effects */
-  --shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.28);
   --ring: rgb(var(--c-primary-500) / 0.5);
   
   /* Accents */
   --accent: rgb(var(--c-primary-500));
   --accent-2: rgb(var(--c-primary-600));
-  --accent-glow: rgb(var(--c-primary-500) / 0.2);
+  --accent-glow: rgb(var(--c-primary-500) / 0.25);
 
   /* Premium card shadow with theme color */
   --card-shadow-premium: 
-    0 8px 32px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgb(var(--c-primary-500) / 0.04);
+    0 16px 40px -12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgb(var(--c-primary-500) / 0.08),
+    0 0 24px -4px rgb(var(--c-primary-500) / 0.1);
   
-  /* Gradients */
+  /* Liquid Gradients for Mesh Light Background */
   --gradient-bg: 
-    radial-gradient(ellipse at 20% -10%, rgb(var(--c-primary-600) / 0.18), transparent 50%),
-    radial-gradient(ellipse at 90% 5%,  rgb(var(--c-primary-500) / 0.12), transparent 40%),
-    radial-gradient(ellipse at 50% 80%, rgb(var(--c-primary-700) / 0.08), transparent 50%),
-    radial-gradient(ellipse at 5%  60%, rgb(var(--c-primary-400) / 0.06), transparent 45%);
+    radial-gradient(circle at 15% 0%, rgb(var(--c-primary-600) / 0.18), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgb(var(--c-primary-500) / 0.14), transparent 40%),
+    radial-gradient(circle at 50% 65%, rgb(var(--c-primary-700) / 0.09), transparent 50%),
+    radial-gradient(circle at 10% 85%, rgb(var(--c-primary-400) / 0.07), transparent 45%);
 
   /* Gradient text using theme colors (theme-safe) */
   --gradient-text-from: rgb(var(--c-text-100));
   --gradient-text-to: rgb(var(--c-text-300));
   --gradient-text-accent-from: rgb(var(--c-primary-300));
   --gradient-text-accent-to: rgb(var(--c-primary-500));
+
+  /* Motion physics: Apple spring curve */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -51,14 +63,23 @@ body {
   background-image: var(--gradient-bg);
   background-attachment: fixed;
   min-height: 100vh;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.011em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  overflow-x: hidden;
+}
+
+/* Tabular figures for financial data consistency */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 /* ============================================
-   GLASS UTILITIES
+   GLASS UTILITIES (Apple / Samsung Material)
    ============================================ */
 
-/* Shared inner highlight line */
+/* Shared inner specular highlight line */
 .glass-highlight-line::before {
   content: '';
   position: absolute;
@@ -68,9 +89,9 @@ body {
   height: 1px;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    rgb(var(--c-text-100) / 0.15) 20%, 
-    rgb(var(--c-text-100) / 0.3)  50%, 
-    rgb(var(--c-text-100) / 0.15) 80%, 
+    rgb(var(--c-text-100) / 0.2) 25%, 
+    rgb(var(--c-text-100) / 0.35) 50%, 
+    rgb(var(--c-text-100) / 0.2) 75%, 
     transparent 100%
   );
   pointer-events: none;
@@ -79,14 +100,12 @@ body {
 .glass-base {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   position: relative;
   overflow: hidden;
   box-shadow: var(--glass-shadow);
-  
-  /* GPU Hardware Acceleration */
-  will-change: transform;
+  will-change: transform, box-shadow;
 }
 
 .glass-base::before {
@@ -98,58 +117,55 @@ body {
   height: 1px;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    rgb(var(--c-text-100) / 0.1)  20%, 
-    rgb(var(--c-text-100) / 0.22) 50%, 
-    rgb(var(--c-text-100) / 0.1)  80%, 
+    rgb(var(--c-text-100) / 0.12) 20%, 
+    rgb(var(--c-text-100) / 0.28) 50%, 
+    rgb(var(--c-text-100) / 0.12) 80%, 
     transparent 100%
   );
-  opacity: 0.8;
+  opacity: 0.9;
   pointer-events: none;
 }
 
 .glass-sm {
-  background: rgb(var(--c-bg-900) / 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgb(var(--c-bg-900) / 0.45);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid var(--glass-border);
-  
-  /* GPU Hardware Acceleration */
+  box-shadow: var(--glass-shadow-sm);
   will-change: transform;
 }
 
 .glass-lg {
-  background: rgb(var(--c-bg-900) / 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgb(var(--c-bg-900) / 0.65);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
-  
-  /* GPU Hardware Acceleration */
-  will-change: transform;
+  will-change: transform, box-shadow;
 }
 
-/* Card com glow temático ao hover */
+/* Card com glow temático ao hover e elevação sutil estilo iOS/OneUI */
 .glass-card-hover {
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  transition: border-color 0.28s var(--ease-spring), box-shadow 0.28s var(--ease-spring), transform 0.28s var(--ease-spring);
 }
 .glass-card-hover:hover {
-  border-color: rgb(var(--c-primary-500) / 0.3);
+  border-color: rgb(var(--c-primary-500) / 0.32);
   box-shadow: 
-    var(--glass-shadow),
-    0 0 0 1px rgb(var(--c-primary-500) / 0.12),
-    0 0 28px rgb(var(--c-primary-500) / 0.12),
-    inset 0 1px 0 rgb(var(--c-text-100) / 0.08);
-  transform: translateY(-3px);
+    var(--card-shadow-premium),
+    inset 0 1px 0 rgb(var(--c-text-100) / 0.12);
+  transform: translateY(-2px);
+}
+.glass-card-hover:active {
+  transform: scale(0.995) translateY(0);
 }
 
 /* Inner inset glass (inputs, inner panels) */
 .glass-inset {
-  background: rgb(var(--c-bg-950) / 0.4);
-  border: 1px solid rgb(var(--c-text-100) / 0.06);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  
-  /* GPU Hardware Acceleration */
+  background: rgb(var(--c-bg-950) / 0.45);
+  border: 1px solid rgb(var(--c-text-100) / 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
   will-change: transform;
 }
 
@@ -185,32 +201,33 @@ body {
 
 /* Premium value display — big monetary numbers */
 .value-text-positive {
-  background: linear-gradient(135deg, #6ee7b7 0%, #10b981 100%);
+  background: linear-gradient(135deg, #a7f3d0 0%, #34d399 50%, #059669 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 8px rgba(16,185,129,0.3));
+  filter: drop-shadow(0 2px 10px rgba(16,185,129,0.25));
 }
 .value-text-negative {
-  background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
+  background: linear-gradient(135deg, #fecaca 0%, #f87171 50%, #dc2626 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 8px rgba(239,68,68,0.3));
+  filter: drop-shadow(0 2px 10px rgba(239,68,68,0.25));
 }
 .value-text-accent {
   background: linear-gradient(
     135deg,
-    rgb(var(--c-primary-300)) 0%,
-    rgb(var(--c-primary-500)) 100%
+    rgb(var(--c-primary-200)) 0%,
+    rgb(var(--c-primary-400)) 50%,
+    rgb(var(--c-primary-600)) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 8px rgb(var(--c-primary-500) / 0.3));
+  filter: drop-shadow(0 2px 12px rgb(var(--c-primary-500) / 0.3));
 }
 
 /* ============================================
@@ -222,26 +239,26 @@ body {
     rgb(var(--c-primary-500) / 0.18) 0%,
     rgb(var(--c-primary-600) / 0.08) 100%
   ) !important;
-  border-color: rgb(var(--c-primary-500) / 0.35) !important;
+  border-color: rgb(var(--c-primary-500) / 0.32) !important;
   box-shadow:
-    inset 0 1px 0 rgb(var(--c-primary-400) / 0.15),
-    0 0 16px rgb(var(--c-primary-500) / 0.1);
+    inset 0 1px 0 rgb(var(--c-primary-300) / 0.2),
+    0 4px 16px -2px rgb(var(--c-primary-500) / 0.15);
 }
 
 /* Brand logo area in sidebar */
 .sidebar-brand-logo {
   background: linear-gradient(
     135deg,
-    rgb(var(--c-primary-500)) 0%,
-    rgb(var(--c-primary-700)) 100%
+    rgb(var(--c-primary-400)) 0%,
+    rgb(var(--c-primary-600)) 100%
   );
   box-shadow:
-    0 4px 12px rgb(var(--c-primary-600) / 0.4),
-    inset 0 1px 0 rgb(var(--c-primary-300) / 0.3);
+    0 6px 20px -4px rgb(var(--c-primary-600) / 0.5),
+    inset 0 1px 0 rgb(var(--c-primary-200) / 0.4);
 }
 
 /* ============================================
-   SCROLLBAR
+   SCROLLBAR (iOS / macOS Style)
    ============================================ */
 ::-webkit-scrollbar {
   width: 6px;
@@ -251,16 +268,27 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--c-primary-500) / 0.2);
-  border-radius: 3px;
+  background: rgb(var(--c-text-100) / 0.12);
+  border-radius: 9999px;
   transition: background 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(var(--c-primary-500) / 0.45);
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(var(--c-text-100) / 0.1);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--c-primary-500) / 0.4);
+}
+
 /* ============================================
-   ANIMATIONS
+   ANIMATIONS & MOTION
    ============================================ */
 
 /* Shimmer effect for skeleton/loading */
@@ -275,7 +303,7 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgb(var(--c-text-100) / 0.04) 50%,
+    rgb(var(--c-text-100) / 0.05) 50%,
     transparent 100%
   );
   animation: shimmer 2.5s infinite;
@@ -285,7 +313,7 @@ body {
 /* Floating animation */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-6px); }
+  50%       { transform: translateY(-5px); }
 }
 .animate-float {
   animation: float 4s ease-in-out infinite;
@@ -293,8 +321,8 @@ body {
 
 /* Glow pulse for special elements */
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 6px  rgb(var(--c-primary-500) / 0.3); }
-  50%       { box-shadow: 0 0 18px rgb(var(--c-primary-500) / 0.6); }
+  0%, 100% { box-shadow: 0 0 8px  rgb(var(--c-primary-500) / 0.25); }
+  50%       { box-shadow: 0 0 22px rgb(var(--c-primary-500) / 0.55); }
 }
 .animate-glow-pulse {
   animation: glow-pulse 2.5s ease-in-out infinite;
@@ -310,10 +338,10 @@ body {
   animation: gradient-x 4s ease infinite;
 }
 
-/* Soft pulse (existing, preserved) */
+/* Soft pulse */
 @keyframes soft-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.8; transform: scale(0.98); }
+  50%       { opacity: 0.85; transform: scale(0.985); }
 }
 .animate-soft-pulse {
   animation: soft-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -322,16 +350,16 @@ body {
 /* Orb background animation */
 @keyframes orb-move-1 {
   0%, 100% { transform: translate(0%,   0%)   scale(1);   }
-  33%       { transform: translate(3%,  -4%)   scale(1.05); }
-  66%       { transform: translate(-2%,  2%)   scale(0.97); }
+  33%       { transform: translate(4%,  -5%)   scale(1.06); }
+  66%       { transform: translate(-3%,  3%)   scale(0.96); }
 }
 @keyframes orb-move-2 {
   0%, 100% { transform: translate(0%,   0%)   scale(1);   }
-  33%       { transform: translate(-4%,  3%)   scale(0.96); }
-  66%       { transform: translate(3%,  -2%)   scale(1.04); }
+  33%       { transform: translate(-5%,  4%)   scale(0.95); }
+  66%       { transform: translate(4%,  -3%)   scale(1.05); }
 }
-.animate-orb-1 { animation: orb-move-1 18s ease-in-out infinite; }
-.animate-orb-2 { animation: orb-move-2 22s ease-in-out infinite; }
+.animate-orb-1 { animation: orb-move-1 20s ease-in-out infinite; }
+.animate-orb-2 { animation: orb-move-2 24s ease-in-out infinite; }
 
 /* Active indicator line (sidebar) */
 .sidebar-active-indicator {
@@ -339,25 +367,25 @@ body {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 3px;
-  height: 65%;
+  width: 3.5px;
+  height: 60%;
   background: linear-gradient(to bottom, rgb(var(--c-primary-300)), rgb(var(--c-primary-600)));
-  border-radius: 0 3px 3px 0;
+  border-radius: 0 4px 4px 0;
   box-shadow: 
-    0 0 10px rgb(var(--c-primary-500) / 0.7),
-    0 0 20px rgb(var(--c-primary-500) / 0.3);
+    0 0 12px rgb(var(--c-primary-500) / 0.8),
+    0 0 24px rgb(var(--c-primary-500) / 0.4);
 }
 
 /* ============================================
    RECHARTS OVERRIDES
    ============================================ */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
-  background-color: rgb(var(--c-bg-900) / 0.85) !important;
+  background-color: rgb(var(--c-bg-900) / 0.88) !important;
   border: 1px solid var(--glass-border)            !important;
-  border-top: 1px solid rgb(var(--c-text-100) / 0.18) !important;
-  border-radius: 12px                              !important;
-  backdrop-filter: blur(16px)                      !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3)        !important;
+  border-top: 1px solid rgb(var(--c-text-100) / 0.22) !important;
+  border-radius: 14px                              !important;
+  backdrop-filter: blur(20px) saturate(180%)      !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4)        !important;
 }
 
 /* Remove focus outline from Recharts elements */
