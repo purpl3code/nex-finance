@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { motion } from 'framer-motion';
@@ -18,7 +19,7 @@ import {
   InsightsList,
   CreditCardSummaryItem
 } from './DashboardWidgets';
-import { Wallet, Sparkles, CreditCard as CardIcon } from 'lucide-react';
+import { Wallet, Sparkles } from 'lucide-react';
 import { GlassCard } from './ui/GlassCard';
 
 interface DashboardProps {
@@ -66,7 +67,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
-  // --- MEMOIZED CALCULATIONS ---
+  // --- MEMOIZED CALCULATIONS (PREMIUM FEATURES) ---
+
   const monthlySummary = useMemo(() => 
     getMonthlySummary(transactions, creditCardTransactions, month, year, totalBalance),
   [transactions, creditCardTransactions, month, year, totalBalance]);
@@ -87,6 +89,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
     getFinancialForecast(recurringRules, invoicesForForecast, month, year),
   [recurringRules, invoicesForForecast, month, year]);
 
+  // Updated to pass month/year filter
   const recentActivity = useMemo(() => 
     getRecentActivity(transactions, creditCardTransactions, categories, month, year, 8, creditCards),
   [transactions, creditCardTransactions, categories, month, year, creditCards]);
@@ -99,21 +102,22 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
     generateInsights(monthlySummary, transactions, creditCardTransactions, categories, creditCards, month, year),
   [monthlySummary, transactions, creditCardTransactions, categories, creditCards, month, year]);
 
+  // Chart Data (Existing Logic)
   const comprehensiveChartData = useMemo(() => {
     if (!getCategorySpending) return [];
     
     const data: ChartDataPoint[] = [];
     categories.forEach((cat) => {
-      if (cat.kind === 'expense') {
-        const val = getCategorySpending(cat.id, month, year);
-        if (val > 0) {
-          data.push({
-            name: cat.name,
-            value: val,
-            color: cat.color || '' 
-          });
-        }
-      }
+       if (cat.kind === 'expense') {
+          const val = getCategorySpending(cat.id, month, year);
+          if (val > 0) {
+             data.push({
+                name: cat.name,
+                value: val,
+                color: cat.color || '' 
+             });
+          }
+       }
     });
     
     return data
@@ -125,21 +129,21 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
 
   }, [getCategorySpending, categories, month, year]);
 
-  // --- ANIMATION VARIANTS (Apple Spring Easing) ---
+  // --- ANIMATION VARIANTS ---
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1, 
-      transition: { staggerChildren: 0.08 } 
+      transition: { staggerChildren: 0.1 } 
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 16 },
+    hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
       y: 0, 
-      transition: { duration: 0.45, ease: "easeOut" as const } 
+      transition: { duration: 0.5, ease: 'easeOut' as const } 
     }
   };
 
@@ -151,50 +155,43 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
       animate="visible"
     >
       
-      {/* 1. PREMIUM HEADER: MAIN METRIC CARDS */}
+      {/* 1. PREMIUM HEADER: MAIN CARDS */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RemainingBalanceCard summary={monthlySummary} />
-        <ForecastCard 
-          summary={forecast} 
-          totalCurrentBalance={totalBalance} 
-          creditCardUsedLimit={creditCardStats.usedLimit} 
-          totalDebts={totalDebts} 
-        />
+        <ForecastCard summary={forecast} totalCurrentBalance={totalBalance} creditCardUsedLimit={creditCardStats.usedLimit} totalDebts={totalDebts} />
       </motion.div>
 
-      {/* 2. MIDDLE SECTION: BALANCE CHART & SMART INSIGHTS */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-auto lg:h-84">
+      {/* 2. MIDDLE SECTION: GRAPH & INSIGHTS */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-auto lg:h-80">
         <div className="lg:col-span-2 h-full">
           <BalanceChart data={balanceHistory} />
         </div>
         <div className="space-y-3 overflow-y-auto pr-1 custom-scrollbar h-full">
-          <div className="flex items-center gap-2 mb-1 px-1">
+          <div className="flex items-center gap-2 mb-1">
             <Sparkles size={16} className="text-amber-400" />
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest">Insights Inteligentes</h3>
+            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Insights</h3>
           </div>
           <InsightsList insights={insights} />
           {insights.length === 0 && (
-            <div className="p-6 border border-dashed border-white/10 rounded-2xl text-center text-slate-500 text-sm bg-white/[0.02]">
-              Nenhum insight disponível para este período.
+            <div className="p-4 border border-white/10 border-dashed rounded-xl text-center text-slate-500 text-sm">
+              Nenhum insight disponível no momento.
             </div>
           )}
         </div>
       </motion.div>
 
-      {/* 3. BOTTOM SECTION: CATEGORY DONUT & RECENT TRANSACTIONS */}
+      {/* 3. BOTTOM SECTION: SPENDING & ACTIVITY */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
-        {/* Left: Expenses & Credit Card mini-cards */}
+        {/* Left: Expenses & Cards */}
         <div className="space-y-4">
-          <GlassCard className="h-auto p-5 sm:p-6">
-            <div className="flex justify-between items-start mb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-1.5 h-4.5 rounded-full bg-gradient-to-b from-amber-400 to-orange-500 shadow-sm" />
+          {/* Chart */}
+          <GlassCard className="h-auto">
+            <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">Despesas por Categoria</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Total gasto: <span className="font-semibold text-slate-200 tabular-nums">{formatCurrency(monthlySummary.totalSpent)}</span></p>
+                  <h3 className="text-lg font-semibold text-white">Despesas por Categoria</h3>
+                  <p className="text-xs text-slate-400">Total gasto: {formatCurrency(monthlySummary.totalSpent)}</p>
                 </div>
-              </div>
             </div>
             
             {comprehensiveChartData.length > 0 ? (
@@ -205,12 +202,13 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                       data={comprehensiveChartData}
                       cx="50%"
                       cy="45%"
-                      innerRadius="58%"
-                      outerRadius="78%"
-                      paddingAngle={4}
-                      minAngle={4}
+                      innerRadius="55%"
+                      outerRadius="75%"
+                      paddingAngle={5}
+                      minAngle={5}
                       dataKey="value"
                       stroke="none"
+                      activeShape={false}
                     >
                       {comprehensiveChartData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} style={{ outline: 'none' }} />
@@ -218,16 +216,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                     </Pie>
                     <Tooltip 
                       formatter={(value: number) => formatCurrency(value)}
-                      contentStyle={{ 
-                        backgroundColor: 'rgb(var(--c-bg-900) / 0.9)', 
-                        borderColor: 'rgb(var(--c-text-100) / 0.12)', 
-                        color: 'rgb(var(--c-text-100))', 
-                        borderRadius: '14px', 
-                        backdropFilter: 'blur(20px) saturate(180%)',
-                        boxShadow: '0 12px 36px rgba(0, 0, 0, 0.4)',
-                        padding: '8px 12px',
-                        fontWeight: 'bold'
-                      }}
+                      contentStyle={{ backgroundColor: 'rgb(var(--c-bg-900) / 0.9)', borderColor: 'rgb(var(--c-text-100) / 0.1)', color: 'rgb(var(--c-text-100))', borderRadius: '12px', backdropFilter: 'blur(8px)' }}
                       itemStyle={{ color: 'rgb(var(--c-text-100))' }}
                     />
                     <Legend 
@@ -237,7 +226,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                       wrapperStyle={{ 
                         color: 'rgb(var(--c-text-400))', 
                         fontSize: '11px',
-                        paddingTop: '12px'
+                        paddingTop: '10px'
                       }}
                     />
                   </RePieChart>
@@ -245,26 +234,23 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
               </div>
             ) : (
               <motion.div 
-                initial={{ opacity: 0, scale: 0.96 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="h-[260px] sm:h-[300px] flex flex-col items-center justify-center text-slate-500 border border-dashed border-white/10 rounded-2xl bg-white/[0.02]"
+                className="h-[300px] sm:h-[350px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-xl bg-white/[0.02]"
               >
-                <div className="relative w-20 h-20 mb-3 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-[rgb(var(--c-primary-500)/0.15)] rounded-full animate-soft-pulse" />
-                  <Wallet size={40} className="relative z-10 text-[rgb(var(--c-primary-400))] opacity-80" />
+                <div className="relative w-24 h-24 mb-4">
+                  <div className="absolute inset-0 bg-[rgb(var(--c-primary-500)/0.2)] rounded-full animate-soft-pulse"></div>
+                  <Wallet size={48} className="absolute inset-0 m-auto text-[rgb(var(--c-primary-400))] opacity-80" />
                 </div>
-                <p className="font-semibold text-slate-200 text-sm">Nenhuma despesa ainda</p>
-                <p className="text-xs text-slate-400 mt-1 max-w-[220px] text-center">Cadastre suas movimentações para ver a distribuição de gastos.</p>
+                <p className="font-semibold text-slate-300">Nenhuma despesa ainda!</p>
+                <p className="text-xs text-slate-400 mt-1 max-w-[200px] text-center">Que tal começar a registrar suas finanças neste mês?</p>
               </motion.div>
             )}
           </GlassCard>
 
           {/* Mini Card List */}
-          <div className="space-y-2.5">
-            <div className="flex items-center gap-2 px-1">
-              <CardIcon size={14} className="text-slate-400" />
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Resumo dos Cartões</h3>
-            </div>
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Resumo dos Cartões</h3>
             {creditCards.length > 0 ? (
               creditCards.map(card => {
                 const totalUsed = getCardTotalUsedLimit ? getCardTotalUsedLimit(card.id) : 0;
@@ -280,7 +266,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                 );
               })
             ) : (
-              <p className="text-xs text-slate-500 italic px-1">Nenhum cartão cadastrado.</p>
+              <p className="text-sm text-slate-500 italic">Nenhum cartão cadastrado.</p>
             )}
           </div>
         </div>

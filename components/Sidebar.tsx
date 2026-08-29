@@ -33,11 +33,11 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ item, activeTab, collapsed, o
     <button
       onClick={() => onNavigate(item.id)}
       className={`
-        w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden active:scale-[0.98]
+        w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden
         ${isActive 
-          ? 'sidebar-item-active text-[rgb(var(--c-primary-300))] font-semibold shadow-sm' 
-          : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-100 border border-transparent hover:border-white/[0.06]'}
-        ${collapsed ? 'justify-center px-0 py-2.5' : ''}
+          ? 'sidebar-item-active text-[rgb(var(--c-primary-300))] border border-transparent' 
+          : 'text-slate-400 hover:bg-white/5 hover:text-slate-100 border border-transparent hover:border-white/8'}
+        ${collapsed ? 'justify-center' : ''}
       `}
       title={collapsed ? item.label : undefined}
     >
@@ -46,31 +46,33 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ item, activeTab, collapsed, o
         <span className="sidebar-active-indicator" />
       )}
       
-      {/* Icon with refined background highlight for active state */}
-      <div className={`
-        flex items-center justify-center rounded-lg transition-all duration-200 relative z-10
-        ${isActive 
-          ? 'text-[rgb(var(--c-primary-300))] scale-105' 
-          : 'text-slate-400 group-hover:text-slate-200 group-hover:scale-105'}
-      `}>
-        <Icon size={18} />
-      </div>
+      {/* Icon */}
+      <Icon 
+        size={18} 
+        className={`
+          min-w-[18px] transition-all duration-200 relative z-10
+          ${isActive 
+            ? 'scale-110' 
+            : 'text-slate-400 group-hover:text-slate-100 group-hover:scale-105'}
+        `} 
+      />
       
       {!collapsed && (
-        <span className="text-sm font-medium whitespace-nowrap overflow-hidden animate-in fade-in duration-300 relative z-10 tracking-tight">
+        <span className="text-sm font-medium whitespace-nowrap overflow-hidden animate-in fade-in duration-300 relative z-10">
           {item.label}
         </span>
       )}
 
       {/* Collapsed Tooltip */}
       {collapsed && (
-        <div className="absolute left-full ml-3 px-3 py-1.5 glass-lg text-white text-xs font-semibold rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-all duration-200 translate-x-2 group-hover:translate-x-0 border border-white/15 shadow-2xl">
+        <div className="absolute left-full ml-3 px-3 py-2 glass-lg text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-all duration-200 translate-x-2 group-hover:translate-x-0 border border-white/10">
           {item.label}
         </div>
       )}
     </button>
   );
 };
+
 
 // Extracted SidebarGroup
 interface SidebarGroupProps {
@@ -88,14 +90,14 @@ const SidebarGroup: React.FC<SidebarGroupProps> = ({ group, isOpen, collapsed, o
   if (!hasItems) return null;
 
   return (
-    <div className="mb-2">
+    <div className="mb-1">
       {!collapsed && (
         <button 
           onClick={() => onToggle(group.id)}
-          className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-widest transition-colors rounded-lg hover:bg-white/[0.02]"
+          className="w-full flex items-center justify-between px-3 py-1.5 text-[9px] font-black text-slate-600 hover:text-slate-400 uppercase tracking-[0.15em] transition-colors"
         >
           <span>{group.title}</span>
-          <ChevronDown size={12} className={`transition-transform duration-200 ${isOpen ? 'rotate-0' : '-rotate-90'}`} />
+          <ChevronDown size={11} className={`transition-transform duration-200 ${isOpen ? 'rotate-0' : '-rotate-90'}`} />
         </button>
       )}
       
@@ -196,18 +198,20 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
     }
   ];
 
+  // --- RENDER ---
+
   return (
     <>
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div 
-          className="fixed inset-0 bg-black/70 backdrop-blur-md z-30 md:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-30 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       <aside className={`
-        flex flex-col glass-lg h-screen transition-all duration-300 border-r border-white/6
+        flex flex-col glass-lg h-screen transition-all duration-300 border-r border-white/5
         ${collapsed ? 'w-[76px]' : 'w-[272px]'}
         fixed md:relative z-40
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -224,13 +228,13 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
         {/* Mobile Close Button */}
         <button 
           onClick={() => setIsMobileOpen(false)}
-          className="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-white bg-white/5 rounded-xl backdrop-blur-md transition-colors"
+          className="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-white bg-white/5 rounded-lg backdrop-blur-md transition-colors"
         >
           <X size={20} />
         </button>
 
         {/* NAV CONTENT */}
-        <div className="flex-1 overflow-y-auto py-3 px-3 space-y-1 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto py-3 px-3 space-y-1 scrollbar-hide">
           {menuGroups.map(group => (
             <div key={group.id}>
               <SidebarGroup 
@@ -247,15 +251,10 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
 
         {/* Footer */}
         {!collapsed && (
-          <div className="p-3.5 border-t border-white/6 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[rgb(var(--c-primary-400))] animate-pulse shadow-[0_0_8px_rgb(var(--c-primary-500)/0.8)]" />
-                <p className="text-[11px] text-slate-400 font-semibold tracking-wide">Nex Finance</p>
-              </div>
-              <span className="text-[10px] text-slate-500 font-mono font-medium px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/8">
-                {APP_VERSION}
-              </span>
+          <div className="p-4 border-t border-white/5 animate-in fade-in duration-500">
+            <div className="flex items-center justify-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'rgb(var(--c-primary-500) / 0.7)' }} />
+              <p className="text-[10px] text-slate-600 font-semibold tracking-wider">{APP_VERSION} · Nex Finance</p>
             </div>
           </div>
         )}

@@ -75,17 +75,17 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
 
   const getIcon = (type: AccountType) => {
     switch (type) {
-      case 'bank': return <Building2 size={22} className="text-blue-400" />;
-      case 'cash': return <Banknote size={22} className="text-emerald-400" />;
-      default: return <Wallet size={22} className="text-violet-400" />;
+      case 'bank': return <Building2 size={24} className="text-blue-400" />;
+      case 'cash': return <Banknote size={24} className="text-emerald-400" />;
+      default: return <Wallet size={24} className="text-violet-400" />;
     }
   };
 
-  const getAccentGlow = (type: AccountType) => {
+  const getAccentColor = (type: AccountType) => {
     switch (type) {
-      case 'bank': return 'from-blue-500/15 via-blue-500/5 to-transparent';
-      case 'cash': return 'from-emerald-500/15 via-emerald-500/5 to-transparent';
-      default: return 'from-violet-500/15 via-violet-500/5 to-transparent';
+      case 'bank': return 'border-t-blue-500/40';
+      case 'cash': return 'border-t-emerald-500/40';
+      default: return 'border-t-violet-500/40';
     }
   };
 
@@ -99,76 +99,60 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
         }
       />
 
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 gap-4" 
-        initial="hidden" 
-        animate="visible" 
-        variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08 } } }}
-      >
+      <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-4" initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } }}>
         {accounts.map(acc => {
           const balance = getBalance(acc.id);
           return (
-            <motion.div 
-              key={acc.id} 
-              variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } } }}
-            >
-              <GlassCard className="relative overflow-hidden flex flex-col justify-between group p-5 sm:p-6">
-                {/* Ambient glow mesh */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${getAccentGlow(acc.type)} opacity-60 group-hover:opacity-100 transition-opacity duration-500`} />
-                
-                <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3.5">
-                      <div className="p-3 bg-white/[0.06] rounded-2xl shadow-sm border border-white/[0.08] group-hover:scale-105 transition-transform duration-200">
-                        {getIcon(acc.type)}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-base font-bold text-white tracking-tight">{acc.name}</h3>
-                          {acc.isDefault && (
-                            <span title="Conta padrão do sistema" className="p-1 rounded-md bg-white/[0.06] border border-white/10">
-                              <Lock size={12} className="text-slate-400" />
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-0.5 block">
-                          {acc.type === 'bank' ? 'Banco' : acc.type === 'cash' ? 'Dinheiro' : 'Carteira Digital'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
-                       <button 
-                         type="button"
-                         onClick={(e) => { e.stopPropagation(); openModal(acc); }} 
-                         className="p-2 text-slate-400 hover:text-[rgb(var(--c-primary-300))] hover:bg-white/[0.08] rounded-xl transition-colors"
-                         title="Editar"
-                       >
-                         <Edit2 size={16} />
-                       </button>
-                       <button 
-                         type="button"
-                         onClick={(e) => { e.stopPropagation(); setDeletingAcc(acc); }}
-                         className={`p-2 rounded-xl transition-colors ${
-                           acc.isDefault 
-                             ? 'text-slate-600 cursor-not-allowed' 
-                             : 'text-slate-400 hover:text-rose-400 hover:bg-rose-500/15'
-                         }`}
-                         disabled={!!acc.isDefault}
-                         title={acc.isDefault ? "Conta padrão não pode ser excluída" : "Excluir conta"}
-                       >
-                         <Trash2 size={16} />
-                       </button>
-                    </div>
+            <motion.div key={acc.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } } }}>
+            <GlassCard className={`flex flex-col justify-between group hover:border-white/20 transition-colors border-t-2 ${getAccentColor(acc.type)}`}>
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/5 rounded-xl shadow-inner border border-white/5">
+                    {getIcon(acc.type)}
                   </div>
-
-                  <div className="pt-3 border-t border-white/6">
-                    <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Saldo Atual</p>
-                    <p className={`text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums ${balance >= 0 ? 'text-white' : 'text-rose-400'}`}>
-                      {formatCurrency(balance)}
-                    </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-white">{acc.name}</h3>
+                      {acc.isDefault && (
+                        <span title="Conta padrão do sistema">
+                          <Lock size={14} className="text-slate-500" />
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">{acc.type === 'bank' ? 'Banco' : acc.type === 'cash' ? 'Dinheiro' : 'Carteira'}</span>
                   </div>
                 </div>
-              </GlassCard>
+                <div className="flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                   <button 
+                     type="button"
+                     onClick={(e) => { e.stopPropagation(); openModal(acc); }} 
+                     className="p-2 text-slate-400 hover:text-[rgb(var(--c-primary-400))] hover:bg-white/5 rounded-lg transition-colors"
+                     title="Editar"
+                   >
+                     <Edit2 size={16} />
+                   </button>
+                   <button 
+                     type="button"
+                     onClick={(e) => { e.stopPropagation(); setDeletingAcc(acc); }}
+                     className={`p-2 rounded-lg transition-colors ${
+                       acc.isDefault 
+                         ? 'text-slate-600 cursor-not-allowed' 
+                         : 'text-slate-400 hover:text-red-400 hover:bg-white/5'
+                     }`}
+                     disabled={!!acc.isDefault}
+                     title={acc.isDefault ? "Conta padrão não pode ser excluída" : "Excluir conta"}
+                   >
+                     <Trash2 size={16} />
+                   </button>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-white/5">
+                <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-0.5">Saldo Atual</p>
+                <p className={`text-2xl font-bold ${balance >= 0 ? 'text-white' : 'text-red-400'}`}>
+                  {formatCurrency(balance)}
+                </p>
+              </div>
+            </GlassCard>
             </motion.div>
           )
         })}
@@ -176,7 +160,7 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
 
       <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingAcc ? 'Editar Conta' : 'Nova Conta'}>
         <ModalBody>
-          <form id="account-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="account-form" onSubmit={handleSubmit} className="space-y-3">
              <GlassInput
                label="Nome da Conta"
                value={name}
@@ -185,7 +169,7 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                required
              />
              <GlassSelect
-               label="Tipo de Conta"
+               label="Tipo"
                value={type}
                onChange={e => setType(e.target.value as AccountType)}
                options={[
@@ -201,28 +185,29 @@ export const AccountList: React.FC<AccountListProps> = ({ accounts, getBalance, 
                   value={initialBalance}
                   onChange={val => setInitialBalance(val)}
                 />
-                <p className="text-[11px] text-slate-400 mt-1 pl-1">O saldo atual será calculado a partir deste valor somado às movimentações.</p>
+                <p className="text-xs text-slate-500 mt-1 pl-1">O saldo atual será calculado a partir deste valor + transações.</p>
               </div>
           </form>
         </ModalBody>
         <ModalFooter>
            <GlassButton type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</GlassButton>
-           <GlassButton type="submit" form="account-form" variant="primary">{editingAcc ? 'Salvar Alterações' : 'Criar Conta'}</GlassButton>
+           <GlassButton type="submit" form="account-form" variant="primary">{editingAcc ? 'Salvar' : 'Criar Conta'}</GlassButton>
         </ModalFooter>
       </ModalShell>
 
       <ModalShell isOpen={!!deletingAcc} onClose={() => setDeletingAcc(null)} title="Excluir Conta">
         <ModalBody>
-          <div className="text-center space-y-4 py-3">
-            <div className="bg-rose-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-rose-500/25">
-               <AlertTriangle size={32} className="text-rose-400" />
+          <div className="text-center space-y-4">
+            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+               <AlertTriangle size={32} className="text-red-500" />
             </div>
             <div>
-              <p className="text-lg text-slate-100 font-bold">Tem certeza que deseja excluir?</p>
-              <p className="text-xl font-extrabold text-white mt-1">{deletingAcc?.name}</p>
+              <p className="text-lg text-slate-200">Tem certeza que deseja excluir?</p>
+              <p className="text-xl font-bold text-white mt-1">{deletingAcc?.name}</p>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
-              Esta ação removerá a conta permanentemente. Caso haja transações vinculadas, a exclusão será bloqueada para proteger o histórico.
+            <p className="text-sm text-slate-400">
+              Esta ação removerá a conta permanentemente. <br/>
+              Se houver transações vinculadas, a exclusão será bloqueada.
             </p>
           </div>
         </ModalBody>

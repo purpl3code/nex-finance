@@ -55,34 +55,37 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
 
   const getVariantColor = (variant?: string) => {
     switch (variant) {
-      case 'secondary': return 'bg-white/10 text-white hover:bg-white/20 border-white/20';
-      case 'danger':    return 'bg-gradient-to-tr from-red-600 to-rose-500 text-white shadow-[0_4px_16px_rgba(239,68,68,0.4)] border-red-400/30';
-      case 'success':   return 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-[0_4px_16px_rgba(16,185,129,0.4)] border-emerald-400/30';
-      case 'warning':   return 'bg-gradient-to-tr from-amber-600 to-orange-500 text-white shadow-[0_4px_16px_rgba(245,158,11,0.4)] border-amber-400/30';
-      default:          return 'bg-gradient-to-tr from-[rgb(var(--c-primary-600))] to-[rgb(var(--c-primary-400))] text-white shadow-[0_4px_20px_var(--accent-glow)] border-[rgb(var(--c-primary-300)/0.4)]';
+      case 'secondary': return 'bg-white/10 text-white hover:bg-white/20';
+      case 'danger':    return 'bg-red-500    text-white hover:bg-red-600';
+      case 'success':   return 'bg-emerald-500 text-white hover:bg-emerald-600';
+      case 'warning':   return 'bg-amber-500   text-white hover:bg-amber-600';
+      default:          return 'bg-[var(--accent)] text-[rgb(var(--c-primary-foreground))] hover:brightness-110';
     }
   };
 
+  // ─── Portal: renders directly on document.body ───────────────────────────
+  // This completely escapes any parent overflow, transform, backdrop-filter,
+  // or stacking-context that could misplace a position:fixed element.
   const content = (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/65 backdrop-blur-sm z-[9998] md:hidden"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] md:hidden"
         style={{
           opacity:        isOpen ? 1 : 0,
           pointerEvents:  isOpen ? 'auto' : 'none',
-          transition:     'opacity 220ms cubic-bezier(0.16, 1, 0.3, 1)',
+          transition:     'opacity 200ms ease',
         }}
         onClick={() => setIsOpen(false)}
       />
 
-      {/* FAB container */}
+      {/* FAB container — always fixed at bottom-right, never unmounted */}
       <div
         ref={menuRef}
         className="fixed md:hidden z-[9999] flex flex-col items-end gap-3 pointer-events-none"
         style={{
-          bottom:         'calc(1.25rem + env(safe-area-inset-bottom))',
-          right:          '1.25rem',
+          bottom:         'calc(1rem + env(safe-area-inset-bottom))',
+          right:          '1rem',
           opacity:        visible ? 1 : 0,
           transform:      visible ? 'translateY(0)' : 'translateY(16px)',
           transition:     'opacity 220ms ease, transform 220ms ease',
@@ -90,7 +93,7 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
       >
         {/* Speed Dial Actions */}
         <div
-          className="flex flex-col items-end gap-3 mb-1"
+          className="flex flex-col items-end gap-3 mb-2"
           style={{
             opacity:       isOpen ? 1 : 0,
             pointerEvents: isOpen && visible ? 'auto' : 'none',
@@ -101,20 +104,20 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
             <div
               key={action.id}
               style={{
-                transform:  isOpen ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.9)',
-                opacity:    isOpen ? 1 : 0,
-                transition: `transform 220ms cubic-bezier(0.16, 1, 0.3, 1) ${idx * 40}ms, opacity 220ms ease ${idx * 40}ms`,
+                transform:  isOpen ? 'translateY(0)'    : 'translateY(10px)',
+                opacity:    isOpen ? 1                  : 0,
+                transition: `transform 200ms ease ${idx * 45}ms, opacity 200ms ease ${idx * 45}ms`,
               }}
             >
               <button
                 onClick={() => handleActionClick(action)}
-                className="flex items-center gap-3 group active:scale-95 transition-transform duration-150"
+                className="flex items-center gap-3 group"
               >
-                <span className="glass-lg text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-xl border border-white/12 whitespace-nowrap tracking-wide">
+                <span className="glass-lg text-white text-sm px-3 py-1.5 rounded-xl shadow-lg border border-white/10 font-medium whitespace-nowrap">
                   {action.label}
                 </span>
                 <div
-                  className={`w-11 h-11 rounded-2xl shadow-xl flex items-center justify-center border transition-all duration-150 group-hover:scale-105 ${getVariantColor(action.variant)}`}
+                  className={`w-11 h-11 rounded-full shadow-xl flex items-center justify-center border border-white/15 transition-transform duration-150 active:scale-90 ${getVariantColor(action.variant)}`}
                 >
                   {action.icon}
                 </div>
@@ -129,14 +132,14 @@ export const MobileFab: React.FC<MobileFabProps> = ({ visible = true, actions })
           aria-label={isOpen ? 'Fechar menu' : 'Adicionar'}
           style={{ pointerEvents: visible ? 'auto' : 'none' }}
           className={`
-            w-14 h-14 rounded-2xl shadow-2xl
+            w-14 h-14 rounded-full shadow-2xl
             flex items-center justify-center
             active:scale-90
-            border
-            transition-all duration-300 ease-out
+            border border-white/20
+            transition-all duration-300
             ${isOpen
-              ? 'bg-white/15 text-white rotate-45 border-white/25 backdrop-blur-xl'
-              : `${getVariantColor()} hover:scale-105`}
+              ? 'bg-white/10 rotate-45 shadow-none'
+              : `${getVariantColor()} shadow-[0_0_20px_var(--accent-glow)]`}
           `}
         >
           {actions.length === 1 ? (

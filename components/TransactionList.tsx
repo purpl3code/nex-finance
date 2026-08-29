@@ -50,86 +50,86 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
   return (
     <div className="space-y-4">
       {/* Desktop Table */}
-      <GlassCard className="hidden md:block overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="text-[11px] uppercase font-bold text-slate-400 border-b border-white/8 bg-white/[0.02]">
+      <GlassCard className="hidden md:block overflow-hidden">
+        <div className="overflow-x-auto -mx-6 px-6">
+          <table className="w-full text-left text-sm text-slate-400">
+            <thead className="text-xs uppercase font-medium text-slate-500 border-b border-white/10">
               <tr>
-                <th className="py-3.5 px-6 font-bold tracking-wider">Data</th>
-                <th className="py-3.5 px-4 font-bold tracking-wider">Categoria / Tipo</th>
-                <th className="py-3.5 px-4 font-bold tracking-wider">Descrição</th>
-                <th className="py-3.5 px-6 text-right font-bold tracking-wider">Valor</th>
-                <th className="py-3.5 px-6 text-center font-bold tracking-wider">Ações</th>
+                <th className="pb-2 font-semibold tracking-wider">Data</th>
+                <th className="pb-2 font-semibold tracking-wider">Categoria / Tipo</th>
+                <th className="pb-2 font-semibold tracking-wider">Descrição</th>
+                <th className="pb-2 text-right font-semibold tracking-wider">Valor</th>
+                <th className="pb-2 text-center font-semibold tracking-wider">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-white/5">
               {transactions.map((item) => {
                 const isTransfer = item.isTransfer;
                 
                 return (
-                  <tr key={item.id} className="hover:bg-white/[0.04] transition-colors duration-150 group">
-                    <td className="py-3.5 px-6 whitespace-nowrap text-slate-300 font-medium tabular-nums text-xs">
+                  <tr key={item.id} className="hover:bg-white/5 transition-colors group">
+                    <td className="py-3 whitespace-nowrap text-slate-300">
                       {formatDate(item.date)}
                     </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <td className="py-3 whitespace-nowrap">
                       {isTransfer ? (
-                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgb(var(--c-primary-500)/0.12)] text-[rgb(var(--c-primary-300))] border border-[rgb(var(--c-primary-500)/0.25)] text-xs font-semibold">
+                         <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[rgb(var(--c-primary-500)/0.1)] text-[rgb(var(--c-primary-400))] border border-[rgb(var(--c-primary-500)/0.2)] text-xs font-medium">
                            <ArrowRightLeft size={12} />
                            <span>Transferência</span>
                          </span>
                       ) : (
-                        <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/[0.06] text-slate-200 border border-white/10 text-xs font-medium">
+                        <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 text-slate-200 border border-white/10 text-xs font-medium">
                           <span><AppleEmoji emoji={getCategory(item.categoryId)?.emoji} /></span>
-                          <span>{getCategory(item.categoryId)?.name || 'Outros'}</span>
+                          <span>{getCategory(item.categoryId)?.name}</span>
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-200 max-w-xs truncate">
+                    <td className="py-3 text-slate-300 max-w-xs truncate">
                       {isTransfer ? (
                         <div className="flex flex-col text-xs">
-                           <span className="text-slate-100 font-semibold">{item.description || 'Sem descrição'}</span>
-                           <span className="text-slate-400 flex items-center gap-1 mt-0.5 font-medium">
-                              {getAccountName(item.fromAccountId)} <ArrowRightLeft size={10} className="text-slate-500" /> {getAccountName(item.toAccountId)}
+                           <span className="text-slate-200 font-medium">{item.description || 'Sem descrição'}</span>
+                           <span className="text-slate-500 flex items-center gap-1 mt-0.5">
+                              {getAccountName(item.fromAccountId)} <ArrowRightLeft size={10} /> {getAccountName(item.toAccountId)}
                            </span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
                           {item.generatedByRuleId && (
-                             <span title="Gerado automaticamente" className="text-[rgb(var(--c-primary-400))] shrink-0"><Repeat size={12} /></span>
+                             <span title="Gerado automaticamente" className="text-[rgb(var(--c-primary-400))]"><Repeat size={12} /></span>
                           )}
-                          <span title={item.description} className="text-slate-200 font-medium truncate">{item.description || '-'}</span>
+                          <span title={item.description} className="text-slate-200">{item.description || '-'}</span>
                         </div>
                       )}
                     </td>
-                    <td className={`py-3.5 px-6 whitespace-nowrap text-right font-bold tabular-nums text-sm
-                      ${isTransfer ? 'text-slate-200' : (item.type === 'income' ? 'text-emerald-400' : 'text-rose-400')}`}>
+                    <td className={`py-3 whitespace-nowrap text-right font-bold 
+                      ${isTransfer ? 'text-slate-300' : (item.type === 'income' ? 'text-emerald-400' : 'text-red-400')}`}>
                       {isTransfer ? '' : (item.type === 'expense' ? '- ' : '+ ')}
                       {formatCurrency(item.amount)}
                     </td>
-                    <td className="py-3.5 px-6 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <td className="py-3 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => onEdit(item)}
-                          className="p-1.5 text-[rgb(var(--c-primary-400))] hover:text-white hover:bg-[rgb(var(--c-primary-500)/0.2)] rounded-lg transition-colors"
+                          className="p-2 text-[rgb(var(--c-primary-400))] hover:bg-[rgb(var(--c-primary-500)/0.2)] rounded-lg transition-colors"
                           title="Editar"
                         >
-                          <Edit2 size={15} />
+                          <Edit2 size={16} />
                         </button>
                         {onDuplicate && !isTransfer && (
                           <button 
                             onClick={() => onDuplicate(item)}
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                             title="Duplicar"
                           >
-                            <Copy size={15} />
+                            <Copy size={16} />
                           </button>
                         )}
                         <button 
                           onClick={() => setDeletingItem(item)}
-                          className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 rounded-lg transition-colors"
+                          className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
                           title="Excluir"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
@@ -142,73 +142,73 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
       </GlassCard>
 
       {/* Mobile Cards */}
-      <div className="md:hidden space-y-2.5">
+      <div className="md:hidden space-y-3">
         {transactions.map((item) => {
           const isTransfer = item.isTransfer;
           const category = !isTransfer ? getCategory(item.categoryId) : null;
           
           return (
-            <GlassCard key={item.id} className={`p-4 ${isTransfer ? 'border-[rgb(var(--c-primary-500)/0.25)] bg-[rgb(var(--c-primary-500)/0.06)]' : ''}`}>
-              <div className="flex justify-between items-start mb-2.5">
+            <GlassCard key={item.id} className={`p-4 ${isTransfer ? 'border-[rgb(var(--c-primary-500)/0.2)] bg-[rgb(var(--c-primary-500)/0.05)]' : ''}`}>
+              <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-3">
-                  <div className="text-xl bg-white/[0.06] p-2.5 rounded-2xl border border-white/[0.08] shadow-sm">
+                  <span className="text-2xl bg-white/5 p-2 rounded-xl border border-white/5">
                     <AppleEmoji emoji={isTransfer ? '🔄' : category?.emoji} />
-                  </div>
+                  </span>
                   <div>
-                    <h4 className="font-bold text-white text-sm flex items-center gap-1.5">
-                      {isTransfer ? 'Transferência' : category?.name || 'Outros'}
+                    <h4 className="font-medium text-white text-sm flex items-center gap-1">
+                      {isTransfer ? 'Transferência' : category?.name}
                       {!isTransfer && item.generatedByRuleId && <Repeat size={12} className="text-blue-400" />}
                     </h4>
-                    <span className="text-xs text-slate-400 font-medium tabular-nums">{formatDate(item.date)}</span>
+                    <span className="text-xs text-slate-500">{formatDate(item.date)}</span>
                   </div>
                 </div>
-                <div className={`font-extrabold text-sm tabular-nums ${isTransfer ? 'text-slate-200' : (item.type === 'income' ? 'text-emerald-400' : 'text-rose-400')}`}>
+                <div className={`font-bold ${isTransfer ? 'text-slate-300' : (item.type === 'income' ? 'text-emerald-400' : 'text-red-400')}`}>
                   {isTransfer ? '' : (item.type === 'expense' ? '- ' : '+ ')}
                   {formatCurrency(item.amount)}
                 </div>
               </div>
               
               {isTransfer ? (
-                <div className="text-xs bg-black/20 p-2.5 rounded-xl border border-white/6 mb-2.5">
+                <div className="text-xs bg-black/20 p-2.5 rounded-lg border border-white/5 mb-3">
                    <div className="flex justify-between items-center text-slate-400 mb-0.5">
                       <span>De: {getAccountName(item.fromAccountId)}</span>
                    </div>
-                   <div className="flex justify-between items-center text-slate-100 font-semibold">
+                   <div className="flex justify-between items-center text-slate-200 font-medium">
                       <span>Para: {getAccountName(item.toAccountId)}</span>
                    </div>
                 </div>
               ) : null}
 
               {item.description && (
-                <p className="text-xs text-slate-300 mb-2.5 line-clamp-1 pl-1 font-medium">{item.description}</p>
+                <p className="text-sm text-slate-300 mb-2 line-clamp-1 pl-1">{item.description}</p>
               )}
               
-              <div className="flex justify-end gap-2 border-t border-white/6 pt-2.5">
+              <div className="flex justify-end gap-3 border-t border-white/5 pt-3">
                  <GlassButton 
                     variant="ghost"
                     size="sm"
                     onClick={() => onEdit(item)}
-                    className="text-[rgb(var(--c-primary-400))] hover:text-[rgb(var(--c-primary-300))]"
+                    className="text-[rgb(var(--c-primary-400))] hover:text-[rgb(var(--c-primary-300))] h-8 px-3"
                   >
-                    <Edit2 size={13} className="mr-1" /> Editar
+                    <Edit2 size={14} className="mr-1.5" /> Editar
                   </GlassButton>
                   {onDuplicate && !isTransfer && (
                     <GlassButton 
                       variant="ghost"
                       size="sm"
                       onClick={() => onDuplicate(item)}
-                      className="text-slate-400 hover:text-white"
+                      className="text-slate-400 hover:text-white h-8 px-3"
                     >
-                      <Copy size={13} className="mr-1" /> Duplicar
+                      <Copy size={14} className="mr-1.5" /> Duplicar
                     </GlassButton>
                   )}
                   <GlassButton 
                     variant="ghost"
                     size="sm"
                     onClick={() => setDeletingItem(item)}
-                    className="text-rose-400 hover:text-rose-300"
+                    className="text-red-400 hover:text-red-300 h-8 px-3"
                   >
-                    <Trash2 size={13} className="mr-1" /> Excluir
+                    <Trash2 size={14} className="mr-1.5" /> Excluir
                   </GlassButton>
               </div>
             </GlassCard>
@@ -219,17 +219,17 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
       <ModalShell isOpen={!!deletingItem} onClose={() => setDeletingItem(null)} title="Excluir Movimentação">
         <ModalBody>
           <div className="text-center space-y-4 py-4">
-            <div className="bg-rose-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-rose-500/25">
-               <AlertTriangle size={32} className="text-rose-400" />
+            <div className="bg-red-500/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-red-500/20">
+               <AlertTriangle size={32} className="text-red-500" />
             </div>
             <div>
-              <p className="text-lg text-slate-100 font-bold">Tem certeza que deseja excluir?</p>
-              <p className="text-sm text-slate-400 mt-1 font-medium">
+              <p className="text-lg text-slate-200">Tem certeza que deseja excluir?</p>
+              <p className="text-sm text-slate-400 mt-2">
                 {deletingItem?.description || (deletingItem?.isTransfer ? 'Transferência' : 'Transação sem descrição')}
               </p>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
-              Esta ação não pode ser desfeita e os saldos das contas e limites serão recalculados automaticamente.
+            <p className="text-sm text-slate-400">
+              Esta ação não pode ser desfeita e o saldo será recalculado.
             </p>
           </div>
         </ModalBody>
