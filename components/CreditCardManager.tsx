@@ -624,16 +624,17 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
         {/* Invoice Summary */}
         <GlassCard className="p-0 overflow-hidden">
-           <div className="p-6 border-b border-white/5 bg-white/5">
+           <div className="relative overflow-hidden p-6 md:p-7 border-b border-white/[0.07]">
              <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6">
                <div className="text-center md:text-left">
-                 <p className="text-slate-400 text-sm font-medium mb-2">Vencimento em {invoiceInfo?.dueDate ? new Date(invoiceInfo.dueDate).toLocaleDateString('pt-BR') : '---'}</p>
-                 <div className="text-4xl font-bold text-white">
+                 <p className="text-slate-400 text-sm font-medium mb-3">Valor total da fatura</p>
+                 <div className="text-4xl md:text-[42px] leading-none font-semibold tracking-tight text-white">
                    {formatCurrency(invoiceInfo?.amount || 0)}
                  </div>
-                 <p className={`text-sm mt-2 font-bold uppercase tracking-wider ${invoiceInfo?.isPaid ? 'text-emerald-400' : 'text-[rgb(var(--c-primary-400))]'}`}>
+                 <p className={`inline-flex items-center mt-4 rounded-full px-3 py-1.5 text-xs font-semibold border border-white/10 bg-white/[0.04] ${invoiceInfo?.isPaid ? 'text-emerald-400' : 'text-[rgb(var(--c-primary-400))]'}`}>
                    {invoiceInfo?.isPaid ? 'Fatura Paga' : 'Fatura Aberta'}
                  </p>
+                 {invoiceInfo?.dueDate && <p className="mt-2 text-xs text-slate-500">Vencimento em {new Date(invoiceInfo.dueDate).toLocaleDateString('pt-BR')}</p>}
                </div>
                <div className="flex flex-col md:flex-row gap-3 relative z-20 pointer-events-auto">
                  {!invoiceInfo?.isPaid && (invoiceInfo?.amount || 0) > 0 && (
@@ -1333,9 +1334,10 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(card => (
-          <GlassCard key={card.id} onClick={() => handleSelectCard(card.id)} className="cursor-pointer group relative overflow-hidden flex flex-col justify-between h-56 hover:border-[rgb(var(--c-primary-500)/0.3)]">
+          <GlassCard key={card.id} onClick={() => handleSelectCard(card.id)} className="cursor-pointer group relative overflow-hidden flex flex-col justify-between min-h-56 border-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-0.5">
              {/* Decorative Background */}
-             <div className="absolute top-0 right-0 p-6 opacity-[0.03] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
+             <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--c-primary-500)/0.12)] via-transparent to-transparent opacity-80 pointer-events-none" />
+             <div className="absolute top-0 right-0 p-6 opacity-[0.045] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
                 <CardIcon size={160} />
              </div>
              
@@ -1346,27 +1348,27 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
                      {card.color && (
                        <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: card.color }} />
                      )}
-                     <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-[rgb(var(--c-primary-400))] transition-colors">{card.name}</h3>
+                     <h3 className="text-xl font-semibold text-white tracking-tight truncate group-hover:text-[rgb(var(--c-primary-300))] transition-colors">{card.name}</h3>
                    </div>
-                   <div className="flex gap-2 text-xs text-slate-400 mt-1">
-                      <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded">Fecha dia {card.closingDay}</span>
-                      <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded">Vence dia {card.dueDay}</span>
+                   <div className="flex flex-wrap gap-2 text-[11px] text-slate-400 mt-3">
+                      <span className="px-2.5 py-1 rounded-full bg-black/15 border border-white/8">Fecha dia {card.closingDay}</span>
+                      <span className="px-2.5 py-1 rounded-full bg-black/15 border border-white/8">Vence dia {card.dueDay}</span>
                    </div>
                  </div>
-                 <div className="bg-white/5 border border-white/10 p-2.5 rounded-xl shadow-inner">
+                 <div className="bg-white/[0.045] border border-white/10 p-2.5 rounded-2xl shadow-lg backdrop-blur-sm">
                    <CardIcon style={{ color: card.color || '#60a5fa' }} size={24} />
                  </div>
                </div>
                
                <div>
-                 <p className="text-xs text-slate-400 uppercase tracking-wide font-medium mb-1">Limite Total</p>
-                 <p className="text-2xl font-bold text-slate-200">{formatCurrency(card.limit)}</p>
+                 <p className="text-xs text-slate-400 uppercase tracking-wide font-medium mb-1">Limite total</p>
+                 <p className="text-[26px] leading-none font-semibold tracking-tight text-slate-100">{formatCurrency(card.limit)}</p>
                </div>
              </div>
                
-             <div className="relative z-10 mt-auto pt-4 border-t border-white/5">
-                <span className="text-sm font-semibold text-[rgb(var(--c-primary-400))] group-hover:text-[rgb(var(--c-primary-300))] flex items-center gap-1 transition-colors">
-                  Ver Fatura e Lançamentos <ChevronRight size={16}/>
+             <div className="relative z-10 mt-5 pt-3.5 border-t border-white/[0.07]">
+                <span className="text-[13px] font-semibold text-[rgb(var(--c-primary-300))] group-hover:text-white flex items-center justify-between transition-colors">
+                  Ver fatura e lançamentos <ChevronRight size={16} className="transition-transform group-hover:translate-x-1"/>
                 </span>
              </div>
           </GlassCard>

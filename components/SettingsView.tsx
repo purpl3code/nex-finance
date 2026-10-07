@@ -5,7 +5,7 @@ import { StorageService, CURRENT_VERSION } from '../services/storageService';
 import { INITIAL_CATEGORIES, INITIAL_ACCOUNTS } from '../constants';
 import { ThemeService, AppTheme } from '../services/themeService';
 import { SyncService } from '../services/syncService';
-import { supabase, isDemoMode, disableDemoMode } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { BackupFile } from '../types';
 import { useFinance } from '../hooks/useFinance';
@@ -54,7 +54,7 @@ export const SettingsView: React.FC = () => {
   } = useFinance();
 
   const { profile, updateName, updateAvatar, removeAvatar } = useUserProfile();
-  const isDemo = isDemoMode();
+  const isCloudSyncUnavailable = !isSupabaseConfigured;
 
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   
@@ -108,11 +108,7 @@ export const SettingsView: React.FC = () => {
   const handleLogout = async () => {
     if(confirm('Tem certeza que deseja sair?')) {
       try {
-        if (isDemoMode()) {
-          disableDemoMode();
-        } else {
-          await supabase.auth.signOut();
-        }
+        await supabase.auth.signOut();
       } catch (error) {
         console.error('Erro ao deslogar do Supabase:', error);
       } finally {
@@ -124,8 +120,8 @@ export const SettingsView: React.FC = () => {
 
   // Sync Handlers
   const handlePushToCloud = async () => {
-    if (isDemo) {
-       toast.error("Sincronização na nuvem indisponível no Modo Demo.");
+    if (isCloudSyncUnavailable) {
+       toast.error("Sincronização na nuvem indisponível sem configuração do Supabase.");
        return;
     }
     if(!session) return;
@@ -142,7 +138,7 @@ export const SettingsView: React.FC = () => {
   };
 
   const handlePullFromCloud = async () => {
-    if (isDemo) {
+    if (isCloudSyncUnavailable) {
        toast.error("Sincronização na nuvem indisponível no Modo Demo.");
        return;
     }
@@ -209,7 +205,7 @@ export const SettingsView: React.FC = () => {
     // 2. If the user is logged in, also wipe their cloud data so that
     //    SyncService.initialize() on the next load doesn't restore the old data.
     try {
-      if (!isDemoMode()) {
+      if (isSupabaseConfigured) {
         const { data: authData } = await supabase.auth.getSession();
         if (authData?.session) {
           const emptyData = {
@@ -311,15 +307,15 @@ export const SettingsView: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <GlassButton onClick={handlePushToCloud} disabled={isSyncing || isDemo} className="w-full flex justify-center">
+             <GlassButton onClick={handlePushToCloud} disabled={isSyncing || isCloudSyncUnavailable} className="w-full flex justify-center">
                 {isSyncing ? 'Enviando...' : 'Enviar Dados para Nuvem'}
              </GlassButton>
-             <GlassButton onClick={handlePullFromCloud} variant="secondary" disabled={isSyncing || isDemo} className="w-full flex justify-center">
+             <GlassButton onClick={handlePullFromCloud} variant="secondary" disabled={isSyncing || isCloudSyncUnavailable} className="w-full flex justify-center">
                 {isSyncing ? 'Baixando...' : 'Baixar Dados da Nuvem'}
              </GlassButton>
           </div>
           <p className="text-xs text-white/40 text-center">
-            {isDemo ? 'Recurso desativado no modo demo.' : 'Seus dados são salvos automaticamente na nuvem ao fazer alterações.'}
+            {isCloudSyncUnavailable ? 'Configure o Supabase para ativar a sincronização na nuvem.' : 'Seus dados são salvos automaticamente na nuvem ao fazer alterações.'}
           </p>
         </div>
       </SectionCard>
@@ -366,8 +362,8 @@ export const SettingsView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <GlassButton onClick={handleExport} className="w-full flex items-center justify-center gap-2 h-12 text-base">
-              <Download size={18} /> Exportar Dados (.json)
+           <GlassButton onClick={handleExport} size="lg" icon={<Download size={18} strokeWidth={1.8} />} className="w-full">
+              Exportar Dados (.json)
            </GlassButton>
            
            <div className="relative">
@@ -378,12 +374,14 @@ export const SettingsView: React.FC = () => {
                 accept=".json"
                 onChange={handleFileSelect}
              />
-             <GlassButton 
-                onClick={() => fileInputRef.current?.click()} 
-                variant="secondary" 
-                className="w-full flex items-center justify-center gap-2 h-12 text-base"
+             <GlassButton
+                onClick={() => fileInputRef.current?.click()}
+                variant="secondary"
+                size="lg"
+                icon={<Upload size={18} strokeWidth={1.8} />}
+                className="w-full"
              >
-                <Upload size={18} /> Importar Backup
+                Importar Backup
              </GlassButton>
            </div>
         </div>

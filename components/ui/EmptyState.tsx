@@ -35,16 +35,16 @@ const iconMap: Record<EmptyStateVariant, React.ReactNode> = {
 };
 
 const decorativeColors: Record<EmptyStateVariant, { ring: string; glow: string; icon: string }> = {
-  transactions: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[rgb(var(--c-primary-500)/0.1)]', icon: 'text-[rgb(var(--c-primary-400))]' },
-  cards: { ring: 'border-violet-500/20', glow: 'shadow-violet-500/10', icon: 'text-violet-400' },
-  goals: { ring: 'border-amber-500/20', glow: 'shadow-amber-500/10', icon: 'text-amber-400' },
-  recurring: { ring: 'border-cyan-500/20', glow: 'shadow-cyan-500/10', icon: 'text-cyan-400' },
-  budgets: { ring: 'border-emerald-500/20', glow: 'shadow-emerald-500/10', icon: 'text-emerald-400' },
-  forecast: { ring: 'border-indigo-500/20', glow: 'shadow-indigo-500/10', icon: 'text-indigo-400' },
-  accounts: { ring: 'border-teal-500/20', glow: 'shadow-teal-500/10', icon: 'text-teal-400' },
-  reports: { ring: 'border-sky-500/20', glow: 'shadow-sky-500/10', icon: 'text-sky-400' },
+  transactions: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
+  cards: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
+  goals: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
+  recurring: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
+  budgets: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
+  forecast: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
+  accounts: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
+  reports: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
   debts: { ring: 'border-rose-500/20', glow: 'shadow-rose-500/10', icon: 'text-rose-400' },
-  generic: { ring: 'border-slate-500/20', glow: 'shadow-slate-500/10', icon: 'text-slate-400' },
+  generic: { ring: 'border-[rgb(var(--c-primary-500)/0.2)]', glow: 'shadow-[0_8px_24px_rgb(var(--c-primary-500)/0.08)]', icon: 'text-[rgb(var(--c-primary-400))]' },
 };
 
 export const EmptyState: React.FC<EmptyStateProps> = ({ 
@@ -67,24 +67,24 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     >
       {/* Decorative background orbs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className={`absolute -top-16 -right-16 w-48 h-48 rounded-full bg-gradient-to-br from-[rgb(var(--c-primary-500)/0.06)] to-transparent blur-3xl animate-orb-1`} />
-        <div className={`absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-gradient-to-tr from-[rgb(var(--c-primary-600)/0.04)] to-transparent blur-3xl animate-orb-2`} />
+        <div className={`absolute -top-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-br from-[rgb(var(--c-primary-500)/0.05)] to-transparent blur-3xl`} />
+        <div className={`absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-gradient-to-tr from-[rgb(var(--c-primary-600)/0.035)] to-transparent blur-3xl`} />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center py-16 sm:py-20 px-6">
+      <div className="relative z-10 flex flex-col items-center justify-center py-14 sm:py-16 px-6">
         {/* Animated icon container */}
         <motion.div 
           className="relative mb-6"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.4, ease: 'easeOut' }}
+          transition={{ delay: 0.08, duration: 0.3, ease: 'easeOut' }}
         >
           {/* Outer ring pulse */}
-          <div className={`absolute -inset-4 rounded-full border ${colors.ring} animate-pulse opacity-40`} />
+          <div className={`absolute -inset-3 rounded-full border ${colors.ring} opacity-50`} />
           
           {/* Icon background */}
-          <div className={`relative p-5 rounded-2xl bg-white/[0.04] border ${colors.ring} shadow-lg ${colors.glow} backdrop-blur-sm`}>
-            <div className={`${colors.icon} opacity-70`}>
+          <div className={`relative p-4 rounded-2xl bg-white/[0.04] border ${colors.ring} shadow-lg ${colors.glow} backdrop-blur-sm`}>
+            <div className={`${colors.icon} opacity-80`}>
               {icon}
             </div>
           </div>

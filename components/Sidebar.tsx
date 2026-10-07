@@ -48,17 +48,18 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ item, activeTab, collapsed, o
       
       {/* Icon */}
       <Icon 
-        size={18} 
+        size={18}
+        strokeWidth={isActive ? 2 : 1.75}
         className={`
           min-w-[18px] transition-all duration-200 relative z-10
           ${isActive 
-            ? 'scale-110' 
-            : 'text-slate-400 group-hover:text-slate-100 group-hover:scale-105'}
+            ? 'scale-[1.04]'
+            : 'text-slate-400 group-hover:text-slate-100'}
         `} 
       />
       
       {!collapsed && (
-        <span className="text-sm font-medium whitespace-nowrap overflow-hidden animate-in fade-in duration-300 relative z-10">
+        <span className="text-sm font-medium text-slate-300 whitespace-nowrap overflow-hidden animate-in fade-in duration-300 relative z-10">
           {item.label}
         </span>
       )}
@@ -94,7 +95,7 @@ const SidebarGroup: React.FC<SidebarGroupProps> = ({ group, isOpen, collapsed, o
       {!collapsed && (
         <button 
           onClick={() => onToggle(group.id)}
-          className="w-full flex items-center justify-between px-3 py-1.5 text-[9px] font-black text-slate-600 hover:text-slate-400 uppercase tracking-[0.15em] transition-colors"
+          className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-[0.14em] transition-colors"
         >
           <span>{group.title}</span>
           <ChevronDown size={11} className={`transition-transform duration-200 ${isOpen ? 'rotate-0' : '-rotate-90'}`} />

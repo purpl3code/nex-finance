@@ -20,8 +20,8 @@ const THEMES: ThemeOption[] = [
   { 
     id: 'dark', 
     name: 'Padrão Dark', 
-    description: 'Azul clássico',
-    colors: { bg: '#0f172a', surface: '#1e293b', primary: '#3b82f6', text: '#94a3b8' }
+    description: 'Nex Teal',
+    colors: { bg: '#07141d', surface: '#10232b', primary: '#2dd4bf', text: '#94a3b8' }
   },
   { 
     id: 'midnight', 
@@ -81,19 +81,38 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
     onThemeChange(id);
   };
 
+  const selectedTheme = THEMES.find((theme) => theme.id === currentTheme) ?? THEMES[0];
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="h-10 w-1 rounded-full" style={{ backgroundColor: selectedTheme.colors.primary }} />
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Tema selecionado</p>
+            <p className="truncate text-sm font-semibold text-white">{selectedTheme.name}</p>
+            <p className="truncate text-xs text-slate-400">{selectedTheme.description}</p>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5" aria-label="Cores do tema">
+          {[selectedTheme.colors.bg, selectedTheme.colors.surface, selectedTheme.colors.primary].map((color) => (
+            <span key={color} className="h-5 w-5 rounded-full border border-white/15" style={{ backgroundColor: color }} />
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
       {THEMES.map(theme => {
         const isActive = currentTheme === theme.id;
         return (
           <button
             key={theme.id}
             onClick={() => handleSelect(theme.id)}
+            aria-pressed={isActive}
             className={`
-              relative group outline-none text-left rounded-2xl transition-all duration-300
+              relative group text-left rounded-2xl transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent
               ${isActive 
-                ? 'ring-2 ring-offset-2 ring-offset-transparent scale-[1.02]' 
-                : 'hover:scale-[1.01]'}
+                ? 'scale-[1.01]'
+                : 'hover:-translate-y-0.5'}
             `}
             style={{ 
               '--tw-ring-color': theme.colors.primary + '80',
@@ -102,12 +121,12 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
             {/* Card */}
             <div 
               className={`
-                rounded-2xl p-3 border transition-all duration-300 h-full overflow-hidden relative
+                rounded-2xl p-3.5 border transition-all duration-200 h-full overflow-hidden relative backdrop-blur-xl
                 ${isActive 
-                  ? 'border-white/20 shadow-lg' 
-                  : 'border-white/8 hover:border-white/15'}
+                  ? 'border-white/30 shadow-lg shadow-black/20'
+                  : 'border-white/10 hover:border-white/20'}
               `}
-              style={{ backgroundColor: theme.colors.surface }}
+              style={{ background: `linear-gradient(145deg, ${theme.colors.surface}, ${theme.colors.bg})` }}
             >
               {/* Top gradient bar */}
               <div 
@@ -117,14 +136,14 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
 
               {/* Color palette preview */}
               <div 
-                className="w-full h-14 rounded-xl mb-3 relative overflow-hidden border border-white/5"
+                className="w-full h-16 rounded-xl mb-3.5 relative overflow-hidden border border-white/10 shadow-inner"
                 style={{ backgroundColor: theme.colors.bg }}
               >
                 {/* Mini UI mockup inside */}
                 <div className="absolute inset-2 flex gap-1.5">
                   {/* Mini sidebar */}
                   <div 
-                    className="w-3 h-full rounded-md opacity-70"
+                    className="w-3 h-full rounded-md opacity-80 border border-white/10"
                     style={{ backgroundColor: theme.colors.surface }}
                   />
                   {/* Mini content */}
@@ -188,6 +207,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
           </button>
         );
       })}
+      </div>
     </div>
   );
 };

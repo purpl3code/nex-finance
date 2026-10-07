@@ -5,6 +5,40 @@ import { AppData } from '../types';
 const SYNC_DEBOUNCE_MS = 2000;
 let saveTimeout: any = null;
 
+const PENDING_CLOUD_SYNC_KEY = 'nex-finance-pending-cloud-sync';
+
+interface PendingCloudSync { userId: string; token: string }
+
+const readPendingCloudSync = (): PendingCloudSync | null => {
+  try {
+    const raw = window.localStorage.getItem(PENDING_CLOUD_SYNC_KEY);
+    return raw ? JSON.parse(raw) as PendingCloudSync : null;
+  } catch {
+    return null;
+  }
+};
+
+const markPendingCloudSync = (userId: string): string | null => {
+  const token = String(Date.now()) + '-' + Math.random().toString(36).slice(2);
+  try {
+    window.localStorage.setItem(PENDING_CLOUD_SYNC_KEY, JSON.stringify({ userId, token }));
+    return token;
+  } catch (error) {
+    console.warn('Unable to mark pending cloud sync.', error);
+    return null;
+  }
+};
+
+const clearPendingCloudSync = (token: string) => {
+  const pending = readPendingCloudSync();
+  if (pending?.token !== token) return;
+  try {
+    window.localStorage.removeItem(PENDING_CLOUD_SYNC_KEY);
+  } catch (error) {
+    console.warn('Unable to clear pending cloud sync marker.', error);
+  }
+};
+
 export const SyncService = {
   // Read local data (wrapper around StorageService)
   getLocalData: (): AppData => {
@@ -25,9 +59,12 @@ export const SyncService = {
 
     // 4. Debounce the cloud save to prevent spamming
     if (saveTimeout) clearTimeout(saveTimeout);
-    
+
+    // Record the pending snapshot before debounce so a fast app close is recoverable.
+    const pendingToken = markPendingCloudSync(authData.session.user.id);
     saveTimeout = setTimeout(async () => {
-      await SyncService.pushToCloud(data, authData.session!.user.id);
+      const result = await SyncService.pushToCloud(data, authData.session!.user.id);
+      if (result.success && pendingToken) clearPendingCloudSync(pendingToken);
     }, SYNC_DEBOUNCE_MS);
   },
 
@@ -89,6 +126,17 @@ export const SyncService = {
     try {
       const { data, error } = await supabase.auth.getSession();
       if (error || !data?.session) return false;
+
+      const pending = readPendingCloudSync();
+      if (pending) {
+        // Never move locally pending financial data between different accounts.
+        if (pending.userId !== data.session.user.id) return false;
+        const localData = StorageService.load();
+        const result = await SyncService.pushToCloud(localData, data.session.user.id);
+        if (result.success) clearPendingCloudSync(pending.token);
+        // Keep local data as the current view; do not replace it with an older remote copy.
+        return false;
+      }
 
       const { data: remoteData } = await SyncService.pullFromCloud(data.session.user.id);
       

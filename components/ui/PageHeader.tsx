@@ -33,7 +33,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, actions
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight gradient-text leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight gradient-text leading-tight">
                 {title}
               </h1>
               {badge && (
@@ -48,10 +48,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, actions
           )}
           {/* Animated accent underline — uses theme primary color */}
           <motion.div 
-            className="mt-2 h-[2px] rounded-full"
+            className="mt-3 h-px rounded-full"
             style={{ 
               background: 'linear-gradient(90deg, rgb(var(--c-primary-500) / 0.8) 0%, transparent 100%)',
-              width: 48
+              width: 40
             }}
             initial={{ scaleX: 0, originX: 0 }}
             animate={{ scaleX: 1 }}

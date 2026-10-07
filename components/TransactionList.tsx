@@ -53,7 +53,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
       <GlassCard className="hidden md:block overflow-hidden">
         <div className="overflow-x-auto -mx-6 px-6">
           <table className="w-full text-left text-sm text-slate-400">
-            <thead className="text-xs uppercase font-medium text-slate-500 border-b border-white/10">
+            <thead className="text-[10px] uppercase font-semibold tracking-[0.12em] text-slate-500 border-b border-white/10">
               <tr>
                 <th className="pb-2 font-semibold tracking-wider">Data</th>
                 <th className="pb-2 font-semibold tracking-wider">Categoria / Tipo</th>
@@ -67,7 +67,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                 const isTransfer = item.isTransfer;
                 
                 return (
-                  <tr key={item.id} className="hover:bg-white/5 transition-colors group">
+                  <tr key={item.id} className="hover:bg-white/[0.035] transition-colors group focus-within:bg-white/[0.035]">
                     <td className="py-3 whitespace-nowrap text-slate-300">
                       {formatDate(item.date)}
                     </td>
@@ -107,7 +107,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                       {formatCurrency(item.amount)}
                     </td>
                     <td className="py-3 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity">
                         <button 
                           onClick={() => onEdit(item)}
                           className="p-2 text-[rgb(var(--c-primary-400))] hover:bg-[rgb(var(--c-primary-500)/0.2)] rounded-lg transition-colors"
@@ -148,10 +148,10 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
           const category = !isTransfer ? getCategory(item.categoryId) : null;
           
           return (
-            <GlassCard key={item.id} className={`p-4 ${isTransfer ? 'border-[rgb(var(--c-primary-500)/0.2)] bg-[rgb(var(--c-primary-500)/0.05)]' : ''}`}>
+            <GlassCard key={item.id} className={`p-4 border-white/8 ${isTransfer ? 'border-[rgb(var(--c-primary-500)/0.2)] bg-[rgb(var(--c-primary-500)/0.05)]' : ''}`}>
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl bg-white/5 p-2 rounded-xl border border-white/5">
+                  <span className="text-xl bg-white/[0.045] p-2.5 rounded-xl border border-white/8">
                     <AppleEmoji emoji={isTransfer ? '🔄' : category?.emoji} />
                   </span>
                   <div>
@@ -162,7 +162,7 @@ export const TransactionList: React.FC<TransactionListProps> = React.memo(({
                     <span className="text-xs text-slate-500">{formatDate(item.date)}</span>
                   </div>
                 </div>
-                <div className={`font-bold ${isTransfer ? 'text-slate-300' : (item.type === 'income' ? 'text-emerald-400' : 'text-red-400')}`}>
+                <div className={`text-sm font-semibold tabular-nums ${isTransfer ? 'text-slate-300' : (item.type === 'income' ? 'text-emerald-400' : 'text-red-400')}`}>
                   {isTransfer ? '' : (item.type === 'expense' ? '- ' : '+ ')}
                   {formatCurrency(item.amount)}
                 </div>

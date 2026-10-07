@@ -83,7 +83,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-xs font-medium text-slate-400 mb-1.5 ml-1">
+        <label className="block text-[11px] font-semibold tracking-wide text-slate-400 mb-2 ml-1">
           {label}
         </label>
       )}
@@ -128,8 +128,8 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
             relative 
             w-[92vw] sm:w-[min(400px,92vw)]
             max-h-[80vh] sm:max-h-[70vh]
-            bg-white/10 backdrop-blur-md border border-white/10
-            rounded-2xl
+            bg-[rgb(var(--c-bg-900)/0.96)] backdrop-blur-2xl border border-white/10
+            rounded-3xl
             shadow-2xl
             flex flex-col
             animate-in zoom-in-95 duration-200
@@ -156,7 +156,7 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({
                   onClick={() => handleSelect(opt.value)}
                   className={`
                     w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-sm transition-colors
-                    ${opt.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5'}
+                    ${opt.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/8'}
                     ${String(value) === String(opt.value) ? 'text-[rgb(var(--c-primary-400))] bg-[rgb(var(--c-primary-500)/0.1)] font-medium' : 'text-slate-200'}
                   `}
                 >

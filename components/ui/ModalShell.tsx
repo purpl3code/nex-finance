@@ -44,7 +44,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
           {/* Backdrop */}
           <motion.div 
-            className="absolute inset-0 bg-black/65 backdrop-blur-md"
+            className="absolute inset-0 bg-black/55 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -60,10 +60,10 @@ export const ModalShell: React.FC<ModalShellProps> = ({
               max-h-[88vh]
               overflow-hidden
               flex flex-col
-              rounded-2xl
+              rounded-3xl
               glass-lg
               shadow-2xl
-              border border-white/12
+              border border-white/10
               ${className}
             `}
             initial={{ opacity: 0, scale: 0.94, y: 16 }}
@@ -75,13 +75,13 @@ export const ModalShell: React.FC<ModalShellProps> = ({
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/28 to-transparent pointer-events-none" />
 
             {/* Subtle top-right glow */}
-            <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-[var(--accent-glow)] blur-3xl pointer-events-none opacity-40" />
+            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-[var(--accent-glow)] blur-3xl pointer-events-none opacity-25" />
 
             {/* Header */}
             <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-white/8 relative z-10">
               <div className="flex items-center gap-3">
                 <div className="w-1 h-5 rounded-full bg-gradient-to-b from-[var(--accent)] to-[rgb(var(--c-primary-700))]" />
-                <h2 className="text-base font-bold text-white tracking-tight">{title}</h2>
+                <h2 className="text-base font-semibold text-white tracking-tight">{title}</h2>
               </div>
               <button 
                 onClick={onClose}
@@ -101,7 +101,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
 };
 
 export const ModalBody: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <div className={`flex-1 overflow-y-auto p-5 custom-scrollbar ${className}`}>
+  <div className={`flex-1 overflow-y-auto p-5 sm:p-6 custom-scrollbar ${className}`}>
     {children}
   </div>
 );

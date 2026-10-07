@@ -11,7 +11,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
+      fontWeight: {
+        normal: '450',
+        medium: '550',
+        semibold: '650',
       },
       colors: {
         white: 'rgb(var(--c-text-100) / <alpha-value>)',

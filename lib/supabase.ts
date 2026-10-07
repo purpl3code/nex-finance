@@ -17,21 +17,9 @@ if (isMissingEnv) {
   console.warn('Missing Supabase Environment Variables. Check .env file. Using placeholder values.');
 }
 
-// Export a flag so other services know if we are in "offline/demo" mode
+// Export a flag so other services know if cloud sync is configured
 export const isSupabaseConfigured = !isMissingEnv;
 
-// --- DEMO MODE HELPERS ---
-const DEMO_KEY = 'nex_finance_demo_mode';
-
-export const isDemoMode = () => {
-  // Demo mode is active if explicitly set OR if Supabase is not configured (forced offline)
-  return !isSupabaseConfigured || localStorage.getItem(DEMO_KEY) === 'true';
-};
-
-export const disableDemoMode = () => {
-  localStorage.removeItem(DEMO_KEY);
-};
-// -------------------------
 
 // Custom Storage Adapter to handle "Remember Me" logic
 // This allows switching between localStorage and sessionStorage dynamically

@@ -8,9 +8,9 @@
   --bg-elev: rgb(var(--c-bg-900));
   
   /* Glass Tokens */
-  --glass-bg: rgb(var(--c-bg-900) / 0.55); 
-  --glass-border: rgb(var(--c-text-100) / 0.08);
-  --glass-highlight: rgb(var(--c-text-100) / 0.12);
+  --glass-bg: rgb(var(--c-bg-900) / 0.48);
+  --glass-border: rgb(var(--c-text-100) / 0.07);
+  --glass-highlight: rgb(var(--c-text-100) / 0.10);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   
   /* Text */
@@ -33,10 +33,9 @@
   
   /* Gradients */
   --gradient-bg: 
-    radial-gradient(ellipse at 20% -10%, rgb(var(--c-primary-600) / 0.18), transparent 50%),
-    radial-gradient(ellipse at 90% 5%,  rgb(var(--c-primary-500) / 0.12), transparent 40%),
-    radial-gradient(ellipse at 50% 80%, rgb(var(--c-primary-700) / 0.08), transparent 50%),
-    radial-gradient(ellipse at 5%  60%, rgb(var(--c-primary-400) / 0.06), transparent 45%);
+    radial-gradient(ellipse at 15% -10%, rgb(var(--c-primary-600) / 0.14), transparent 48%),
+    radial-gradient(ellipse at 90% 5%, rgb(var(--c-primary-500) / 0.08), transparent 38%),
+    radial-gradient(ellipse at 50% 80%, rgb(var(--c-primary-700) / 0.05), transparent 48%);
 
   /* Gradient text using theme colors (theme-safe) */
   --gradient-text-from: rgb(var(--c-text-100));
@@ -51,7 +50,8 @@ body {
   background-image: var(--gradient-bg);
   background-attachment: fixed;
   min-height: 100vh;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
+  font-weight: 450;
 }
 
 /* ============================================
@@ -86,7 +86,6 @@ body {
   box-shadow: var(--glass-shadow);
   
   /* GPU Hardware Acceleration */
-  will-change: transform;
 }
 
 .glass-base::before {
@@ -114,18 +113,16 @@ body {
   border: 1px solid var(--glass-border);
   
   /* GPU Hardware Acceleration */
-  will-change: transform;
 }
 
 .glass-lg {
-  background: rgb(var(--c-bg-900) / 0.55);
+  background: rgb(var(--c-bg-900) / 0.48);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   
   /* GPU Hardware Acceleration */
-  will-change: transform;
 }
 
 /* Card com glow temático ao hover */
@@ -137,9 +134,9 @@ body {
   box-shadow: 
     var(--glass-shadow),
     0 0 0 1px rgb(var(--c-primary-500) / 0.12),
-    0 0 28px rgb(var(--c-primary-500) / 0.12),
+    0 0 18px rgb(var(--c-primary-500) / 0.08),
     inset 0 1px 0 rgb(var(--c-text-100) / 0.08);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 /* Inner inset glass (inputs, inner panels) */
@@ -150,7 +147,6 @@ body {
   -webkit-backdrop-filter: blur(4px);
   
   /* GPU Hardware Acceleration */
-  will-change: transform;
 }
 
 /* ============================================
@@ -190,7 +186,7 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 8px rgba(16,185,129,0.3));
+  filter: drop-shadow(0 0 4px rgba(16,185,129,0.18));
 }
 .value-text-negative {
   background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
@@ -198,7 +194,7 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 8px rgba(239,68,68,0.3));
+  filter: drop-shadow(0 0 4px rgba(239,68,68,0.18));
 }
 .value-text-accent {
   background: linear-gradient(
@@ -210,7 +206,7 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 8px rgb(var(--c-primary-500) / 0.3));
+  filter: drop-shadow(0 0 4px rgb(var(--c-primary-500) / 0.18));
 }
 
 /* ============================================

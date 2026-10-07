@@ -23,20 +23,20 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
       <div className={`absolute inset-0 bg-gradient-to-br ${isPositive ? 'from-emerald-500/15 via-transparent to-blue-500/5' : 'from-red-500/15 via-transparent to-orange-500/5'} opacity-70 group-hover:opacity-100 transition-opacity duration-500`} />
       
       {/* Decorative icon — higher opacity + hover stronger */}
-      <div className={`absolute -top-2 -right-2 p-5 ${isPositive ? 'text-emerald-400' : 'text-red-400'} opacity-[0.13] group-hover:opacity-[0.22] group-hover:scale-105 group-hover:rotate-6 transition-all duration-700`}>
-        <ShoppingBag size={100} />
+      <div className={`absolute -top-2 -right-2 p-5 ${isPositive ? 'text-emerald-400' : 'text-red-400'} opacity-[0.08] group-hover:opacity-[0.12] group-hover:scale-[1.02] group-hover:rotate-3 transition-all duration-700`}>
+        <ShoppingBag size={84} />
       </div>
       
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-3">
           <div className={`w-1.5 h-4 rounded-full ${isPositive ? 'bg-emerald-400' : 'bg-red-400'} shadow-[0_0_6px_currentColor]`} />
-          <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest">Saldo Restante no Mês</h3>
+          <h3 className="text-slate-400 text-[11px] font-semibold tracking-[0.12em]">Saldo Restante no Mês</h3>
         </div>
         
         <AnimatedNumber 
           value={summary.remainingBalance} 
           format={formatCurrency} 
-          className={`block text-3xl sm:text-4xl font-extrabold mb-5 ${isPositive ? 'value-text-positive' : 'value-text-negative'}`} 
+          className={`block text-3xl sm:text-4xl font-extrabold mb-5 ${isPositive ? 'value-text-positive' : 'value-text-negative'}`}
         />
         
         <div className="flex flex-wrap gap-2 text-xs font-medium">
@@ -65,8 +65,8 @@ export const ForecastCard: React.FC<{ summary: ForecastSummary, totalCurrentBala
       <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--c-primary-500)/0.12)] via-transparent to-[rgb(var(--c-primary-700)/0.06)] opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
       {/* Decorative icon */}
-      <div className="absolute -top-2 -right-2 p-5 text-[rgb(var(--c-primary-400))] opacity-[0.13] group-hover:opacity-[0.22] group-hover:scale-105 group-hover:-rotate-6 transition-all duration-700">
-        <TrendingUp size={100} />
+      <div className="absolute -top-2 -right-2 p-5 text-[rgb(var(--c-primary-400))] opacity-[0.08] group-hover:opacity-[0.12] group-hover:scale-[1.02] group-hover:-rotate-3 transition-all duration-700">
+        <TrendingUp size={84} />
       </div>
 
       <div className="relative z-10">
@@ -102,7 +102,7 @@ export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities
     <GlassCard className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-blue-400 to-indigo-500 shadow-sm" />
+          <div className="w-1.5 h-4 rounded-full bg-[rgb(var(--c-primary-400))]" />
           <h3 className="text-base font-bold text-white">Últimas Movimentações</h3>
         </div>
       </div>
@@ -117,7 +117,7 @@ export const RecentActivityList: React.FC<{ activities: any[] }> = ({ activities
             {activities.map((item, idx) => (
               <div 
                 key={`${item.source}-${item.id}`} 
-                className="p-3 rounded-xl flex items-center justify-between hover:bg-white/5 transition-all duration-200 group border border-transparent hover:border-white/8"
+                className="p-3 rounded-xl flex items-center justify-between hover:bg-white/[0.04] transition-colors duration-200 group border border-transparent hover:border-white/8"
                 style={{ animationDelay: `${idx * 40}ms` }}
               >
                 <div className="flex items-center gap-3 overflow-hidden flex-1 mr-2">

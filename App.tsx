@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useMemo, useEffect } from 'react';
 import { useFinance } from './hooks/useFinance';
 import { useAuth } from './hooks/useAuth';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -8,14 +8,6 @@ import { Dashboard } from './components/Dashboard';
 import { TransactionList } from './components/TransactionList';
 import { TransactionForm } from './components/TransactionForm';
 import { AccountList } from './components/AccountList';
-import { CreditCardManager } from './components/CreditCardManager';
-import { RecurringManager } from './components/RecurringManager';
-import { ForecastView } from './components/ForecastView';
-import { BudgetManager } from './components/BudgetManager';
-import { SettingsView } from './components/SettingsView';
-import { GoalManager } from './components/GoalManager';
-import { DebtManager } from './components/DebtManager';
-import { ReportView } from './components/ReportView';
 import { Sidebar } from './components/Sidebar';
 import { ModalShell, ModalBody, ModalFooter } from './components/ui/ModalShell';
 import { GlassButton } from './components/ui/GlassButton';
@@ -32,6 +24,14 @@ import { exportTransactionsToCSV } from './utils/csvExport';
 import { useUserProfile } from './hooks/useUserProfile';
 import { UpdateService, AppUpdate } from './services/updateService';
 import { APP_VERSION } from './constants';
+const CreditCardManager = lazy(() => import('./components/CreditCardManager').then((module) => ({ default: module.CreditCardManager })));
+const RecurringManager = lazy(() => import('./components/RecurringManager').then((module) => ({ default: module.RecurringManager })));
+const ForecastView = lazy(() => import('./components/ForecastView').then((module) => ({ default: module.ForecastView })));
+const BudgetManager = lazy(() => import('./components/BudgetManager').then((module) => ({ default: module.BudgetManager })));
+const SettingsView = lazy(() => import('./components/SettingsView').then((module) => ({ default: module.SettingsView })));
+const GoalManager = lazy(() => import('./components/GoalManager').then((module) => ({ default: module.GoalManager })));
+const DebtManager = lazy(() => import('./components/DebtManager').then((module) => ({ default: module.DebtManager })));
+const ReportView = lazy(() => import('./components/ReportView').then((module) => ({ default: module.ReportView })));
 
 // Define valid tabs for type safety
 type AppTab = 'dashboard' | 'list' | 'accounts' | 'cards' | 'recurring' | 'forecast' | 'budgets' | 'settings' | 'goals' | 'reports' | 'debts';
@@ -404,6 +404,7 @@ const App: React.FC = () => {
 
         {/* Scrollable Content */}
         <div id="main-scroll-container" className="flex-1 overflow-y-auto bg-transparent">
+           <Suspense fallback={<div className="p-8 text-center text-slate-400">Carregando tela...</div>}>
            <div className="animate-in fade-in duration-300 min-h-full">
               
               {/* DASHBOARD TAB */}
@@ -635,6 +636,7 @@ const App: React.FC = () => {
               )}
 
            </div>
+           </Suspense>
         </div>
       </div>
 

@@ -18,7 +18,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-[10px] sm:text-[11px] font-bold text-slate-400 mb-1.5 ml-1 uppercase tracking-wide sm:tracking-wider truncate">
+        <label className="block text-[11px] font-semibold text-slate-400 mb-2 ml-1 uppercase tracking-[0.08em] truncate">
           {label}
         </label>
       )}
@@ -34,7 +34,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
             bg-white/5 hover:bg-white/7
             border border-white/10 hover:border-white/18
             rounded-xl 
-            ${icon ? 'pl-10' : 'pl-4'} pr-4 py-2.5 
+            ${icon ? 'pl-10' : 'pl-4'} pr-4 py-3
             text-sm text-slate-100 
             placeholder:text-slate-600
             focus:outline-none 

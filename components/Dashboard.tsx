@@ -168,8 +168,8 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
         </div>
         <div className="space-y-3 overflow-y-auto pr-1 custom-scrollbar h-full">
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles size={16} className="text-amber-400" />
-            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Insights</h3>
+            <Sparkles size={16} className="text-[rgb(var(--c-primary-400))]" />
+            <h3 className="text-sm font-semibold text-slate-200">Insights</h3>
           </div>
           <InsightsList insights={insights} />
           {insights.length === 0 && (
@@ -250,7 +250,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
 
           {/* Mini Card List */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Resumo dos Cartões</h3>
+            <h3 className="text-sm font-semibold text-slate-200">Resumo dos cartões</h3>
             {creditCards.length > 0 ? (
               creditCards.map(card => {
                 const totalUsed = getCardTotalUsedLimit ? getCardTotalUsedLimit(card.id) : 0;
@@ -266,7 +266,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
                 );
               })
             ) : (
-              <p className="text-sm text-slate-500 italic">Nenhum cartão cadastrado.</p>
+              <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-5 text-sm text-slate-400">Nenhum cartão cadastrado.</p>
             )}
           </div>
         </div>

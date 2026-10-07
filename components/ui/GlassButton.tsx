@@ -20,7 +20,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
 }) => {
   const baseStyles = `
     relative inline-flex items-center justify-center rounded-xl font-semibold 
-    transition-all duration-200 active:scale-[0.97] outline-none 
+    transition-all duration-200 active:scale-[0.98] outline-none
     disabled:opacity-50 disabled:cursor-not-allowed group
     focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent
   `;
@@ -30,15 +30,15 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       bg-[var(--accent)] hover:brightness-110 
       text-[rgb(var(--c-primary-foreground))]
       border border-[rgb(var(--c-primary-400)/0.4)]
-      shadow-[0_0_16px_var(--accent-glow)]
-      hover:shadow-[0_0_24px_var(--accent-glow)]
+      shadow-[0_0_10px_var(--accent-glow)]
+      hover:shadow-[0_0_16px_var(--accent-glow)]
       focus-visible:ring-[var(--accent)]
     `,
     secondary: `
       bg-white/5 hover:bg-white/10 backdrop-blur-sm
       text-slate-200 
       border border-white/10 hover:border-white/20
-      hover:shadow-lg
+      hover:shadow-md
       focus-visible:ring-white/40
     `,
     danger: `
