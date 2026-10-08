@@ -30,7 +30,7 @@ export const RemainingBalanceCard: React.FC<{ summary: MonthlySummary }> = ({ su
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-3">
           <div className={`w-1.5 h-4 rounded-full ${isPositive ? 'bg-emerald-400' : 'bg-red-400'} shadow-[0_0_6px_currentColor]`} />
-          <h3 className="text-slate-400 text-[11px] font-semibold tracking-[0.12em]">Saldo Restante no Mês</h3>
+          <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest">Saldo Restante no Mês</h3>
         </div>
         
         <AnimatedNumber 

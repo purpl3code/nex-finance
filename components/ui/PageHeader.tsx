@@ -13,7 +13,7 @@ interface PageHeaderProps {
 export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, actions, controls, badge, icon }) => {
   return (
     <motion.div 
-      className="space-y-4"
+      className="space-y-3"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -48,7 +48,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, actions
           )}
           {/* Animated accent underline — uses theme primary color */}
           <motion.div 
-            className="mt-3 h-px rounded-full"
+            className="mt-2 h-px rounded-full"
             style={{ 
               background: 'linear-gradient(90deg, rgb(var(--c-primary-500) / 0.8) 0%, transparent 100%)',
               width: 40

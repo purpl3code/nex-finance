@@ -28,12 +28,6 @@ export const DebtCard: React.FC<DebtCardProps> = ({ debt, onEdit, onPay, onSettl
     ? 'from-amber-400 to-yellow-500'
     : 'from-red-400 to-rose-500';
 
-  const progressGlow = isComplete
-    ? 'rgba(16,185,129,0.5)'
-    : stats.progressPercent >= 50
-    ? 'rgba(245,158,11,0.4)'
-    : 'rgba(239,68,68,0.4)';
-
   return (
     <GlassCard
       className="p-6 relative group overflow-hidden"
@@ -41,17 +35,6 @@ export const DebtCard: React.FC<DebtCardProps> = ({ debt, onEdit, onPay, onSettl
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Animated progress bar at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5 overflow-hidden">
-        <motion.div
-          className={`h-full rounded-full bg-gradient-to-r ${progressColor}`}
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(stats.progressPercent, 100)}%` }}
-          transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
-          style={{ boxShadow: `0 0 8px ${progressGlow}` }}
-        />
-      </div>
-
       {/* Completion glow overlay */}
       {isComplete && (
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none" />

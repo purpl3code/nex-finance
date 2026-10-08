@@ -1,5 +1,5 @@
 import { Debt } from '../types';
-import { addMonths, parseISO } from 'date-fns';
+import { addMonths, parseISO, startOfDay } from 'date-fns';
 
 export interface DebtStats {
   remaining: number;
@@ -34,7 +34,8 @@ export const computeDebtStats = (debt: Debt): DebtStats => {
   let isOverdue = false;
   if (debt.dueDate && remaining > 0) {
     const deadlineDate = parseISO(debt.dueDate);
-    if (deadlineDate <= today) {
+    // The debt becomes overdue after its due date has passed, not on the due date itself.
+    if (deadlineDate < startOfDay(today)) {
       isOverdue = true;
     }
   }

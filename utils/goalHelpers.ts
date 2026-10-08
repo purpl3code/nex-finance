@@ -1,5 +1,5 @@
 import { Goal } from '../types';
-import { addMonths, differenceInMonths, parseISO } from 'date-fns';
+import { addMonths, differenceInCalendarMonths, parseISO, startOfDay } from 'date-fns';
 
 interface GoalStats {
   remaining: number;
@@ -36,15 +36,13 @@ export const computeGoalStats = (goal: Goal): GoalStats => {
 
   if (goal.deadline && remaining > 0) {
     const deadlineDate = parseISO(goal.deadline);
-    const monthsUntilDeadline = differenceInMonths(deadlineDate, today);
+    const monthsUntilDeadline = differenceInCalendarMonths(deadlineDate, today);
+    const monthsIncludingDeadline = Math.max(1, monthsUntilDeadline + 1);
     
-    if (monthsUntilDeadline <= 0) {
-      // Deadline passed or is this month
-      requiredMonthlyForDeadline = remaining; 
-      if (remaining > 0) isDelayed = true;
-    } else {
-      requiredMonthlyForDeadline = Math.ceil(remaining / monthsUntilDeadline);
-    }
+    // A goal remains on time throughout its deadline date. Count the current
+    // and deadline months inclusively for the monthly contribution estimate.
+    requiredMonthlyForDeadline = Math.ceil(remaining / monthsIncludingDeadline);
+    isDelayed = deadlineDate < startOfDay(today);
   }
 
   return {

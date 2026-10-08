@@ -9,7 +9,7 @@ import { GlassInput } from './ui/GlassInput';
 import { GlassSelect } from './ui/GlassSelect';
 import { GlassCard } from './ui/GlassCard';
 import { GlassBadge } from './ui/GlassBadge';
-import { Plus, Edit2, Archive, AlertTriangle, Lock, RotateCcw, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Archive, AlertTriangle, Lock, RotateCcw, Trash2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CategoryManagerProps {
@@ -46,10 +46,13 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
   const [deleteReassignId, setDeleteReassignId] = useState('');
 
   const displayedCategories = categories.filter(c => c.kind === activeTab && (showArchived ? true : !c.isArchived));
+  const expenseCount = categories.filter(c => c.kind === 'expense' && !c.isArchived).length;
+  const incomeCount = categories.filter(c => c.kind === 'income' && !c.isArchived).length;
   const groups: CategoryGroup[] = ['Essencial', 'Estilo de Vida', 'Investimentos e D\u00edvidas', 'Renda', 'Personalizado'];
   const colors = COLORS;
+  const getCategoryAccent = (category: Category) => category.kind === 'income' ? '#34D399' : category.color || COLORS[0];
 
-  const resetForm = () => { setForm({ name: '', emoji: 'e', group: 'Personalizado', type: activeTab, color: COLORS[0] }); setEditingCategory(null); };
+  const resetForm = () => { setForm({ name: '', emoji: '', group: 'Personalizado', type: activeTab, color: COLORS[0] }); setEditingCategory(null); };
 
   const handleOpenModal = (cat?: Category) => {
     if (cat) { setEditingCategory(cat); setForm({ name: cat.name, emoji: cat.emoji, group: cat.group, type: cat.kind, color: cat.color || COLORS[0] }); }
@@ -92,17 +95,29 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
 
   return (
     <div className="min-h-full flex flex-col">
-      <div className="sticky -top-4 -mx-4 px-4 py-3 bg-white/5 backdrop-blur-md z-10 border-b border-white/5 mb-4 flex flex-wrap gap-3 items-center justify-between shadow-sm">
-         <div className="flex bg-white/5 p-1 rounded-lg shrink-0 border border-white/5">
-            <button onClick={() => setActiveTab('expense')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${activeTab === 'expense' ? 'bg-red-500/20 text-red-400 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}>Despesas</button>
-            <button onClick={() => setActiveTab('income')} className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${activeTab === 'income' ? 'bg-emerald-500/20 text-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}>Entradas</button>
-         </div>
-         <div className="flex items-center gap-3 w-full sm:w-auto">
-            <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 cursor-pointer select-none hover:text-slate-300 transition-colors">
-               <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="rounded bg-white/5 border-white/10 text-blue-500 focus:ring-blue-500/20" />
-               Arquivadas
+      <div className="sticky -top-4 -mx-5 -mt-5 px-5 pt-5 pb-3.5 bg-slate-950/85 backdrop-blur-xl z-10 mb-4">
+         <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex rounded-xl bg-slate-950/45 p-1 shadow-inner">
+               <button
+                 onClick={() => setActiveTab('expense')}
+                 aria-pressed={activeTab === 'expense'}
+                 className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all ${activeTab === 'expense' ? 'bg-red-500/15 text-red-300 shadow-sm ring-1 ring-red-400/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
+               >
+                 Despesas <span className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${activeTab === 'expense' ? 'bg-red-500/20 text-red-200' : 'bg-white/5 text-slate-500'}`}>{expenseCount}</span>
+               </button>
+               <button
+                 onClick={() => setActiveTab('income')}
+                 aria-pressed={activeTab === 'income'}
+                 className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all ${activeTab === 'income' ? 'bg-emerald-500/15 text-emerald-300 shadow-sm ring-1 ring-emerald-400/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
+               >
+                 Entradas <span className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${activeTab === 'income' ? 'bg-emerald-500/20 text-emerald-200' : 'bg-white/5 text-slate-500'}`}>{incomeCount}</span>
+               </button>
+            </div>
+            <label className="inline-flex items-center gap-2.5 rounded-xl bg-white/[0.03] px-3 py-2 text-xs sm:text-sm font-medium text-slate-400 cursor-pointer select-none hover:bg-white/[0.06] hover:text-slate-200 transition-colors">
+               <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="h-4 w-4 rounded accent-emerald-400 focus:ring-emerald-400/30" />
+               Mostrar arquivadas
             </label>
-            <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={16}/>} className="flex-1 sm:flex-none">Nova</GlassButton>
+            <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={16}/>} className="w-full sm:w-auto sm:ml-auto">Nova categoria</GlassButton>
          </div>
       </div>
 
@@ -112,23 +127,23 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
            <p className="text-sm">Nenhuma categoria encontrada.</p>
         </GlassCard>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-3 lg:gap-4 pb-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pb-2">
            {displayedCategories.map(cat => (
-              <GlassCard key={cat.id} className={`p-3 flex items-center justify-between group h-20 md:h-22 transition-all hover:border-white/20 hover:bg-white/5 ${cat.isArchived ? 'opacity-50 grayscale' : ''}`}>
+              <GlassCard key={cat.id} className={`p-3 flex items-center justify-between group min-h-[76px] transition-all hover:border-white/15 hover:bg-white/[0.04] ${cat.isArchived ? 'opacity-55 grayscale' : ''}`}>
                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-white/5 shrink-0 border border-white/10 shadow-sm" style={{ color: cat.color }}>
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 border shadow-sm" style={{ color: getCategoryAccent(cat), backgroundColor: `${getCategoryAccent(cat)}18`, borderColor: `${getCategoryAccent(cat)}45` }}>
                        <AppleEmoji emoji={cat.emoji} />
                     </div>
                     <div className="min-w-0 flex-1">
                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className={`font-semibold text-slate-200 text-sm truncate flex-1 min-w-0 ${cat.isArchived ? 'line-through' : ''}`} title={cat.name}>{cat.name}</span>
+                          <span className={`font-semibold text-slate-100 text-sm truncate flex-1 min-w-0 ${cat.isArchived ? 'line-through' : ''}`} title={cat.name}>{cat.name}</span>
                           {cat.isSystem && <GlassBadge variant="secondary" className="px-1 py-0.5 shrink-0"><Lock size={10}/></GlassBadge>}
-                          {cat.isArchived && <GlassBadge variant="outline" className="px-1 py-0.5 shrink-0">Arq.</GlassBadge>}
+                          {cat.isArchived && <GlassBadge variant="outline" className="px-1.5 py-0.5 shrink-0">Arquivada</GlassBadge>}
                        </div>
-                       <span className="text-xs text-slate-500 truncate block opacity-80" title={cat.group}>{cat.group}</span>
+                       <span className="text-[11px] text-slate-500 truncate block mt-0.5" title={cat.group}>{cat.group}</span>
                     </div>
                  </div>
-                 <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity pl-2">
+                 <div className="flex gap-0.5 opacity-100 sm:opacity-60 sm:group-hover:opacity-100 transition-opacity pl-2">
                     {!cat.isArchived && (
                        <GlassButton variant="ghost" size="sm" onClick={() => handleOpenModal(cat)} title="Editar" icon={<Edit2 size={16} />} />
                     )}
@@ -167,7 +182,9 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                            type="button"
                            key={c}
                            onClick={() => setForm({...form, color: c})}
-                           className={`w-7 h-7 rounded-full border-2 transition-all duration-200 hover:scale-125 hover:shadow-lg ${
+                           aria-label={`Selecionar cor ${c}`}
+                           aria-pressed={form.color === c}
+                           className={`relative w-7 h-7 rounded-full border-2 transition-all duration-200 hover:scale-110 hover:shadow-lg ${
                              form.color === c
                                ? 'border-white ring-2 ring-white/30 scale-110 shadow-lg'
                                : 'border-transparent hover:border-white/50'
@@ -176,7 +193,9 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
                              backgroundColor: c,
                              boxShadow: form.color === c ? `0 0 12px ${c}80` : undefined
                            }}
-                         />
+                         >
+                           {form.color === c && <Check size={13} className="absolute inset-0 m-auto text-white drop-shadow" />}
+                         </button>
                       ))}
                    </div>
                 </div>
