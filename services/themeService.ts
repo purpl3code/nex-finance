@@ -37,13 +37,13 @@ export const ThemeService = {
     if (metaThemeColor) {
       let color = '#020617'; // default dark (slate-950)
       switch (theme) {
-        case 'midnight': color = '#0a0a0a'; break;
-        case 'graphite': color = '#111827'; break;
-        case 'royal': color = '#1e1b4b'; break;
-        case 'sunset': color = '#450a0a'; break;
-        case 'forest': color = '#022c22'; break;
+        case 'midnight': color = '#050a16'; break;
+        case 'graphite': color = '#0a0f16'; break;
+        case 'royal': color = '#0c0a18'; break;
+        case 'sunset': color = '#140c0f'; break;
+        case 'forest': color = '#051213'; break;
         case 'pure-black': color = '#000000'; break;
-        case 'pure-white': color = '#fafafa'; break;
+        case 'pure-white': color = '#f8fafc'; break;
       }
       metaThemeColor.setAttribute('content', color);
     }
@@ -52,15 +52,15 @@ export const ThemeService = {
     if (Capacitor.isNativePlatform()) {
       try {
         let isLight = theme === 'pure-white';
-        let color = '#050a14'; // default dark (slate-950)
+        let color = '#0f172a'; // default dark (slate-900)
         switch (theme) {
-          case 'midnight': color = '#0a0f1e'; break;
-          case 'graphite': color = '#171717'; break;
-          case 'royal': color = '#18181b'; break;
-          case 'sunset': color = '#1c1917'; break;
-          case 'forest': color = '#064e3b'; break;
+          case 'midnight': color = '#0a1222'; break;
+          case 'graphite': color = '#111822'; break;
+          case 'royal': color = '#141124'; break;
+          case 'sunset': color = '#1f1418'; break;
+          case 'forest': color = '#081d1e'; break;
           case 'pure-black': color = '#000000'; break;
-          case 'pure-white': color = '#f5f5f5'; break;
+          case 'pure-white': color = '#f1f5f9'; break;
         }
         StatusBar.setBackgroundColor({ color });
         StatusBar.setStyle({ style: isLight ? Style.Light : Style.Dark });

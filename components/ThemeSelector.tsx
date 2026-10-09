@@ -26,46 +26,46 @@ const THEMES: ThemeOption[] = [
   { 
     id: 'midnight', 
     name: 'Midnight', 
-    description: 'Azul profundo',
-    colors: { bg: '#0a0f1e', surface: '#172038', primary: '#0ea5e9', text: '#8ca0c0' }
+    description: 'Azul noturno',
+    colors: { bg: '#050a16', surface: '#0a1222', primary: '#3b82f6', text: '#97a9c2' }
   },
   { 
     id: 'graphite', 
     name: 'Grafite', 
-    description: 'Verde esmeralda',
-    colors: { bg: '#171717', surface: '#262626', primary: '#10b981', text: '#a3a3a3' }
+    description: 'Grafite e esmeralda',
+    colors: { bg: '#0a0f16', surface: '#111822', primary: '#10b981', text: '#9eabbb' }
   },
   { 
     id: 'royal', 
     name: 'Royal', 
-    description: 'Violeta premium',
-    colors: { bg: '#18181b', surface: '#27272a', primary: '#8b5cf6', text: '#a1a1aa' }
+    description: 'Violeta profundo',
+    colors: { bg: '#0c0a18', surface: '#141124', primary: '#8b5cf6', text: '#a59dbb' }
   },
   { 
     id: 'sunset', 
     name: 'Sunset', 
-    description: 'Laranja quente',
-    colors: { bg: '#1c1917', surface: '#292524', primary: '#f97316', text: '#a8a29e' }
+    description: 'Âmbar e tons quentes',
+    colors: { bg: '#140c0f', surface: '#1f1418', primary: '#f59e0b', text: '#b79d8f' }
   },
   { 
     id: 'forest', 
     name: 'Forest', 
-    description: 'Verde selva',
-    colors: { bg: '#064e3b', surface: '#065f46', primary: '#14b8a6', text: '#34d399' }
+    description: 'Verde pinho',
+    colors: { bg: '#051213', surface: '#081d1e', primary: '#10b981', text: '#8fb19d' }
   },
   { 
     id: 'pure-black', 
     name: 'Pure Black', 
-    description: 'AMOLED puro',
+    description: 'Preto AMOLED com acento mint',
     icon: <Moon size={12} />,
-    colors: { bg: '#000000', surface: '#0f0f0f', primary: '#ffffff', text: '#737373' }
+    colors: { bg: '#000000', surface: '#0f0f0f', primary: '#14b8a6', text: '#a3a3a3' }
   },
   { 
     id: 'pure-white', 
     name: 'Pure White', 
-    description: 'Modo claro',
+    description: 'Claro, suave e com acento teal',
     icon: <Sun size={12} />,
-    colors: { bg: '#f5f5f5', surface: '#e5e5e5', primary: '#000000', text: '#525252' }
+    colors: { bg: '#f8fafc', surface: '#f1f5f9', primary: '#0d9488', text: '#475569' }
   }
 ];
 
@@ -85,18 +85,21 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+      <div
+        className="flex items-center justify-between gap-4 rounded-2xl border p-4"
+        style={{ backgroundColor: 'rgb(var(--c-bg-800) / 0.48)', borderColor: 'var(--glass-border)' }}
+      >
         <div className="flex min-w-0 items-center gap-3">
           <span className="h-10 w-1 rounded-full" style={{ backgroundColor: selectedTheme.colors.primary }} />
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Tema selecionado</p>
-            <p className="truncate text-sm font-semibold text-white">{selectedTheme.name}</p>
-            <p className="truncate text-xs text-slate-400">{selectedTheme.description}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--muted)' }}>Tema selecionado</p>
+            <p className="truncate text-sm font-semibold" style={{ color: 'var(--text)' }}>{selectedTheme.name}</p>
+            <p className="truncate text-xs" style={{ color: 'var(--muted)' }}>{selectedTheme.description}</p>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5" aria-label="Cores do tema">
           {[selectedTheme.colors.bg, selectedTheme.colors.surface, selectedTheme.colors.primary].map((color) => (
-            <span key={color} className="h-5 w-5 rounded-full border border-white/15" style={{ backgroundColor: color }} />
+            <span key={color} className="h-5 w-5 rounded-full border" style={{ backgroundColor: color, borderColor: 'var(--glass-border)' }} />
           ))}
         </div>
       </div>
@@ -200,7 +203,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
                   className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
                   style={{ backgroundColor: theme.colors.primary }}
                 >
-                  <Check size={10} strokeWidth={3} style={{ color: theme.id === 'pure-white' ? '#fff' : '#000' }} />
+                  <Check size={10} strokeWidth={3} style={{ color: theme.id === 'pure-white' ? '#fff' : '#07141d' }} />
                 </div>
               )}
             </div>

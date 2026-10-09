@@ -22,7 +22,7 @@ import { CategoryManager } from './CategoryManager';
 import { 
   Download, Upload, AlertTriangle, 
   Trash2, ShieldAlert, History,
-  User, Camera, Palette, Cloud, LogOut, Tag
+  User, Camera, Palette, Cloud, LogOut, Tag, ChevronDown
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -44,6 +44,66 @@ const SectionCard = ({ title, description, icon, children, danger = false }: any
     </div>
   </GlassCard>
 );
+
+const THEME_LABELS: Record<AppTheme, string> = {
+  dark: 'Padrão Dark',
+  midnight: 'Midnight',
+  graphite: 'Grafite',
+  royal: 'Royal',
+  sunset: 'Sunset',
+  forest: 'Forest',
+  'pure-black': 'Pure Black',
+  'pure-white': 'Pure White',
+};
+
+const AppearanceSection: React.FC<{
+  currentTheme: AppTheme;
+  onThemeChange: (theme: AppTheme) => void;
+}> = ({ currentTheme, onThemeChange }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <GlassCard className="overflow-hidden">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-4 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--c-primary-400))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--c-bg-900))]"
+        aria-expanded={isExpanded}
+        aria-controls="appearance-theme-options"
+        onClick={() => setIsExpanded((expanded) => !expanded)}
+      >
+        <span className="flex min-w-0 items-start gap-3 sm:gap-4">
+          <span className="shrink-0 rounded-xl bg-[rgb(var(--c-primary-500)/0.2)] p-2.5 text-[rgb(var(--c-primary-400))] shadow-lg shadow-[rgb(var(--c-primary-500)/0.1)] sm:p-3">
+            <Palette size={24} />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-base font-semibold sm:text-lg" style={{ color: 'var(--text)' }}>Aparência</span>
+            <span className="mt-0.5 block text-xs leading-relaxed sm:mt-1 sm:text-sm" style={{ color: 'var(--muted)' }}>
+              Escolha o tema que mais combina com você.
+            </span>
+            {!isExpanded && (
+              <span
+                className="mt-2 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs"
+                style={{ backgroundColor: 'rgb(var(--c-bg-800) / 0.4)', borderColor: 'var(--glass-border)', color: 'var(--muted)' }}
+              >
+                <span className="h-2 w-2 rounded-full bg-[rgb(var(--c-primary-400))] shadow-[0_0_8px_rgb(var(--c-primary-400)/0.6)]" />
+                Tema atual: {THEME_LABELS[currentTheme]}
+              </span>
+            )}
+          </span>
+        </span>
+        <ChevronDown
+          size={20}
+          className={`shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          style={{ color: 'var(--muted)' }}
+          aria-hidden="true"
+        />
+      </button>
+      <div id="appearance-theme-options" hidden={!isExpanded} className="pt-5 sm:pt-6">
+        <ThemeSelector currentTheme={currentTheme} onThemeChange={onThemeChange} />
+      </div>
+    </GlassCard>
+  );
+};
 
 export const SettingsView: React.FC = () => {
   const { session } = useAuth();
@@ -294,7 +354,25 @@ export const SettingsView: React.FC = () => {
         </div>
       </SectionCard>
 
-      {/* 0.5 CLOUD SYNC */}
+      {/* 0.6. THEME SELECTOR */}
+      <AppearanceSection currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
+
+      {/* 0.7 CATEGORY MANAGER */}
+      <SectionCard
+        title="Categorias"
+        description="Personalize, crie ou arquive categorias de entradas e saídas."
+        icon={<Tag size={24} />}
+      >
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+           <div>
+              <p className="text-slate-300 font-medium">Categorias cadastradas: {categories.length}</p>
+              <p className="text-xs text-slate-500 mt-1">Gerencie ícones, cores e grupos.</p>
+           </div>
+           <GlassButton onClick={() => setIsCatManagerOpen(true)} className="w-full sm:w-auto">Gerenciar Categorias</GlassButton>
+        </div>
+      </SectionCard>
+
+      {/* CLOUD SYNC */}
       <SectionCard
         title="Sincronização na Nuvem"
         description="Mantenha seus dados salvos e sincronizados entre dispositivos."
@@ -317,30 +395,6 @@ export const SettingsView: React.FC = () => {
           <p className="text-xs text-white/40 text-center">
             {isCloudSyncUnavailable ? 'Configure o Supabase para ativar a sincronização na nuvem.' : 'Seus dados são salvos automaticamente na nuvem ao fazer alterações.'}
           </p>
-        </div>
-      </SectionCard>
-
-      {/* 0.6. THEME SELECTOR */}
-      <SectionCard
-        title="Aparência"
-        description="Escolha o tema que mais combina com você."
-        icon={<Palette size={24} />}
-      >
-        <ThemeSelector currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
-      </SectionCard>
-
-      {/* 0.7 CATEGORY MANAGER */}
-      <SectionCard
-        title="Categorias"
-        description="Personalize, crie ou arquive categorias de entradas e saídas."
-        icon={<Tag size={24} />}
-      >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-           <div>
-              <p className="text-slate-300 font-medium">Categorias cadastradas: {categories.length}</p>
-              <p className="text-xs text-slate-500 mt-1">Gerencie ícones, cores e grupos.</p>
-           </div>
-           <GlassButton onClick={() => setIsCatManagerOpen(true)} className="w-full sm:w-auto">Gerenciar Categorias</GlassButton>
         </div>
       </SectionCard>
 
