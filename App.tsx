@@ -22,7 +22,7 @@ import { MobileFab } from './components/ui/MobileFab';
 import { Toaster } from 'sonner';
 import { exportTransactionsToCSV } from './utils/csvExport';
 import { useUserProfile } from './hooks/useUserProfile';
-import { UpdateService, AppUpdate } from './services/updateService';
+import { UpdateService, AppUpdate, UpdateDownloadProgress } from './services/updateService';
 import { APP_VERSION } from './constants';
 const CreditCardManager = lazy(() => import('./components/CreditCardManager').then((module) => ({ default: module.CreditCardManager })));
 const RecurringManager = lazy(() => import('./components/RecurringManager').then((module) => ({ default: module.RecurringManager })));
@@ -123,6 +123,10 @@ const App: React.FC = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [update, setUpdate] = useState<AppUpdate | null>(null);
+  const [isInstallingUpdate, setIsInstallingUpdate] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState(0);
+  const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+  const [updateStatusIsError, setUpdateStatusIsError] = useState(false);
 
   // Check for updates
   useEffect(() => {
@@ -263,6 +267,36 @@ const App: React.FC = () => {
       deleteTransfer(id);
     } else {
       deleteTransaction(id);
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    if (!update || isInstallingUpdate) return;
+
+    setIsInstallingUpdate(true);
+    setUpdateProgress(0);
+    setUpdateStatus(null);
+    setUpdateStatusIsError(false);
+
+    try {
+      const result = await UpdateService.installUpdate(update, (progress: UpdateDownloadProgress) => {
+        setUpdateProgress(progress.totalBytes > 0 ? progress.progress : -1);
+        setUpdateStatus('Baixando a atualização com segurança…');
+      });
+
+      if (result.status === 'permission_required') {
+        setUpdateStatus('Permita que o Nex Finance instale apps nas configurações do Android e toque em “Tentar novamente”.');
+      } else if (result.status === 'installer_opened') {
+        setUpdateStatus('O instalador do Android foi aberto. Confirme a instalação para concluir a atualização.');
+      } else {
+        setUpdate(null);
+      }
+    } catch (error) {
+      console.error('Erro ao instalar atualização:', error);
+      setUpdateStatus(error instanceof Error ? error.message : 'Não foi possível baixar a atualização. Tente novamente.');
+      setUpdateStatusIsError(true);
+    } finally {
+      setIsInstallingUpdate(false);
     }
   };
 
@@ -684,16 +718,40 @@ const App: React.FC = () => {
             <p className="text-xs text-slate-500">
               Versão atual: {APP_VERSION}
             </p>
+            {updateStatus && (
+              <p className={`text-xs ${updateStatusIsError ? 'text-red-400' : 'text-slate-400'}`} role={updateStatusIsError ? 'alert' : 'status'}>
+                {updateStatus}
+              </p>
+            )}
+            {isInstallingUpdate && (
+              <div className="space-y-1.5" aria-label="Progresso do download">
+                <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className={`h-full rounded-full bg-[rgb(var(--c-primary-400))] transition-[width] duration-200 ${updateProgress < 0 ? 'w-1/3 animate-pulse' : ''}`}
+                    style={updateProgress >= 0 ? { width: `${updateProgress}%` } : undefined}
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={updateProgress >= 0 ? updateProgress : undefined}
+                  />
+                </div>
+                <p className="text-right text-[11px] text-slate-500">
+                  {updateProgress < 0 ? 'Download em andamento' : `${updateProgress}%`}
+                </p>
+              </div>
+            )}
           </div>
         </ModalBody>
         <ModalFooter>
-          <GlassButton type="button" variant="ghost" onClick={() => setUpdate(null)}>Depois</GlassButton>
-          <GlassButton type="button" variant="primary" onClick={() => {
-            if (update) {
-              window.location.href = update.apkUrl;
-              setUpdate(null);
-            }
-          }}>Atualizar Agora</GlassButton>
+          <GlassButton type="button" variant="ghost" disabled={isInstallingUpdate} onClick={() => setUpdate(null)}>Depois</GlassButton>
+          <GlassButton
+            type="button"
+            variant="primary"
+            isLoading={isInstallingUpdate}
+            onClick={handleInstallUpdate}
+          >
+            {isInstallingUpdate ? updateProgress < 0 ? 'Baixando atualização…' : `Baixando ${updateProgress}%` : updateStatus?.includes('instalador') ? 'Abrir instalador' : updateStatus?.includes('Permita') ? 'Tentar novamente' : 'Atualizar Agora'}
+          </GlassButton>
         </ModalFooter>
       </ModalShell>
 
