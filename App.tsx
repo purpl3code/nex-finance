@@ -5,11 +5,13 @@ import { useAuth } from './hooks/useAuth';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { format } from 'date-fns';
 import { Dashboard } from './components/Dashboard';
+import { DashboardGroup, DashboardLayoutMenu, DashboardLayoutMode, DashboardSection } from './components/DashboardLayoutMenu';
+import { UpdateNotificationMenu } from './components/UpdateNotificationMenu';
 import { TransactionList } from './components/TransactionList';
 import { TransactionForm } from './components/TransactionForm';
 import { AccountList } from './components/AccountList';
 import { Sidebar } from './components/Sidebar';
-import { ModalShell, ModalBody, ModalFooter } from './components/ui/ModalShell';
+import { ModalShell } from './components/ui/ModalShell';
 import { GlassButton } from './components/ui/GlassButton';
 import { GlassSelect } from './components/ui/GlassSelect';
 import { PageShell } from './components/ui/PageShell';
@@ -41,6 +43,54 @@ const VALID_TABS: AppTab[] = [
 ];
 
 const App: React.FC = () => {
+  const [dashboardLayoutMode, setDashboardLayoutMode] = useState<DashboardLayoutMode>(() => {
+    try { return localStorage.getItem('nex-dashboard-layout-mode') === 'custom' ? 'custom' : 'default'; } catch { return 'default'; }
+  });
+  const [dashboardSections, setDashboardSections] = useState<DashboardSection[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('nex-dashboard-layout-sections') || 'null');
+      const valid: DashboardSection[] = ['monthlyBalance', 'availableBalance', 'balanceChart', 'insights', 'categorySpending', 'creditCards', 'recentActivity'];
+      if (!Array.isArray(saved) || saved.some(item => ['overview', 'activity'].includes(item))) return valid;
+      const selected = saved.filter((item): item is DashboardSection => valid.includes(item));
+      return selected.length ? selected : valid;
+    } catch { return ['monthlyBalance', 'availableBalance', 'balanceChart', 'insights', 'categorySpending', 'creditCards', 'recentActivity']; }
+  });
+  const [dashboardGroupOrder, setDashboardGroupOrder] = useState<DashboardGroup[]>(() => {
+    const valid: DashboardGroup[] = ['overview', 'charts', 'details'];
+    try {
+      const saved = JSON.parse(localStorage.getItem('nex-dashboard-layout-order') || 'null');
+      if (!Array.isArray(saved)) return valid;
+      const order = saved.filter((item): item is DashboardGroup => valid.includes(item));
+      return valid.every(group => order.includes(group)) ? order : valid;
+    } catch { return valid; }
+  });
+  const [dashboardWidgetOrder, setDashboardWidgetOrder] = useState<DashboardSection[]>(() => {
+    const valid: DashboardSection[] = ['monthlyBalance', 'availableBalance', 'balanceChart', 'insights', 'categorySpending', 'creditCards', 'recentActivity'];
+    try {
+      const saved = JSON.parse(localStorage.getItem('nex-dashboard-widget-order') || 'null');
+      if (!Array.isArray(saved)) return valid;
+      const order = saved.filter((item): item is DashboardSection => valid.includes(item));
+      return valid.every(section => order.includes(section)) ? order : valid;
+    } catch { return valid; }
+  });
+
+  const updateDashboardMode = (mode: DashboardLayoutMode) => {
+    setDashboardLayoutMode(mode);
+    try { localStorage.setItem('nex-dashboard-layout-mode', mode); } catch { /* Storage may be unavailable. */ }
+  };
+  const updateDashboardSections = (sections: DashboardSection[]) => {
+    setDashboardSections(sections);
+    try { localStorage.setItem('nex-dashboard-layout-sections', JSON.stringify(sections)); } catch { /* Storage may be unavailable. */ }
+  };
+  const updateDashboardGroupOrder = (groups: DashboardGroup[]) => {
+    setDashboardGroupOrder(groups);
+    try { localStorage.setItem('nex-dashboard-layout-order', JSON.stringify(groups)); } catch { /* Storage may be unavailable. */ }
+  };
+  const updateDashboardWidgetOrder = (sections: DashboardSection[]) => {
+    setDashboardWidgetOrder(sections);
+    try { localStorage.setItem('nex-dashboard-widget-order', JSON.stringify(sections)); } catch { /* Storage may be unavailable. */ }
+  };
+
   const { session, loading: authLoading } = useAuth();
   const { profile } = useUserProfile();
 
@@ -414,7 +464,7 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         
         {/* Mobile Header (Hidden on Desktop) */}
-        <header className="md:hidden flex items-center justify-between py-3 px-4 glass-lg border-b border-white/8 z-20 relative overflow-hidden">
+        <header className="md:hidden flex items-center justify-between py-3 px-4 glass-lg border-b border-white/8 z-20 relative overflow-visible">
           <div className="flex items-center gap-3">
              <button 
                onClick={() => setIsMobileSidebarOpen(true)} 
@@ -425,14 +475,10 @@ const App: React.FC = () => {
              <h1 className="font-bold text-sm tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">{getPageTitle()}</h1>
           </div>
           {activeTab === 'dashboard' && (
-            <GlassButton 
-              onClick={() => handleOpenModal()} 
-              icon={<Plus size={16} />}
-              size="sm"
-              className="hidden md:flex"
-            >
-              Novo
-            </GlassButton>
+            <div className="flex items-center gap-2">
+              <DashboardLayoutMenu mode={dashboardLayoutMode} visibleSections={dashboardSections} groupOrder={dashboardGroupOrder} widgetOrder={dashboardWidgetOrder} onModeChange={updateDashboardMode} onSectionsChange={updateDashboardSections} onGroupOrderChange={updateDashboardGroupOrder} onWidgetOrderChange={updateDashboardWidgetOrder} className="shrink-0" />
+              <UpdateNotificationMenu update={update} currentVersion={APP_VERSION} isInstalling={isInstallingUpdate} progress={updateProgress} status={updateStatus} statusIsError={updateStatusIsError} onInstall={handleInstallUpdate} className="shrink-0" />
+            </div>
           )}
         </header>
 
@@ -448,9 +494,32 @@ const App: React.FC = () => {
                     title={(() => { const h = new Date().getHours(); const g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; return profile.displayName && profile.displayName !== 'Usuário' ? `${g}, ${profile.displayName.split(' ')[0]}` : g; })()}
                     subtitle="Visão geral das suas finanças neste mês."
                     actions={
-                      <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={18} />} className="hidden md:flex">
-                        Nova Movimentação
-                      </GlassButton>
+                      <>
+                        <DashboardLayoutMenu
+                          mode={dashboardLayoutMode}
+                          visibleSections={dashboardSections}
+                          groupOrder={dashboardGroupOrder}
+                          widgetOrder={dashboardWidgetOrder}
+                          onModeChange={updateDashboardMode}
+                          onSectionsChange={updateDashboardSections}
+                          onGroupOrderChange={updateDashboardGroupOrder}
+                          onWidgetOrderChange={updateDashboardWidgetOrder}
+                          className="hidden md:block"
+                        />
+                        <UpdateNotificationMenu
+                          update={update}
+                          currentVersion={APP_VERSION}
+                          isInstalling={isInstallingUpdate}
+                          progress={updateProgress}
+                          status={updateStatus}
+                          statusIsError={updateStatusIsError}
+                          onInstall={handleInstallUpdate}
+                          className="hidden md:block"
+                        />
+                        <GlassButton onClick={() => handleOpenModal()} icon={<Plus size={18} />} className="hidden md:flex">
+                          Nova Movimentação
+                        </GlassButton>
+                      </>
                     }
                     controls={
                       <>
@@ -483,6 +552,10 @@ const App: React.FC = () => {
                     month={filters.month}
                     year={filters.year}
                     onCardClick={handleCardClick}
+                    layoutMode={dashboardLayoutMode}
+                    visibleSections={dashboardSections}
+                    groupOrder={dashboardGroupOrder}
+                    widgetOrder={dashboardWidgetOrder}
                   />
                 </PageShell>
               )}
@@ -690,69 +763,6 @@ const App: React.FC = () => {
           currentMonth={filters.month}
           currentYear={filters.year}
         />
-      </ModalShell>
-
-      {/* Update Check Modal */}
-      <ModalShell 
-        isOpen={!!update} 
-        onClose={() => setUpdate(null)} 
-        title="Atualização Disponível 🚀"
-      >
-        <ModalBody>
-          <div className="text-center space-y-4 py-4">
-            <div className="bg-[rgb(var(--c-primary-500)/0.1)] p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 border border-[rgb(var(--c-primary-500)/0.2)]">
-               <Download size={32} className="text-[rgb(var(--c-primary-400))]" />
-            </div>
-            <div>
-              <p className="text-lg text-slate-200 font-semibold">Nova versão {update?.version} disponível!</p>
-              <p className="text-sm text-slate-400 mt-2">
-                Uma nova versão do Nex Finance foi encontrada no GitHub Releases.
-              </p>
-            </div>
-            {update?.releaseNotes && (
-              <div className="text-left bg-white/5 border border-white/8 rounded-xl p-3 max-h-32 overflow-y-auto text-xs text-slate-400">
-                <p className="font-semibold text-slate-300 mb-1">Notas da versão:</p>
-                <pre className="font-sans whitespace-pre-wrap">{update.releaseNotes}</pre>
-              </div>
-            )}
-            <p className="text-xs text-slate-500">
-              Versão atual: {APP_VERSION}
-            </p>
-            {updateStatus && (
-              <p className={`text-xs ${updateStatusIsError ? 'text-red-400' : 'text-slate-400'}`} role={updateStatusIsError ? 'alert' : 'status'}>
-                {updateStatus}
-              </p>
-            )}
-            {isInstallingUpdate && (
-              <div className="space-y-1.5" aria-label="Progresso do download">
-                <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                  <div
-                    className={`h-full rounded-full bg-[rgb(var(--c-primary-400))] transition-[width] duration-200 ${updateProgress < 0 ? 'w-1/3 animate-pulse' : ''}`}
-                    style={updateProgress >= 0 ? { width: `${updateProgress}%` } : undefined}
-                    role="progressbar"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={updateProgress >= 0 ? updateProgress : undefined}
-                  />
-                </div>
-                <p className="text-right text-[11px] text-slate-500">
-                  {updateProgress < 0 ? 'Download em andamento' : `${updateProgress}%`}
-                </p>
-              </div>
-            )}
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <GlassButton type="button" variant="ghost" disabled={isInstallingUpdate} onClick={() => setUpdate(null)}>Depois</GlassButton>
-          <GlassButton
-            type="button"
-            variant="primary"
-            isLoading={isInstallingUpdate}
-            onClick={handleInstallUpdate}
-          >
-            {isInstallingUpdate ? updateProgress < 0 ? 'Baixando atualização…' : `Baixando ${updateProgress}%` : updateStatus?.includes('instalador') ? 'Abrir instalador' : updateStatus?.includes('Permita') ? 'Tentar novamente' : 'Atualizar Agora'}
-          </GlassButton>
-        </ModalFooter>
       </ModalShell>
 
       <MobileFab

@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { motion } from 'framer-motion';
+import { LayoutGroup, motion } from 'framer-motion';
 import { DashboardStats, ChartDataPoint, Account, Budget, CreditCard, Transaction, CreditCardTransaction, RecurringRule, Category } from '../types';
 import { COLORS } from '../constants';
 import { 
@@ -21,6 +21,7 @@ import {
 } from './DashboardWidgets';
 import { Wallet, Sparkles } from 'lucide-react';
 import { GlassCard } from './ui/GlassCard';
+import { DashboardGroup, DashboardLayoutMode, DashboardSection } from './DashboardLayoutMenu';
 
 interface DashboardProps {
   stats: DashboardStats;
@@ -45,6 +46,10 @@ interface DashboardProps {
   year: number;
   onCardClick?: (cardId: string) => void;
   totalDebts?: number;
+  layoutMode?: DashboardLayoutMode;
+  visibleSections?: DashboardSection[];
+  groupOrder?: DashboardGroup[];
+  widgetOrder?: DashboardSection[];
 }
 
 export const Dashboard: React.FC<DashboardProps> = React.memo(({ 
@@ -62,8 +67,21 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   year,
   onCardClick,
   creditCardStats,
-  totalDebts = 0
+  totalDebts = 0,
+  layoutMode = 'default',
+  visibleSections = ['monthlyBalance', 'availableBalance', 'balanceChart', 'insights', 'categorySpending', 'creditCards', 'recentActivity'],
+  groupOrder = ['overview', 'charts', 'details'],
+  widgetOrder = ['monthlyBalance', 'availableBalance', 'balanceChart', 'insights', 'categorySpending', 'creditCards', 'recentActivity']
 }) => {
+  const isVisible = (section: DashboardSection) => layoutMode === 'default' || visibleSections.includes(section);
+  const defaultGroupOrder: DashboardGroup[] = ['overview', 'charts', 'details'];
+  const getGroupPosition = (group: DashboardGroup) => (layoutMode === 'default' ? defaultGroupOrder : groupOrder).indexOf(group);
+  const getWidgetGroup = (section: DashboardSection): DashboardGroup => ['monthlyBalance', 'availableBalance'].includes(section) ? 'overview' : ['balanceChart', 'insights'].includes(section) ? 'charts' : 'details';
+  const getWidgetPosition = (section: DashboardSection) => {
+    if (layoutMode === 'default') return (['monthlyBalance', 'availableBalance', 'balanceChart', 'insights', 'categorySpending', 'creditCards', 'recentActivity'] as DashboardSection[]).indexOf(section);
+    const groupMembers = (widgetOrder as DashboardSection[]).filter(item => getWidgetGroup(item) === getWidgetGroup(section));
+    return groupMembers.indexOf(section);
+  };
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
@@ -148,25 +166,27 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   };
 
   return (
+    <LayoutGroup id="dashboard-layout-sections">
     <motion.div 
-      className="space-y-4"
+      className="flex flex-col gap-4"
+      layout
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       
       {/* 1. PREMIUM HEADER: MAIN CARDS */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <RemainingBalanceCard summary={monthlySummary} />
-        <ForecastCard summary={forecast} totalCurrentBalance={totalBalance} creditCardUsedLimit={creditCardStats.usedLimit} totalDebts={totalDebts} />
-      </motion.div>
+      {(isVisible('monthlyBalance') || isVisible('availableBalance')) && (
+        <motion.div layout layoutDependency={`${groupOrder.join('-')}:${widgetOrder.join('-')}`} transition={{ layout: { type: 'spring', stiffness: 180, damping: 24, mass: 0.9 } }} style={{ order: getGroupPosition('overview') }} variants={itemVariants} className={`grid grid-cols-1 gap-4 ${isVisible('monthlyBalance') && isVisible('availableBalance') ? 'lg:grid-cols-2' : ''}`}>
+          {isVisible('monthlyBalance') && <motion.div layout="position" transition={{ layout: { type: 'spring', stiffness: 180, damping: 24 } }} style={{ order: getWidgetPosition('monthlyBalance') }}><RemainingBalanceCard summary={monthlySummary} /></motion.div>}
+          {isVisible('availableBalance') && <motion.div layout="position" transition={{ layout: { type: 'spring', stiffness: 180, damping: 24 } }} style={{ order: getWidgetPosition('availableBalance') }}><ForecastCard summary={forecast} totalCurrentBalance={totalBalance} creditCardUsedLimit={creditCardStats.usedLimit} totalDebts={totalDebts} /></motion.div>}
+        </motion.div>
+      )}
 
       {/* 2. MIDDLE SECTION: GRAPH & INSIGHTS */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-auto lg:h-80">
-        <div className="lg:col-span-2 h-full">
-          <BalanceChart data={balanceHistory} />
-        </div>
-        <div className="space-y-3 overflow-y-auto pr-1 custom-scrollbar h-full">
+      {(isVisible('balanceChart') || isVisible('insights')) && <motion.div layout layoutDependency={`${groupOrder.join('-')}:${widgetOrder.join('-')}`} transition={{ layout: { type: 'spring', stiffness: 180, damping: 24, mass: 0.9 } }} style={{ order: getGroupPosition('charts') }} variants={itemVariants} className={`grid grid-cols-1 gap-4 h-auto ${isVisible('balanceChart') && isVisible('insights') ? 'lg:grid-cols-3 lg:h-80' : 'lg:h-80'}`}>
+        {isVisible('balanceChart') && <motion.div layout="position" transition={{ layout: { type: 'spring', stiffness: 180, damping: 24 } }} style={{ order: getWidgetPosition('balanceChart') }} className={`${isVisible('insights') ? 'lg:col-span-2' : 'lg:col-span-3'} h-full`}><BalanceChart data={balanceHistory} /></motion.div>}
+        {isVisible('insights') && <motion.div layout="position" transition={{ layout: { type: 'spring', stiffness: 180, damping: 24 } }} style={{ order: getWidgetPosition('insights') }} className="space-y-3 overflow-y-auto pr-1 custom-scrollbar h-full">
           <div className="flex items-center gap-2 mb-1">
             <Sparkles size={16} className="text-[rgb(var(--c-primary-400))]" />
             <h3 className="text-sm font-semibold text-slate-200">Insights</h3>
@@ -177,15 +197,14 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
               Nenhum insight disponível no momento.
             </div>
           )}
-        </div>
-      </motion.div>
+        </motion.div>}
+      </motion.div>}
 
       {/* 3. BOTTOM SECTION: SPENDING & ACTIVITY */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {(isVisible('categorySpending') || isVisible('creditCards') || isVisible('recentActivity')) && <motion.div layout layoutDependency={`${groupOrder.join('-')}:${widgetOrder.join('-')}`} transition={{ layout: { type: 'spring', stiffness: 180, damping: 24, mass: 0.9 } }} style={{ order: getGroupPosition('details') }} variants={itemVariants} className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         
         {/* Left: Expenses & Cards */}
-        <div className="space-y-4">
-          {/* Chart */}
+          {isVisible('categorySpending') && <motion.div layout="position" transition={{ layout: { type: 'spring', stiffness: 180, damping: 24 } }} style={{ order: getWidgetPosition('categorySpending') }}>
           <GlassCard className="h-auto">
             <div className="flex justify-between items-start mb-4">
                 <div>
@@ -247,9 +266,10 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
               </motion.div>
             )}
           </GlassCard>
+          </motion.div>}
 
           {/* Mini Card List */}
-          <div className="space-y-3">
+          {isVisible('creditCards') && <motion.div layout="position" transition={{ layout: { type: 'spring', stiffness: 180, damping: 24 } }} style={{ order: getWidgetPosition('creditCards') }} className="space-y-3">
             <h3 className="text-sm font-semibold text-slate-200">Resumo dos cartões</h3>
             {creditCards.length > 0 ? (
               creditCards.map(card => {
@@ -268,15 +288,13 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
             ) : (
               <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-5 text-sm text-slate-400">Nenhum cartão cadastrado.</p>
             )}
-          </div>
-        </div>
-
-        {/* Right: Recent Activity */}
-        <div>
+          </motion.div>}
+        {isVisible('recentActivity') && <motion.div layout="position" transition={{ layout: { type: 'spring', stiffness: 180, damping: 24 } }} style={{ order: getWidgetPosition('recentActivity') }}>
           <RecentActivityList activities={recentActivity} />
-        </div>
+        </motion.div>}
 
-      </motion.div>
+      </motion.div>}
     </motion.div>
+    </LayoutGroup>
   );
 });
