@@ -409,3 +409,13 @@ path.recharts-sector:focus {
     padding-top: env(safe-area-inset-top) !important;
   }
 }
+
+/* Keep the dashboard layout panel inside the mobile viewport instead of anchoring it to the first header icon. */
+@media (max-width: 767px) {
+  .dashboard-layout-popup {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 4rem);
+    right: max(0.5rem, env(safe-area-inset-right));
+    left: auto;
+  }
+}

@@ -51,7 +51,7 @@ export const UpdateNotificationMenu: React.FC<UpdateNotificationMenuProps> = ({
         onClick={() => setOpen(value => !value)}
         className="relative"
       >
-        {update && <span aria-hidden="true" className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-400 ring-2 ring-slate-950" />}
+        {update && <span aria-hidden="true" className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-400 ring-2 ring-slate-950" />}
       </GlassButton>
 
       <AnimatePresence>
