@@ -165,13 +165,25 @@ const App: React.FC = () => {
   // --- NAVIGATION & ROUTING LOGIC ---
   const getTabFromHash = (): AppTab => {
     if (typeof window === 'undefined') return 'dashboard';
-    const hash = window.location.hash.replace('#', '');
-    return VALID_TABS.includes(hash as AppTab) ? (hash as AppTab) : 'dashboard';
+    const route = window.location.hash.slice(1).split('/')[0];
+    return VALID_TABS.includes(route as AppTab) ? (route as AppTab) : 'dashboard';
+  };
+
+  const getCardIdFromHash = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    const [route, cardId] = window.location.hash.slice(1).split('/');
+    if (route !== 'cards' || !cardId) return null;
+
+    try {
+      return decodeURIComponent(cardId);
+    } catch {
+      return null;
+    }
   };
 
   const [activeTab, setActiveTabState] = useState<AppTab>(getTabFromHash());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(getCardIdFromHash());
   const [update, setUpdate] = useState<AppUpdate | null>(null);
   const [isInstallingUpdate, setIsInstallingUpdate] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
@@ -191,9 +203,7 @@ const App: React.FC = () => {
     const handleHashChange = () => {
       const newTab = getTabFromHash();
       setActiveTabState(newTab);
-      if (newTab !== 'cards') {
-        setSelectedCardId(null);
-      }
+      setSelectedCardId(newTab === 'cards' ? getCardIdFromHash() : null);
     };
 
     window.addEventListener('hashchange', handleHashChange);
@@ -222,8 +232,17 @@ const App: React.FC = () => {
   };
 
   const handleCardClick = (cardId: string) => {
+    window.location.hash = `cards/${encodeURIComponent(cardId)}`;
+    setActiveTabState('cards');
     setSelectedCardId(cardId);
-    setActiveTab('cards');
+    setTimeout(() => {
+      const scrollContainer = document.getElementById('main-scroll-container');
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   const currentDate = new Date();

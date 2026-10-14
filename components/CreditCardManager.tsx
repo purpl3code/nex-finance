@@ -137,6 +137,9 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }, 50);
+    } else {
+      setSelectedCardId(null);
+      setView('list');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCardId, initialMonth, initialYear]);
@@ -430,6 +433,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       if (selectedCardId === deletingCardId) {
         setView('list');
         setSelectedCardId(null);
+        window.location.hash = 'cards';
       }
       setDeletingCardId(null);
     }
@@ -440,7 +444,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (openDate) {
       setCurrentDate(openDate);
     }
-    window.history.pushState({ nexFinanceCardDetails: true, cardId }, '', window.location.href);
+    window.location.hash = `cards/${encodeURIComponent(cardId)}`;
     setSelectedCardId(cardId);
     setView('details');
     setTimeout(() => {
@@ -561,34 +565,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
       }
     }, 50);
   };
-
-  const handleBack = React.useCallback(() => {
-    setView('list');
-    setSelectedCardId(null);
-    setTimeout(() => {
-      const scrollContainer = document.getElementById('main-scroll-container');
-      if (scrollContainer) {
-        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 50);
-  }, []);
-
-  React.useEffect(() => {
-    const handleBrowserNavigation = (event: PopStateEvent) => {
-      const previousView = event.state as { nexFinanceCardDetails?: boolean; cardId?: string } | null;
-      if (previousView?.nexFinanceCardDetails && previousView.cardId) {
-        setSelectedCardId(previousView.cardId);
-        setView('details');
-      } else if (view === 'details') {
-        handleBack();
-      }
-    };
-
-    window.addEventListener('popstate', handleBrowserNavigation);
-    return () => window.removeEventListener('popstate', handleBrowserNavigation);
-  }, [view, handleBack]);
 
   const monthName = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 

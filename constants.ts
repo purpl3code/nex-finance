@@ -105,4 +105,4 @@ export const COLORS = [
   '#E91E63', // magenta pink
 ];
 
-export const APP_VERSION = 'v1.4.9';
+export const APP_VERSION = 'v1.5.0';
