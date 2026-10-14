@@ -55,7 +55,6 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = React.memo(({ 
   totalBalance,
   accounts,
-  getCategorySpending,
   categories = [],
   transactions = [],
   creditCardTransactions = [],
@@ -66,7 +65,10 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
   month,
   year,
   onCardClick,
+  onNavigateToBudgets,
   creditCardStats,
+  budgets = [],
+  getCategorySpending,
   totalDebts = 0,
   layoutMode = 'default',
   visibleSections = ['monthlyBalance', 'availableBalance', 'balanceChart', 'insights', 'categorySpending', 'creditCards', 'recentActivity'],
@@ -116,9 +118,22 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
     getBalanceHistory(accounts, transactions, month, year),
   [accounts, transactions, month, year]);
 
-  const insights = useMemo(() => 
-    generateInsights(monthlySummary, transactions, creditCardTransactions, categories, creditCards, month, year),
-  [monthlySummary, transactions, creditCardTransactions, categories, creditCards, month, year]);
+  const insights = useMemo(() => {
+    const cardUsage = creditCards.map(card => ({
+      cardId: card.id,
+      used: getCardTotalUsedLimit ? getCardTotalUsedLimit(card.id) : 0
+    }));
+    return generateInsights(
+      transactions,
+      creditCardTransactions,
+      categories,
+      creditCards,
+      month,
+      year,
+      budgets,
+      cardUsage
+    );
+  }, [transactions, creditCardTransactions, categories, creditCards, month, year, budgets, getCardTotalUsedLimit]);
 
   // Chart Data (Existing Logic)
   const comprehensiveChartData = useMemo(() => {
@@ -191,7 +206,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
             <Sparkles size={16} className="text-[rgb(var(--c-primary-400))]" />
             <h3 className="text-sm font-semibold text-slate-200">Insights</h3>
           </div>
-          <InsightsList insights={insights} />
+          <InsightsList insights={insights} onNavigateToBudgets={onNavigateToBudgets} onCardClick={onCardClick} />
           {insights.length === 0 && (
             <div className="p-4 border border-white/10 border-dashed rounded-xl text-center text-slate-500 text-sm">
               Nenhum insight disponível no momento.

@@ -44,15 +44,14 @@ export const UpdateNotificationMenu: React.FC<UpdateNotificationMenuProps> = ({
         variant="secondary"
         size="icon"
         icon={<Bell size={17} />}
+        indicator={update && <span aria-hidden="true" className="absolute bottom-1 right-1 z-20 h-2 w-2 rounded-full bg-rose-400 ring-2 ring-slate-950" />}
         aria-label={update ? `Notificações. Atualização ${update.version} disponível` : 'Notificações'}
         aria-expanded={open}
         aria-haspopup="dialog"
         title="Notificações"
         onClick={() => setOpen(value => !value)}
         className="relative"
-      >
-        {update && <span aria-hidden="true" className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-400 ring-2 ring-slate-950" />}
-      </GlassButton>
+      />
 
       <AnimatePresence>
         {open && (

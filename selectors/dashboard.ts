@@ -1,6 +1,6 @@
 
-import { Transaction, CreditCardTransaction, RecurringRule, Account, Category, CreditCard } from '../types';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns';
+import { Transaction, CreditCardTransaction, RecurringRule, Account, Category, CreditCard, Budget } from '../types';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, getDaysInMonth } from 'date-fns';
 
 // --- TYPES ---
 
@@ -31,6 +31,7 @@ export interface Insight {
   type: 'success' | 'warning' | 'info';
   title: string;
   message: string;
+  action?: { label: string; target: 'budgets' } | { label: string; target: 'card'; cardId: string };
 }
 
 // --- SELECTORS ---
@@ -234,88 +235,147 @@ export const getBalanceHistory = (
 };
 
 export const generateInsights = (
-  summaryCurrent: MonthlySummary,
   transactions: Transaction[],
   cardTransactions: CreditCardTransaction[],
   categories: Category[],
   cards: CreditCard[],
   month: number,
-  year: number
+  year: number,
+  budgets: Budget[] = [],
+  cardUsage: { cardId: string; used: number }[] = []
 ): Insight[] => {
   const insights: Insight[] = [];
-
-  // 1. Top Category
+  const selectedMonth = new Date(year, month, 1);
+  const now = new Date();
+  const isCurrentMonth = now.getMonth() === month && now.getFullYear() === year;
+  const throughDay = isCurrentMonth ? now.getDate() : getDaysInMonth(selectedMonth);
+  const currency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const isInSelectedPeriod = (date: string) => {
+    const d = new Date(`${date}T12:00:00`);
+    return d.getMonth() === month && d.getFullYear() === year && d.getDate() <= throughDay;
+  };
+  const isExpenseTransaction = (t: Transaction) =>
+    t.type === 'expense' && t.categoryId !== 'cat_invoice_payment' && isInSelectedPeriod(t.date);
+  const isCardTransactionInPeriod = (t: CreditCardTransaction) => isInSelectedPeriod(t.date);
+  const periodIncome = transactions
+    .filter(t => t.type === 'income' && isInSelectedPeriod(t.date))
+    .reduce((sum, t) => sum + t.amount, 0);
+  const periodSpent = transactions
+    .filter(isExpenseTransaction)
+    .reduce((sum, t) => sum + t.amount, 0)
+    + cardTransactions.filter(isCardTransactionInPeriod).reduce((sum, t) => sum + t.amount, 0);
   const categoryTotals: Record<string, number> = {};
-  
-  // Sum direct expenses
   transactions
-    .filter(t => {
-      const d = new Date(t.date + 'T12:00:00');
-      return t.type === 'expense' && t.categoryId !== 'cat_invoice_payment' && d.getMonth() === month && d.getFullYear() === year;
-    })
+    .filter(isExpenseTransaction)
     .forEach(t => categoryTotals[t.categoryId] = (categoryTotals[t.categoryId] || 0) + t.amount);
-    
-  // Sum card expenses
   cardTransactions
-    .filter(t => {
-      const d = new Date(t.date + 'T12:00:00');
-      return d.getMonth() === month && d.getFullYear() === year;
-    })
+    .filter(isCardTransactionInPeriod)
     .forEach(t => categoryTotals[t.categoryId] = (categoryTotals[t.categoryId] || 0) + t.amount);
 
-  let topCatId = '';
-  let topCatAmount = 0;
-  Object.entries(categoryTotals).forEach(([id, amt]) => {
-    if (amt > topCatAmount) {
-      topCatAmount = amt;
-      topCatId = id;
+  // Compare the selected month with the same number of elapsed days in the previous month.
+  const previousMonth = new Date(year, month - 1, 1);
+  const previousMonthIndex = previousMonth.getMonth();
+  const previousMonthYear = previousMonth.getFullYear();
+  const previousThroughDay = Math.min(throughDay, getDaysInMonth(previousMonth));
+  const sumPeriodExpenses = (targetMonth: number, targetYear: number, cutoffDay: number) => {
+    const inPeriod = (date: string) => {
+      const d = new Date(`${date}T12:00:00`);
+      return d.getMonth() === targetMonth && d.getFullYear() === targetYear && d.getDate() <= cutoffDay;
+    };
+    return transactions
+      .filter(t => t.type === 'expense' && t.categoryId !== 'cat_invoice_payment' && inPeriod(t.date))
+      .reduce((sum, t) => sum + t.amount, 0)
+      + cardTransactions.filter(t => inPeriod(t.date)).reduce((sum, t) => sum + t.amount, 0);
+  };
+  const previousSpent = sumPeriodExpenses(previousMonthIndex, previousMonthYear, previousThroughDay);
+  if (periodSpent > 0 && previousSpent > 0) {
+    const changePercent = ((periodSpent - previousSpent) / previousSpent) * 100;
+    if (Math.abs(changePercent) >= 10) {
+      const increased = changePercent > 0;
+      const throughLabel = isCurrentMonth ? `até o dia ${throughDay}` : 'no mês';
+      insights.push({
+        id: 'spending_trend',
+        type: increased ? 'warning' : 'success',
+        title: increased ? 'Gastos acima do mês passado' : 'Gastos abaixo do mês passado',
+        message: `Você gastou ${currency(periodSpent)} ${throughLabel}, ${Math.abs(changePercent).toFixed(0)}% ${increased ? 'a mais' : 'a menos'} que no mesmo período anterior (${currency(previousSpent)}).`
+      });
     }
-  });
+  }
 
-  if (topCatId) {
-    const catName = categories.find(c => c.id === topCatId)?.name || 'Desconhecida';
+  // Budget progress is calculated from actual category spending for the selected month.
+  const monthBudgets = budgets.filter(b => b.month === month && b.year === year && b.amountLimit > 0);
+  const budgetProgress = monthBudgets
+    .map(budget => {
+      const spent = categoryTotals[budget.categoryId] || 0;
+      return { budget, spent, percent: (spent / budget.amountLimit) * 100 };
+    })
+    .filter(item => item.spent > 0)
+    .sort((a, b) => b.percent - a.percent)[0];
+
+  if (budgetProgress && budgetProgress.percent >= budgetProgress.budget.alertAtPercent) {
+    const categoryName = categories.find(c => c.id === budgetProgress.budget.categoryId)?.name || 'uma categoria';
+    const exceeded = budgetProgress.spent - budgetProgress.budget.amountLimit;
+    insights.push({
+      id: 'budget_progress',
+      type: budgetProgress.percent >= 100 ? 'warning' : 'info',
+      title: budgetProgress.percent >= 100 ? 'Orçamento ultrapassado' : 'Orçamento perto do limite',
+      message: budgetProgress.percent >= 100
+        ? `Você usou ${Math.round(budgetProgress.percent)}% do orçamento de ${categoryName} e passou ${currency(exceeded)} do limite.`
+        : `${categoryName} já consumiu ${Math.round(budgetProgress.percent)}% do limite (${currency(budgetProgress.spent)} de ${currency(budgetProgress.budget.amountLimit)}).`,
+      action: { label: 'Ver orçamentos', target: 'budgets' }
+    });
+  }
+
+  // Actual outstanding card limit usage, rather than this month's purchases, indicates utilization.
+  const cardUtilization = cards
+    .filter(card => card.limit > 0)
+    .map(card => ({ card, used: Math.max(0, cardUsage.find(item => item.cardId === card.id)?.used ?? 0) }))
+    .map(item => ({ ...item, percent: (item.used / item.card.limit) * 100 }))
+    .sort((a, b) => b.percent - a.percent)[0];
+  if (cardUtilization && cardUtilization.percent >= 70) {
+    insights.push({
+      id: 'card_limit',
+      type: cardUtilization.percent >= 90 ? 'warning' : 'info',
+      title: cardUtilization.percent >= 90 ? 'Cartão perto do limite' : 'Uso do cartão',
+      message: `${cardUtilization.card.name}: ${currency(cardUtilization.used)} utilizados de ${currency(cardUtilization.card.limit)} (${Math.round(cardUtilization.percent)}%).`,
+      action: { label: 'Ver cartão', target: 'card', cardId: cardUtilization.card.id }
+    });
+  }
+
+  // 1. Top category, with its share of all expenses for better context.
+  const positiveCategoryTotals = Object.entries(categoryTotals).filter(([, amount]) => amount > 0);
+  const [topCatId, topCatAmount] = positiveCategoryTotals.sort((a, b) => b[1] - a[1])[0] || ['', 0];
+  if (topCatId && periodSpent > 0) {
+    const catName = categories.find(c => c.id === topCatId)?.name || 'Sem categoria';
+    const share = Math.min(100, (topCatAmount / periodSpent) * 100);
     insights.push({
       id: 'top_cat',
       type: 'info',
       title: 'Maior Despesa',
-      message: `${catName} representa sua maior despesa este mês (R$ ${topCatAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}).`
+      message: `${catName} concentra ${Math.round(share)}% dos gastos registrados (${currency(topCatAmount)} de ${currency(periodSpent)}).`
     });
   }
 
-  // 2. Card Limit Warning
-  // We need to estimate current card usage (roughly sum of unpaid transactions)
-  // This is complex without full history, but we can check if totalSpent on cards > 70% of total limits
-  // (Simplified for this scope)
-  const totalLimit = cards.reduce((sum, c) => sum + c.limit, 0);
-  if (totalLimit > 0 && summaryCurrent.cardExpenses > (totalLimit * 0.7)) {
-    const pct = Math.round((summaryCurrent.cardExpenses / totalLimit) * 100);
-    insights.push({
-      id: 'card_limit',
-      type: 'warning',
-      title: 'Atenção ao Limite',
-      message: `Você já utilizou aproximadamente ${pct}% do limite total dos seus cartões neste mês.`
-    });
-  }
-
-  // 3. Economy (Income vs Expense)
-  if (summaryCurrent.income > 0) {
-    const saveRate = ((summaryCurrent.income - summaryCurrent.totalSpent) / summaryCurrent.income) * 100;
-    if (saveRate > 20) {
+  // Describe current cash flow as recorded so far, without presenting it as a closed-month result.
+  if (periodIncome > 0) {
+    const remaining = periodIncome - periodSpent;
+    const cashFlowRate = (remaining / periodIncome) * 100;
+    if (cashFlowRate >= 20) {
       insights.push({
-        id: 'save_rate',
+        id: 'cash_flow_positive',
         type: 'success',
-        title: 'Boa Economia!',
-        message: `Você poupou ${saveRate.toFixed(0)}% da sua renda este mês.`
+        title: 'Entradas acima dos gastos',
+        message: `Dos ${currency(periodIncome)} em entradas registradas, ${currency(remaining)} ainda não foram consumidos pelos gastos deste período (${Math.round(cashFlowRate)}%).`
       });
-    } else if (saveRate < 0) {
+    } else if (remaining < 0) {
       insights.push({
-        id: 'negative_balance',
+        id: 'cash_flow_negative',
         type: 'warning',
-        title: 'Gastos Excessivos',
-        message: `Seus gastos superaram sua renda em ${Math.abs(saveRate).toFixed(0)}%.`
+        title: 'Gastos acima das entradas',
+        message: `Os gastos registrados superam as entradas em ${currency(Math.abs(remaining))} neste período.`
       });
     }
   }
 
-  return insights;
+  return insights.slice(0, 4);
 };

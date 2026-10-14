@@ -6,6 +6,7 @@ interface GlassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
   size?: 'sm' | 'md' | 'lg' | 'icon';
   isLoading?: boolean;
   icon?: React.ReactNode;
+  indicator?: React.ReactNode;
 }
 
 export const GlassButton: React.FC<GlassButtonProps> = ({ 
@@ -15,6 +16,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   size = 'md',
   isLoading = false,
   icon,
+  indicator,
   disabled,
   ...props 
 }) => {
@@ -97,6 +99,8 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       {children && (
         <span className="relative z-10">{children}</span>
       )}
+
+      {indicator}
     </button>
   );
 };

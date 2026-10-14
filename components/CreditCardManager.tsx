@@ -440,6 +440,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     if (openDate) {
       setCurrentDate(openDate);
     }
+    window.history.pushState({ nexFinanceCardDetails: true, cardId }, '', window.location.href);
     setSelectedCardId(cardId);
     setView('details');
     setTimeout(() => {
@@ -561,7 +562,7 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
     }, 50);
   };
 
-  const handleBack = () => {
+  const handleBack = React.useCallback(() => {
     setView('list');
     setSelectedCardId(null);
     setTimeout(() => {
@@ -572,7 +573,22 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }, 50);
-  };
+  }, []);
+
+  React.useEffect(() => {
+    const handleBrowserNavigation = (event: PopStateEvent) => {
+      const previousView = event.state as { nexFinanceCardDetails?: boolean; cardId?: string } | null;
+      if (previousView?.nexFinanceCardDetails && previousView.cardId) {
+        setSelectedCardId(previousView.cardId);
+        setView('details');
+      } else if (view === 'details') {
+        handleBack();
+      }
+    };
+
+    window.addEventListener('popstate', handleBrowserNavigation);
+    return () => window.removeEventListener('popstate', handleBrowserNavigation);
+  }, [view, handleBack]);
 
   const monthName = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
@@ -580,10 +596,6 @@ export const CreditCardManager: React.FC<CreditCardManagerProps> = ({
   if (view === 'details' && selectedCard) {
     return (
       <PageShell>
-        <button onClick={handleBack} className="flex items-center text-slate-400 hover:text-white mb-4 transition-colors">
-          <ChevronLeft size={16} className="mr-1" /> Voltar para Cartões
-        </button>
-
         {/* Card Header */}
         <GlassCard className="mb-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

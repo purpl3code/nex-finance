@@ -209,7 +209,11 @@ export const BalanceChart: React.FC<{ data: DailyBalance[] }> = ({ data }) => {
 };
 
 // --- 5. INSIGHTS LIST ---
-export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) => {
+export const InsightsList: React.FC<{
+  insights: Insight[];
+  onNavigateToBudgets?: () => void;
+  onCardClick?: (cardId: string) => void;
+}> = ({ insights, onNavigateToBudgets, onCardClick }) => {
   if (insights.length === 0) return null;
 
   return (
@@ -240,6 +244,18 @@ export const InsightsList: React.FC<{ insights: Insight[] }> = ({ insights }) =>
               'text-blue-200'
             }`}>{insight.title}</h4>
             <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{insight.message}</p>
+            {insight.action && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (insight.action?.target === 'budgets') onNavigateToBudgets?.();
+                  if (insight.action?.target === 'card') onCardClick?.(insight.action.cardId);
+                }}
+                className="mt-2 text-xs font-semibold text-[rgb(var(--c-primary-300))] hover:text-[rgb(var(--c-primary-200))] transition-colors"
+              >
+                {insight.action.label} →
+              </button>
+            )}
           </div>
         </div>
       ))}
