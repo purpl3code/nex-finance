@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { supabase, setRememberMe, isSupabaseConfigured } from '../../lib/supabase';
 import { GlassButton } from '../ui/GlassButton';
 import { GlassInput } from '../ui/GlassInput';
-import { Lock, Mail, AlertCircle, Landmark, ArrowRight, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
+import { Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
+import { BrandMark } from '../ui/BrandMark';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -107,7 +108,7 @@ export const LoginScreen: React.FC = () => {
           className="relative z-10 flex items-center gap-3"
         >
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-2)] flex items-center justify-center shadow-2xl shadow-[var(--accent-glow)] animate-glow-pulse">
-            <Landmark className="text-[rgb(var(--c-primary-foreground))]" size={24} strokeWidth={2} />
+            <BrandMark className="text-[rgb(var(--c-primary-foreground))]" size={24} />
           </div>
           <div>
             <span className="text-2xl font-bold tracking-tight text-[var(--text)]">Nex Finance</span>
@@ -170,7 +171,7 @@ export const LoginScreen: React.FC = () => {
           {/* Mobile Logo */}
           <div className="flex lg:hidden items-center justify-center gap-3 mb-8">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-2)] flex items-center justify-center shadow-xl shadow-[var(--accent-glow)]">
-              <Landmark className="text-[rgb(var(--c-primary-foreground))]" size={22} strokeWidth={2} />
+              <BrandMark className="text-[rgb(var(--c-primary-foreground))]" size={22} />
             </div>
             <span className="text-xl font-bold tracking-tight text-[var(--text)]">Nex Finance</span>
           </div>

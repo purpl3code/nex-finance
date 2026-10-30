@@ -4,8 +4,8 @@
   "description": "Suas finanças em qualquer lugar.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#06111F",
+  "theme_color": "#06111F",
   "icons": [
     {
       "src": "/favicon.svg",

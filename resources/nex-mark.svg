@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Nex Finance</title>
+  <desc id="desc">Símbolo N geométrico com uma pausa curta na diagonal.</desc>
+  <g fill="#2DD4BF">
+    <path d="M44 36h44v184H44z" />
+    <path d="M168 36h44v184h-44z" />
+    <path d="M74 36h46l25 75H99z" />
+    <path d="M111 145h46l25 75h-46z" />
+  </g>
+</svg>

@@ -1,14 +1,10 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Full black background (no rounded corners — browser/OS handles masking) -->
-  <rect width="512" height="512" fill="#000000"/>
-
-  <!-- Wallet icon (matching Lucide Wallet style, centered) -->
-  <g transform="translate(256,256)" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Wallet body -->
-    <rect x="-140" y="-80" width="280" height="190" rx="24" stroke-width="24"/>
-    <!-- Wallet flap -->
-    <path d="M-100,-80 L-100,-110 Q-100,-135 -75,-135 L75,-135 Q100,-135 100,-110 L100,-80" stroke-width="24"/>
-    <!-- Card slot / clasp -->
-    <circle cx="100" cy="15" r="18" stroke-width="20"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="title">
+  <title id="title">Nex Finance</title>
+  <rect width="32" height="32" rx="8" fill="#071321" />
+  <g transform="scale(.125)" fill="#2DD4BF">
+    <path d="M44 36h44v184H44z" />
+    <path d="M168 36h44v184h-44z" />
+    <path d="M74 36h46l25 75H99z" />
+    <path d="M111 145h46l25 75h-46z" />
   </g>
 </svg>
