@@ -15,11 +15,13 @@ export const BrandMark: React.FC<BrandMarkProps> = ({ size = 24, className = '' 
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g fill="currentColor">
-      <path d="M44 36h44v184H44z" />
-      <path d="M168 36h44v184h-44z" />
-      <path d="M74 36h46l25 75H99z" />
-      <path d="M111 145h46l25 75h-46z" />
-    </g>
+    <path
+      fill="currentColor"
+      d="M53 58h141a29 29 0 0 1 29 29v8h-28a37 37 0 0 0 0 74h28v4a25 25 0 0 1-25 25H53a25 25 0 0 1-25-25v-94a25 25 0 0 1 25-25Z"
+    />
+    <path fill="#2DD4BF" d="M46 92h135v15H46z" />
+    <circle cx="195" cy="132" r="38" fill="currentColor" />
+    <circle cx="195" cy="132" r="29" fill="#FFC857" />
+    <path fill="currentColor" d="M191 114h8v36h-8zM182 121h26v6h-26zM182 137h26v6h-26z" />
   </svg>
 );
