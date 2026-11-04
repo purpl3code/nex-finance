@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="112dp"
+    android:height="112dp"
+    android:viewportWidth="256"
+    android:viewportHeight="256">
+
+    <group
+        android:pivotX="128"
+        android:pivotY="128"
+        android:scaleX="0.92"
+        android:scaleY="0.92">
+        <!-- Carteira reduzida a formas essenciais para continuar legível no splash. -->
+        <path
+            android:fillColor="#2DD4BF"
+            android:pathData="M63,58h110c22,0 37,15 37,37v12h-35c-20,0 -36,16 -36,36s16,36 36,36h35v2c0,20 -15,35 -35,35H63c-20,0 -36,-16 -36,-36V94c0,-20 16,-36 36,-36z" />
+        <path
+            android:fillColor="#071321"
+            android:pathData="M36,91h151v15H36z" />
+
+        <!-- Moeda dourada com sinal de adição, mantendo a leitura financeira. -->
+        <path
+            android:fillColor="#071321"
+            android:pathData="M192,105a39,39 0,1 0,0 78a39,39 0,1 0,0 -78z" />
+        <path
+            android:fillColor="#FFC857"
+            android:pathData="M192,113a31,31 0,1 0,0 62a31,31 0,1 0,0 -62z" />
+        <path
+            android:fillColor="#071321"
+            android:pathData="M188,128h8v32h-8zM176,140h32v8h-32z" />
+    </group>
+</vector>

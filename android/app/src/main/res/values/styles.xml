@@ -20,6 +20,10 @@
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">#020617</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/nex_splash_mark</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
         <item name="android:statusBarColor">#050a14</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
